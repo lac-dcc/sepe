@@ -1,5 +1,3 @@
-# Merlin 
-
 <p align="center">
   <img alt="Sepe Banner" src="assets/images/SepeBanner.png" width="95%" height="auto"/></br>
 </p>
