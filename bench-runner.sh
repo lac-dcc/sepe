@@ -39,8 +39,8 @@ set -e # Exit on error
     IPV4_HASHES="IPV4HashGeneric IPV4HashMove IPV4HashUnrolled"
     SSN_HASHES="SSNHashBitOps"
     CPF_HASHES="CPFHashBitOps CPFHashVectorizedMul"
-    ALL_HASHES="$GNERIC_HASHES $SSN_HASHES $CPF_HASHES $IPV4HASHES" # All hashes in customHashes.hpp
-    EXEC_HASHES="$GENERIC_HASHES $SSNHASHES" # Hashes to execute
+    ALL_HASHES="$GENERIC_HASHES $SSN_HASHES $CPF_HASHES $IPV4HASHES" # All hashes in customHashes.hpp
+    EXEC_HASHES="$GENERIC_HASHES $SSN_HASHES" # Hashes to execute
     NUM_OPERATIONS=1000000  # Total number of KEYGEN_INSERT, KEYGEN_SEARCH, and KEYGEN_ELIMINATION operations
     KEYGEN_INSERT=50        # Percentage of KEYGEN_INSERT operations
     KEYGEN_SEARCH=30        # Percentage of KEYGEN_SEARCH operations

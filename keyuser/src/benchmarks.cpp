@@ -128,7 +128,7 @@ void printVerbose(Benchmark& bench, const std::chrono::duration<double>& elapsed
 }
 
 void reportHashMetrics(std::unordered_map<std::string,HashBenchmarkInfo>& hashInfo){
-    for(auto hashBench : hashInfo){
+    for(auto& hashBench : hashInfo){
             printf( "\t\t------> %-25s Average time: %f (s)    Geomean time: %f (s)"
                     "    Total Collision Count (Buckets) %d\n", 
                     hashBench.first.c_str(),

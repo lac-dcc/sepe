@@ -83,7 +83,6 @@ BenchmarkParameters parseArgs(int argc, char** argv){
     return args;
 }
 
-#include <chrono>
 int main(int argc, char** argv){
     std::unordered_multiset<std::string, STDHash> mset;
 
@@ -130,8 +129,8 @@ int main(int argc, char** argv){
         {
             filteredBenchmarks.push_back(bench);
         } else {
-            delete bench;
             hashInfo.erase(bench->getHashName());
+            delete bench;
         }
     }
 
