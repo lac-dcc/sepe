@@ -39,4 +39,12 @@ struct SSNHashBitOps{
     std::size_t operator()(const std::string& key) const;
 };
 
+struct CarPlateHashBitOps{
+    std::size_t operator()(const std::string& key) const;
+};
+
+struct MacAddressHashBitOps{
+    std::size_t operator()(const std::string& key) const;
+};
+
 #endif

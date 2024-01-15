@@ -9,6 +9,9 @@ set -e # Exit on error
     NUM_KEYS_TO_GENERATE=1000000 # Number of random keys to generate
     KEYGEN_SEED=223554           # Chosen by a fair roll of the dice
 
+    # Regexes
+    MAC_ADDRESS="([0-9a-fA-F]{2}-){5}[0-9a-fA-F]{2}"
+    CAR_PLATE="([A-Z]{3}-[0-9][A-Z][0-9]{3})"
     CPF_REGEX="(([0-9]{3})\.){2}[0-9]{3}-[0-9]{2}"
     SSN_REGEX="[0-9]{3}-[0-9]{2}-[0-9]{4}"
     IPV4_REGEX="(([0-9]{3})\.){3}[0-9]{3}"
@@ -27,7 +30,7 @@ set -e # Exit on error
                  $INTEGER32_REGEX $FLOAT64_REGEX $FLOAT32_REGEX $OCTAL64_REGEX 
                  $OCTAL32_REGEX $HEX32_REGEX $HEX64_REGEX"
     # EXEC_REGEXES=$ALL_REGEXES
-    EXEC_REGEXES="$SSN_REGEX"
+    EXEC_REGEXES="$MAC_ADDRESS"
 
 # KeyUser Parameters
     TARGET=keyuser # keyuser or keyuser-debug
@@ -39,8 +42,10 @@ set -e # Exit on error
     IPV4_HASHES="IPV4HashGeneric IPV4HashMove IPV4HashUnrolled"
     SSN_HASHES="SSNHashBitOps"
     CPF_HASHES="CPFHashBitOps CPFHashVectorizedMul"
-    ALL_HASHES="$GENERIC_HASHES $SSN_HASHES $CPF_HASHES $IPV4HASHES" # All hashes in customHashes.hpp
-    EXEC_HASHES="$GENERIC_HASHES $SSN_HASHES" # Hashes to execute
+    CAR_PLATE="CarPlateHashBitOps"
+    MAC_ADDRESS="MacAddressHashBitOps"
+    ALL_HASHES="$GENERIC_HASHES $SSN_HASHES $CPF_HASHES $IPV4HASHES $CAR_PLATE" # All hashes in customHashes.hpp
+    EXEC_HASHES="$GENERIC_HASHES $MAC_ADDRESS" # Hashes to execute
     NUM_OPERATIONS=1000000  # Total number of KEYGEN_INSERT, KEYGEN_SEARCH, and KEYGEN_ELIMINATION operations
     KEYGEN_INSERT=50        # Percentage of KEYGEN_INSERT operations
     KEYGEN_SEARCH=30        # Percentage of KEYGEN_SEARCH operations

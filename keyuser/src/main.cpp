@@ -106,6 +106,10 @@ int main(int argc, char** argv){
     REGISTER_BENCHMARKS(IPV4HashGeneric);
     REGISTER_BENCHMARKS(IPV4HashUnrolled);
     REGISTER_BENCHMARKS(IPV4HashMove);
+    
+    REGISTER_BENCHMARKS(CarPlateHashBitOps);
+
+    REGISTER_BENCHMARKS(MacAddressHashBitOps);
 
     // Load keys from standard input into memory
     std::vector<std::string> keys;

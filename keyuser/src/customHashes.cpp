@@ -121,3 +121,20 @@ std::size_t SSNHashBitOps::operator()(const std::string& key) const{
 
 	return low | (high << 24);
 }
+
+
+std::size_t CarPlateHashBitOps::operator()(const std::string& key) const{
+	return load_u64_le(key.c_str());
+}
+
+std::size_t MacAddressHashBitOps::operator()(const std::string& key) const{
+    //FORMAT:  AC-1B-2F-8E-0D-5C
+
+	constexpr std::size_t mask1 = 0x7F7F007F7F007F7F;
+	const std::size_t low = _pext_u64(load_u64_le(key.c_str()), mask1);
+
+	constexpr std::size_t mask2 = 0x7F7F007F7F007F7F;
+	const std::size_t high = _pext_u64(load_u64_le(key.c_str() + 9), mask2);
+
+	return low ^ (high << 21);
+}
