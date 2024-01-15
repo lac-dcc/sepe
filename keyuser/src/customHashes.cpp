@@ -109,37 +109,33 @@ std::size_t CPFHashVectorizedMul::operator()(const std::string& key) const {
 }
 
 std::size_t CPFHashBitOps::operator()(const std::string& key) const{
-	const std::size_t* u64_ptr = (const std::size_t *)(key.c_str());
-
 	// [0-7] inclusive, 
 	//we only care about 0, 1, 2, 4, 5, 6
 	constexpr std::size_t mask1 = 0x000F0F0F000F0F0F;
-	const std::size_t low = _pext_u64(u64_ptr[0], mask1);
+	const std::size_t low = _pext_u64(*((const std::size_t *)(key.c_str())), mask1);
 	//printf("u64_ptr[0]: 0x%lx, low: 0x%lx\n", u64_ptr[0], low);
 
-	// [8-15] inclusive, 
+	// [6-13] inclusive, 
 	//we only care about 8, 9, 10, 12, 13
-	constexpr std::size_t mask2 = 0x00000F0F000F0F0F;
-	const std::size_t high = _pext_u64(u64_ptr[1], mask2);
+	constexpr std::size_t mask2 = 0x0F0F000F0F0F0000;
+	const std::size_t high = _pext_u64(*((const std::size_t *)(key.c_str() + 6)), mask2);
 
 	return low | (high << 24);
 }
 
 std::size_t SSNHashBitOps::operator()(const std::string& key) const{
-	const std::size_t* u64_ptr = (const std::size_t *)(key.c_str());
-    
     //SSN FORMAT: 123-45-6789
 
 	// [0-7] inclusive, 
 	//we only care about 0, 1, 2, 4, 5, 7
 	constexpr std::size_t mask1 = 0x0F000F0F000F0F0F;
-	const std::size_t low = _pext_u64(u64_ptr[0], mask1);
+	const std::size_t low = _pext_u64(*((const std::size_t *)(key.c_str())), mask1);
 	//printf("u64_ptr[0]: 0x%lx, low: 0x%lx\n", u64_ptr[0], low);
 
-	// [8-15] inclusive, 
+	// [3-10] inclusive, 
 	//we only care about 8, 9, 10
-	constexpr std::size_t mask2 = 0x00000000000F0F0F;
-	const std::size_t high = _pext_u64(u64_ptr[1], mask2);
+	constexpr std::size_t mask2 = 0x0F0F0F0000000000;
+	const std::size_t high = _pext_u64(*((const std::size_t *)(key.c_str() + 3)), mask2);
 
 	return low | (high << 24);
 }
