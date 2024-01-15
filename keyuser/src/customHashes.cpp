@@ -1,16 +1,14 @@
 #include "customHashes.hpp"
+#include <cstring>
 #include <smmintrin.h>
 #include <pmmintrin.h>
 #include <immintrin.h>
 
 inline static uint64_t load_u64_le(const char* b) {
-	union {
-    	uint64_t u64;
-    	char u8[8];
-	} u = {.u8 = {
-		b[0], b[1], b[2], b[3], b[4], b[5], b[6], b[7]
-	}};
-	return u.u64;
+    uint64_t Ret;
+    // This is a way for the compiler to optimize this func to a single movq instruction
+    memcpy(&Ret, b, sizeof(uint64_t)); 
+    return Ret;
 }
 
 std::size_t STDHash::operator()(const std::string& key) const{
