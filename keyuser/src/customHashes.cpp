@@ -1,33 +1,7 @@
 #include "customHashes.hpp"
-#include<chrono>
 #include <smmintrin.h>
 #include <pmmintrin.h>
-#include <emmintrin.h>
 #include <immintrin.h>
-
-double geometricMean(const std::vector<double>& nums) {
-    double product = 1.0;
-    for (double num : nums) {
-        product *= num;
-    }
-    return std::pow(product, 1.0 / nums.size());
-}
-
-
-std::size_t RandHash::operator()(const std::string& ) const{
-    return rand();
-}
-
-static inline constexpr std::size_t a = 863;
-static inline constexpr std::size_t c = 401;
-static inline constexpr std::size_t m = 4294967291;
-// Note: this isn't thread-safe; there **WILL** be race conditions. However,
-// they ultimately do not matter, since it won't be noticeable for the player
-static std::size_t x = std::chrono::system_clock::now().time_since_epoch().count();
-std::size_t FastRandHash::operator()(const std::string& ) const {
-    x = (a * x + c) % m;
-    return x;
-}
 
 std::size_t STDHash::operator()(const std::string& key) const{
     return std::hash<std::string>{}(key);

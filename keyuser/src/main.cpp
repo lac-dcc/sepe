@@ -10,7 +10,7 @@
 #define DECLARE_ONE_BENCH(name, hashname) (Benchmark*)new name<hashname>(#name,#hashname)
 
 // Define Macro to set the benchmarks and HashInfo
-#define REGISTER_BENCHMARKS(hashname)  benchmarks.push_back(DECLARE_ONE_BENCH(UnorderedMapBench, hashname)); \
+#define REGISTER_BENCHMARKS(hashname)   benchmarks.push_back(DECLARE_ONE_BENCH(UnorderedMapBench, hashname)); \
                                         benchmarks.push_back(DECLARE_ONE_BENCH(UnorderedMultiMapBench, hashname)); \
                                         benchmarks.push_back(DECLARE_ONE_BENCH(UnorderedSetBench, hashname)); \
                                         benchmarks.push_back(DECLARE_ONE_BENCH(UnorderedMultisetBench, hashname)); \
@@ -18,6 +18,7 @@
 
 std::string correctBenchUsage(){
     return "Correct Usage: ./benchmarks -i <number> -s <number> -e <number> -n <number>\n"
+           "       --hashes <hash0> <hash1> ... <hashN>: list of hashes to run\n "
            "       -i or --insert: integer that represents the percentage of insertion operations\n"
            "       -s or --search: integer that represents the percentage of search operations\n"
            "       -e or --elimination: integer that represents the percentage of elimination operations\n"
@@ -34,7 +35,13 @@ BenchmarkParameters parseArgs(int argc, char** argv){
     args.verbose = false;
     int i = 1;
     while(i<argc){
-        if(strcmp(argv[i], "-i") == 0 || 
+        if(strcmp(argv[i], "--hashes") == 0){
+            i++;
+            while(i<argc && argv[i][0] != '-'){
+                args.hashesToRun.push_back(argv[i]);
+                i++;
+            }
+        } else if(strcmp(argv[i], "-i") == 0 || 
            strcmp(argv[i], "--insert") == 0){
             args.insert = atoi(argv[i+1]);
             i+=2;
@@ -91,9 +98,15 @@ int main(int argc, char** argv){
     // Register Benchmarks
     REGISTER_BENCHMARKS(STDHash);
     REGISTER_BENCHMARKS(FNVHash);
-    REGISTER_BENCHMARKS(IPV4HashGeneric);
-    // REGISTER_BENCHMARKS(CPFHashBitOps);
+
     REGISTER_BENCHMARKS(SSNHashBitOps);
+
+    REGISTER_BENCHMARKS(CPFHashBitOps);
+    REGISTER_BENCHMARKS(CPFHashVectorizedMul);
+
+    REGISTER_BENCHMARKS(IPV4HashGeneric);
+    REGISTER_BENCHMARKS(IPV4HashUnrolled);
+    REGISTER_BENCHMARKS(IPV4HashMove);
 
     // Load keys from standard input into memory
     std::vector<std::string> keys;
@@ -102,7 +115,27 @@ int main(int argc, char** argv){
         keys.push_back(line);
     }
 
+    // Fill default hash functions to run
+    if(args.hashesToRun.empty()){
+        args.hashesToRun.push_back("STDHash");
+        args.hashesToRun.push_back("FNVHash");
+    }
+    // Delete benchmarks that are not in the list of hashes to run
+    std::vector<Benchmark*> filteredBenchmarks;
+    for(auto& bench : benchmarks){
+        // Check if we should run this hash based on arguments
+        if(std::find(args.hashesToRun.begin(),
+                     args.hashesToRun.end(), 
+                     bench->getHashName()) != args.hashesToRun.end())
+        {
+            filteredBenchmarks.push_back(bench);
+        } else {
+            delete bench;
+            hashInfo.erase(bench->getHashName());
+        }
+    }
+
     // Run benchmarks
-    benchmarkExecutor(benchmarks, keys, args, hashInfo);
+    benchmarkExecutor(filteredBenchmarks, keys, args, hashInfo);
 
 }

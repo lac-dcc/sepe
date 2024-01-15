@@ -1,6 +1,15 @@
 #include "benchmarks.hpp"
 
 #include <chrono>
+#include <algorithm>
+
+double geometricMean(const std::vector<double>& nums) {
+    double product = 1.0;
+    for (double num : nums) {
+        product *= num;
+    }
+    return std::pow(product, 1.0 / nums.size());
+}
 
 void executeInterweaved(Benchmark* bench, 
                         const std::vector<std::string>& keys, 
@@ -137,7 +146,8 @@ void benchmarkExecutor(const std::vector<Benchmark*>& benchmarks,
 {
     // Execution modes are hard coded since we do not expect to add new ones or modify existing ones
     printf("\tInterweaved execution mode (50%% batched inserts):\n");
-    for (auto bench : benchmarks){
+    for (const auto& bench : benchmarks){
+
         // Execute benchmark for performance count
         auto start = std::chrono::system_clock::now();
         executeInterweaved(bench, keys, args);
@@ -162,7 +172,8 @@ void benchmarkExecutor(const std::vector<Benchmark*>& benchmarks,
     reportHashMetrics(hashInfo);
 
     printf("\tBatch execution mode:\n");
-    for (auto bench : benchmarks){
+    for (const auto& bench : benchmarks){
+
         // Execute benchmark for performance count
         auto start = std::chrono::system_clock::now();
         executeBatched(bench, keys, args);

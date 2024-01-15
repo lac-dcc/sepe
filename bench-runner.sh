@@ -32,6 +32,15 @@ set -e # Exit on error
 # KeyUser Parameters
     TARGET=keyuser # keyuser or keyuser-debug
     sed -i "s/TARGET=.*/TARGET="${TARGET}"/g" keyuser/Makefile
+
+
+
+    GENERIC_HASHES="STDHash FNVHash"
+    IPV4_HASHES="IPV4HashGeneric IPV4HashMove IPV4HashUnrolled"
+    SSN_HASHES="SSNHashBitOps"
+    CPF_HASHES="CPFHashBitOps CPFHashVectorizedMul"
+    ALL_HASHES="$GNERIC_HASHES $SSN_HASHES $CPF_HASHES $IPV4HASHES" # All hashes in customHashes.hpp
+    EXEC_HASHES="$GENERIC_HASHES $SSNHASHES" # Hashes to execute
     NUM_OPERATIONS=1000000  # Total number of KEYGEN_INSERT, KEYGEN_SEARCH, and KEYGEN_ELIMINATION operations
     KEYGEN_INSERT=50        # Percentage of KEYGEN_INSERT operations
     KEYGEN_SEARCH=30        # Percentage of KEYGEN_SEARCH operations
@@ -49,5 +58,5 @@ set -e # Exit on error
         echo
         echo "Running with regex: $REGEX"
         KEYGEN="./keygen/target/release/keygen $REGEX -n $NUM_KEYS_TO_GENERATE -s $KEYGEN_SEED"
-        $KEYGEN | ./keyuser/$TARGET -i $KEYGEN_INSERT -s $KEYGEN_SEARCH -e $KEYGEN_ELIMINATION -n $NUM_OPERATIONS -seed $KEYUSER_SEED $VERBOSE
+        $KEYGEN | ./keyuser/$TARGET --hashes $EXEC_HASHES -i $KEYGEN_INSERT -s $KEYGEN_SEARCH -e $KEYGEN_ELIMINATION -n $NUM_OPERATIONS -seed $KEYUSER_SEED $VERBOSE
     done

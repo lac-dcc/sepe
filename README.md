@@ -77,13 +77,15 @@ KeyGen is independent from KeyUser.
 KeyUser benchmarks custom hash functions with keys received from standard input.
 
 ```
-<standard_output_keys> | ./keyuser/keyuser <num_operations> <insert> <search> <elimination> [seed] [verbose]
+<standard_output_keys> | ./keyuser/keyuser [hashes] <num_operations> <insert> <search> <elimination> [seed] [verbose]
 ```
 
-Example: *Benchmarking 2 IPV4 Keys with 10 total operations*
+**If no [hashes] are specified, only generic hash functions are executed**
+
+Example: *Benchmarking 2 IPV4 Keys with 10 total operations using STDHash IPV4HashGeneric hash functions.*
 
 ```
-./keygen/target/release/keygen "(([0-9]{3})\.){3}[0-9]{3}" -n 2 -s 223554 | ./keyuser/keyuser -n 10 -i 50 -s 30 -e 20
+./keygen/target/release/keygen "(([0-9]{3})\.){3}[0-9]{3}" -n 2 -s 223554 | ./keyuser/keyuser --hashes STDHash IPV4HashGeneric -n 10 -i 50 -s 30 -e 20
  Interweaved execution mode (50% batched inserts):
                 ------> IPV4HashGeneric           Average time: 0.000004 (s)    Geomean time: 0.000004 (s)    Total Collision Count (Buckets) 4
                 ------> STDHash                   Average time: 0.000005 (s)    Geomean time: 0.000004 (s)    Total Collision Count (Buckets) 4
@@ -91,8 +93,6 @@ Example: *Benchmarking 2 IPV4 Keys with 10 total operations*
                 ------> IPV4HashGeneric           Average time: 0.000004 (s)    Geomean time: 0.000004 (s)    Total Collision Count (Buckets) 4
                 ------> STDHash                   Average time: 0.000004 (s)    Geomean time: 0.000004 (s)    Total Collision Count (Buckets) 4
 ```
-
-**For specific Hash Functions, register them in the main.cpp with the REGISTER_BENCHMARKS**
 
 See all usability with:
 ```
