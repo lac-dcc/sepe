@@ -3,6 +3,16 @@
 #include <pmmintrin.h>
 #include <immintrin.h>
 
+inline static uint64_t load_u64_le(const char* b) {
+	union {
+    	uint64_t u64;
+    	char u8[8];
+	} u = {.u8 = {
+		b[0], b[1], b[2], b[3], b[4], b[5], b[6], b[7]
+	}};
+	return u.u64;
+}
+
 std::size_t STDHash::operator()(const std::string& key) const{
     return std::hash<std::string>{}(key);
 }
@@ -86,13 +96,13 @@ std::size_t CPFHashBitOps::operator()(const std::string& key) const{
 	// [0-7] inclusive, 
 	//we only care about 0, 1, 2, 4, 5, 6
 	constexpr std::size_t mask1 = 0x000F0F0F000F0F0F;
-	const std::size_t low = _pext_u64(*((const std::size_t *)(key.c_str())), mask1);
+	const std::size_t low = _pext_u64(load_u64_le(key.c_str()), mask1);
 	//printf("u64_ptr[0]: 0x%lx, low: 0x%lx\n", u64_ptr[0], low);
 
 	// [6-13] inclusive, 
 	//we only care about 8, 9, 10, 12, 13
 	constexpr std::size_t mask2 = 0x0F0F000F0F0F0000;
-	const std::size_t high = _pext_u64(*((const std::size_t *)(key.c_str() + 6)), mask2);
+	const std::size_t high = _pext_u64(load_u64_le(key.c_str() + 6), mask2);
 
 	return low | (high << 24);
 }
@@ -103,13 +113,13 @@ std::size_t SSNHashBitOps::operator()(const std::string& key) const{
 	// [0-7] inclusive, 
 	//we only care about 0, 1, 2, 4, 5, 7
 	constexpr std::size_t mask1 = 0x0F000F0F000F0F0F;
-	const std::size_t low = _pext_u64(*((const std::size_t *)(key.c_str())), mask1);
+	const std::size_t low = _pext_u64(load_u64_le(key.c_str()), mask1);
 	//printf("u64_ptr[0]: 0x%lx, low: 0x%lx\n", u64_ptr[0], low);
 
 	// [3-10] inclusive, 
 	//we only care about 8, 9, 10
 	constexpr std::size_t mask2 = 0x0F0F0F0000000000;
-	const std::size_t high = _pext_u64(*((const std::size_t *)(key.c_str() + 3)), mask2);
+	const std::size_t high = _pext_u64(load_u64_le(key.c_str() + 3), mask2);
 
 	return low | (high << 24);
 }
