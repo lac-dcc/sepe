@@ -52,6 +52,12 @@ struct IPV4HashMove{
     std::size_t operator()(const std::string& key) const;
 };
 
+
+
+struct IPV4HashBitOps{
+    std::size_t operator()(const std::string& key) const;
+};
+
 /**
  * @struct CPFHashVectorizedMul
  * @brief This struct provides a hash function for CPF numbers that uses vectorized multiplication.

@@ -106,6 +106,7 @@ int main(int argc, char** argv){
     REGISTER_BENCHMARKS(IPV4HashGeneric);
     REGISTER_BENCHMARKS(IPV4HashUnrolled);
     REGISTER_BENCHMARKS(IPV4HashMove);
+    REGISTER_BENCHMARKS(IPV4HashBitOps);
     
     REGISTER_BENCHMARKS(CarPlateHashBitOps);
 

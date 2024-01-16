@@ -1,3 +1,5 @@
+# Regexes with \. should be \\. inside the TOML parser
+
 [MAC]
 regex = "([0-9a-fA-F]{2}-){5}[0-9a-fA-F]{2}"
 hashes = ["STDHash", "FNVHash", "MacAddressHashBitOps"]
@@ -12,7 +14,7 @@ hashes = ["STDHash", "FNVHash",  "SSNHashBitOps"]
 
 [IPV4]
 regex = "(([0-9]{3})\\.){3}[0-9]{3}"
-hashes = ["STDHash", "FNVHash", "IPV4HashGeneric", "IPV4HashMove", "IPV4HashUnrolled"]
+hashes = ["STDHash", "FNVHash", "IPV4HashGeneric", "IPV4HashMove", "IPV4HashUnrolled", "IPV4HashBitOps"]
 
 [IPV6]
 regex = "([0-9a-fA-F]{4}:){7}[0-9a-fA-F]{4}"

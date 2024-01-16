@@ -59,6 +59,17 @@ std::size_t IPV4HashMove::operator()(const std::string& key) const {
     return ((std::size_t*)key.c_str())[0];
 }
 
+std::size_t IPV4HashBitOps::operator()(const std::string& key) const{
+
+	constexpr std::size_t mask1 = 0x000F0F0F000F0F0F;
+	const std::size_t low = _pext_u64(load_u64_le(key.c_str()), mask1);
+
+	constexpr std::size_t mask2 = 0x000F0F0F000F0F0F;
+	const std::size_t high = _pext_u64(load_u64_le(key.c_str() + 7), mask2);
+
+	return low | (high << 24);
+}
+
 std::size_t CPFHashVectorizedMul::operator()(const std::string& key) const {
 	__m128i vector = _mm_lddqu_si128((const __m128i *)key.c_str());
 	const __m128i zeros = _mm_set1_epi8('0');
