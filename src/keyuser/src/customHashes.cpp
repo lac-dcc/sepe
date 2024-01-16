@@ -129,28 +129,39 @@ std::size_t MacAddressHashBitOps::operator()(const std::string& key) const{
 }
 
 std::size_t UrlGenericHashBitOps::operator()(const std::string& key) const{
-	//constexpr std::size_t START = 12; // skip first 12 positions
-	//constexpr std::size_t MASK = 0x7F7F7F7F7F7F7F7F;
-
-	//std::size_t bits = 0;
-	//std::size_t i = 0;
-	//std::size_t j = START;
-
-	//while (j < key.size()) {
-	//	bits ^= _pext_u64(load_u64_le(key.c_str() + j) << i, MASK);
-	//	i = (i + 1) & 7;
-	//	j += 8;
-	//}
-
-	//return bits;
 	constexpr std::size_t mask1 = 0x3F3F3F3F3F3F3F3F;
 	const std::size_t low = _pext_u64(load_u64_le(key.c_str()), mask1);
 
 	constexpr std::size_t mask2 = 0x3F3F3F3F3F3F3F3F;
 	const std::size_t high = _pext_u64(load_u64_le(key.c_str() + 8), mask2);
 
-	constexpr std::size_t mask3 = 0x000000003F3F3F3F;
+	constexpr std::size_t mask3 = 0x3F3F3F3F00000000;
 	const std::size_t high2 = _pext_u64(load_u64_le(key.c_str() + 12), mask3);
 
-	return (low ^ (high << 16)) ^ high2;
+	return (low ^ (high2 << 36)) ^ (high << 2);
+}
+
+std::size_t IntHash::operator()(const std::string& key) const {
+	constexpr std::size_t mask = 0x0F0F0F0F0F0F0F0F;
+	std::size_t bits1 = _pext_u64(load_u64_le(key.c_str()), mask);
+	bits1 |= _pext_u64(load_u64_le(key.c_str() + 8), mask) << 32;
+
+	std::size_t bits2 = _pext_u64(load_u64_le(key.c_str() + 16), mask);
+	bits2 |= _pext_u64(load_u64_le(key.c_str() + 24), mask) << 32;
+
+	std::size_t bits3 = _pext_u64(load_u64_le(key.c_str() + 32), mask);
+	bits3 |= _pext_u64(load_u64_le(key.c_str() + 40), mask) << 32;
+
+	std::size_t bits4 = _pext_u64(load_u64_le(key.c_str() + 48), mask);
+	bits4 |= _pext_u64(load_u64_le(key.c_str() + 56), mask) << 32;
+
+	std::size_t bits5 = _pext_u64(load_u64_le(key.c_str() + 64), mask);
+	bits5 |= _pext_u64(load_u64_le(key.c_str() + 72), mask) << 32;
+
+	std::size_t bits6 = _pext_u64(load_u64_le(key.c_str() + 80), mask);
+	bits6 |= _pext_u64(load_u64_le(key.c_str() + 88), mask) << 32;
+
+	std::size_t bits7 = _pext_u64(load_u64_le(key.c_str() + 92), mask);
+
+	return bits1 ^ bits2 ^ bits3 ^ bits4 ^ bits5 ^ bits6 ^ bits7;
 }

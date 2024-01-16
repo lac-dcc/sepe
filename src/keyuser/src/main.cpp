@@ -112,6 +112,7 @@ int main(int argc, char** argv){
 
     REGISTER_BENCHMARKS(MacAddressHashBitOps);
     REGISTER_BENCHMARKS(UrlGenericHashBitOps);
+    REGISTER_BENCHMARKS(IntHash);
 
     // Load keys from standard input into memory
     std::vector<std::string> keys;
