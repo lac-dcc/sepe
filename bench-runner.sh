@@ -29,14 +29,11 @@ set -e # Exit on error
     ALL_REGEXES="$CPF_REGEX $SSN_REGEX $IPV4_REGEX $IPV6_REGEX $INTEGER64_REGEX
                  $INTEGER32_REGEX $FLOAT64_REGEX $FLOAT32_REGEX $OCTAL64_REGEX 
                  $OCTAL32_REGEX $HEX32_REGEX $HEX64_REGEX"
-    # EXEC_REGEXES=$ALL_REGEXES
-    EXEC_REGEXES="$MAC_ADDRESS"
+    EXEC_REGEXES="$ALL_REGEXES"
 
 # KeyUser Parameters
     TARGET=keyuser # keyuser or keyuser-debug
     sed -i "s/TARGET=.*/TARGET="${TARGET}"/g" keyuser/Makefile
-
-
 
     GENERIC_HASHES="STDHash FNVHash"
     IPV4_HASHES="IPV4HashGeneric IPV4HashMove IPV4HashUnrolled"
@@ -45,7 +42,7 @@ set -e # Exit on error
     CAR_PLATE="CarPlateHashBitOps"
     MAC_ADDRESS="MacAddressHashBitOps"
     ALL_HASHES="$GENERIC_HASHES $SSN_HASHES $CPF_HASHES $IPV4HASHES $CAR_PLATE" # All hashes in customHashes.hpp
-    EXEC_HASHES="$GENERIC_HASHES $MAC_ADDRESS" # Hashes to execute
+    EXEC_HASHES="$GENERIC_HASHES" # Hashes to execute
     NUM_OPERATIONS=1000000  # Total number of KEYGEN_INSERT, KEYGEN_SEARCH, and KEYGEN_ELIMINATION operations
     KEYGEN_INSERT=50        # Percentage of KEYGEN_INSERT operations
     KEYGEN_SEARCH=30        # Percentage of KEYGEN_SEARCH operations

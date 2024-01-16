@@ -56,17 +56,6 @@ std::size_t IPV4HashUnrolled::operator()(const std::string& key) const {
 }
 
 std::size_t IPV4HashMove::operator()(const std::string& key) const {
-
-//   std::size_t hash_code = 0;
-//   // Convert ASCII digits to integers
-//   unsigned int digit0 = ((unsigned int*)key.c_str())[0];
-//   unsigned int digit1 = (unsigned int)key[4];
-
-//   // Vectorized multiplication
-//   hash_code = digit1;
-//   hash_code <<= 32;
-//   hash_code += digit0;
-
     return ((std::size_t*)key.c_str())[0];
 }
 
@@ -91,14 +80,10 @@ std::size_t CPFHashVectorizedMul::operator()(const std::string& key) const {
 }
 
 std::size_t CPFHashBitOps::operator()(const std::string& key) const{
-	// [0-7] inclusive, 
-	//we only care about 0, 1, 2, 4, 5, 6
+
 	constexpr std::size_t mask1 = 0x000F0F0F000F0F0F;
 	const std::size_t low = _pext_u64(load_u64_le(key.c_str()), mask1);
-	//printf("u64_ptr[0]: 0x%lx, low: 0x%lx\n", u64_ptr[0], low);
 
-	// [6-13] inclusive, 
-	//we only care about 8, 9, 10, 12, 13
 	constexpr std::size_t mask2 = 0x0F0F000F0F0F0000;
 	const std::size_t high = _pext_u64(load_u64_le(key.c_str() + 6), mask2);
 
@@ -106,16 +91,10 @@ std::size_t CPFHashBitOps::operator()(const std::string& key) const{
 }
 
 std::size_t SSNHashBitOps::operator()(const std::string& key) const{
-    //SSN FORMAT: 123-45-6789
 
-	// [0-7] inclusive, 
-	//we only care about 0, 1, 2, 4, 5, 7
 	constexpr std::size_t mask1 = 0x0F000F0F000F0F0F;
 	const std::size_t low = _pext_u64(load_u64_le(key.c_str()), mask1);
-	//printf("u64_ptr[0]: 0x%lx, low: 0x%lx\n", u64_ptr[0], low);
 
-	// [3-10] inclusive, 
-	//we only care about 8, 9, 10
 	constexpr std::size_t mask2 = 0x0F0F0F0000000000;
 	const std::size_t high = _pext_u64(load_u64_le(key.c_str() + 3), mask2);
 
@@ -128,7 +107,6 @@ std::size_t CarPlateHashBitOps::operator()(const std::string& key) const{
 }
 
 std::size_t MacAddressHashBitOps::operator()(const std::string& key) const{
-    //FORMAT:  AC-1B-2F-8E-0D-5C
 
 	constexpr std::size_t mask1 = 0x7F7F007F7F007F7F;
 	const std::size_t low = _pext_u64(load_u64_le(key.c_str()), mask1);

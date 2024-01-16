@@ -65,7 +65,7 @@ Example: *Generating 2 random IPV4 keys with seed 223554*
 445.982.868.308
 ```
 
-See all usability with:
+For more options, do:
 ```
 ./keygen/target/release/keygen --help
 ```
@@ -82,7 +82,7 @@ KeyUser benchmarks custom hash functions with keys received from standard input.
 
 **If no [hashes] are specified, only generic hash functions are executed**
 
-Example: *Benchmarking 2 IPV4 Keys with 10 total operations using STDHash IPV4HashGeneric hash functions.*
+Example: *Benchmarking 2 IPV4 Keys with 10 total operations using STDHash IPV4HashGeneric hash functions. 50% insertions, 30% search, and 20% elimination operations.*
 
 ```
 ./keygen/target/release/keygen "(([0-9]{3})\.){3}[0-9]{3}" -n 2 -s 223554 | ./keyuser/keyuser --hashes STDHash IPV4HashGeneric -n 10 -i 50 -s 30 -e 20
@@ -94,7 +94,7 @@ Example: *Benchmarking 2 IPV4 Keys with 10 total operations using STDHash IPV4Ha
                 ------> STDHash                   Average time: 0.000004 (s)    Geomean time: 0.000004 (s)    Total Collision Count (Buckets) 4
 ```
 
-See all usability with:
+For more options, do:
 ```
 ./keyuser/keyuser --help
 ```
