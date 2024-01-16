@@ -1,4 +1,11 @@
 # Regexes with \. should be \\. inside the TOML parser
+[URL_FIXED_PATTERN]
+regex = "http:/google.github.io/farmhash/doxygen/html/[a-z0-9]{20}\\.html"
+hashes = ["STDHash", "FNVHash", "UrlGenericHashBitOps"]
+
+[URL_FIXED_PATTERN_INTERNAL]
+regex = "[a-z0-9]{20}"
+hashes = ["STDHash", "FNVHash", "UrlGenericHashBitOps"]
 
 [MAC]
 regex = "([0-9a-fA-F]{2}-){5}[0-9a-fA-F]{2}"

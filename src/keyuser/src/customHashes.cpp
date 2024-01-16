@@ -127,3 +127,30 @@ std::size_t MacAddressHashBitOps::operator()(const std::string& key) const{
 
 	return low ^ (high << 21);
 }
+
+std::size_t UrlGenericHashBitOps::operator()(const std::string& key) const{
+	//constexpr std::size_t START = 12; // skip first 12 positions
+	//constexpr std::size_t MASK = 0x7F7F7F7F7F7F7F7F;
+
+	//std::size_t bits = 0;
+	//std::size_t i = 0;
+	//std::size_t j = START;
+
+	//while (j < key.size()) {
+	//	bits ^= _pext_u64(load_u64_le(key.c_str() + j) << i, MASK);
+	//	i = (i + 1) & 7;
+	//	j += 8;
+	//}
+
+	//return bits;
+	constexpr std::size_t mask1 = 0x3F3F3F3F3F3F3F3F;
+	const std::size_t low = _pext_u64(load_u64_le(key.c_str()), mask1);
+
+	constexpr std::size_t mask2 = 0x3F3F3F3F3F3F3F3F;
+	const std::size_t high = _pext_u64(load_u64_le(key.c_str() + 8), mask2);
+
+	constexpr std::size_t mask3 = 0x000000003F3F3F3F;
+	const std::size_t high2 = _pext_u64(load_u64_le(key.c_str() + 12), mask3);
+
+	return (low ^ (high << 16)) ^ high2;
+}
