@@ -53,7 +53,10 @@ struct IPV4HashMove{
 };
 
 
-
+/**
+ * @struct IPV4HashBitOps
+ * @brief This struct provides a hash function for IPV4 addresses that uses data compression..
+ */
 struct IPV4HashBitOps{
     std::size_t operator()(const std::string& key) const;
 };
@@ -68,7 +71,7 @@ struct CPFHashVectorizedMul{
 
 /**
  * @struct CPFHashBitOps
- * @brief This struct provides a hash function for CPF numbers that uses bitwise operations.
+ * @brief This struct provides a hash function for CPF numbers that uses data compression..
  */
 struct CPFHashBitOps{
     std::size_t operator()(const std::string& key) const;
@@ -76,7 +79,7 @@ struct CPFHashBitOps{
 
 /**
  * @struct SSNHashBitOps
- * @brief This struct provides a hash function for Social Security numbers that uses bitwise operations.
+ * @brief This struct provides a hash function for Social Security numbers that uses data compression..
  */
 struct SSNHashBitOps{
     std::size_t operator()(const std::string& key) const;
@@ -84,7 +87,7 @@ struct SSNHashBitOps{
 
 /**
  * @struct CarPlateHashBitOps
- * @brief This struct provides a hash function for car plate numbers that uses bitwise operations.
+ * @brief This struct provides a hash function for car plate numbers that uses data compression..
  */
 struct CarPlateHashBitOps{
     std::size_t operator()(const std::string& key) const;
@@ -92,7 +95,7 @@ struct CarPlateHashBitOps{
 
 /**
  * @struct MacAddressHashBitOps
- * @brief This struct provides a hash function for MAC addresses that uses bitwise operations.
+ * @brief This struct provides a hash function for MAC addresses that uses data compression..
  */
 struct MacAddressHashBitOps{
     std::size_t operator()(const std::string& key) const;
