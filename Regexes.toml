@@ -1,10 +1,14 @@
+[MAC]
+regex = "([0-9a-fA-F]{2}-){5}[0-9a-fA-F]{2}"
+hashes = ["STDHash", "FNVHash", "MacAddressHashBitOps"]
+
 [CPF]
 regex = "(([0-9]{3})\\.){2}[0-9]{3}-[0-9]{2}"
-hashes = ["STDHash", "FNVHash", "IPV4HashGeneric", "CPFHashBitOps", "CPFHashVectorizedMul"]
+hashes = ["STDHash", "FNVHash",  "CPFHashBitOps", "CPFHashVectorizedMul"]
 
 [SSN]
 regex = "[0-9]{3}-[0-9]{2}-[0-9]{4}"
-hashes = ["STDHash", "FNVHash", "IPV4HashGeneric", "SSNHashBitOps"]
+hashes = ["STDHash", "FNVHash",  "SSNHashBitOps"]
 
 [IPV4]
 regex = "(([0-9]{3})\\.){3}[0-9]{3}"

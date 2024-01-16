@@ -1,4 +1,4 @@
-all: bin bin/keygen bin/keyuser bin/keyuser-debug bin/bench-runner
+all: bin bin/keygen bin/keyuser bin/bench-runner
 
 bin:
 	@mkdir -p bin/
