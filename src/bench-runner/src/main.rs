@@ -47,8 +47,8 @@ struct Command {
     #[clap(short, long, default_value = "false")]
     verbose: bool,
 
-    /// regex we will benchmark
-    regex: String,
+    /// regexes we will benchmark
+    regexes: Vec<String>,
 }
 
 fn find_file(filename: &str) -> fs::DirEntry {
@@ -85,81 +85,98 @@ fn read_toml_file() -> Table {
 }
 
 fn main() {
-    let cmd = Command::parse();
+    let mut cmd = Command::parse();
     let regex_table = read_toml_file();
 
-    let values = regex_table
-        .get(&cmd.regex)
-        .unwrap_or_else(|| panic!("there is {} entry in {}", cmd.regex, TOML_FILENAME));
-
-    let regex = values
-        .get("regex")
-        .unwrap_or_else(|| panic!("{} entry has no 'regex' value!", cmd.regex))
-        .as_str()
-        .unwrap_or_else(|| panic!("{} regex entry must be a string!", cmd.regex));
-
-    let hashes = values
-        .get("hashes")
-        .unwrap_or_else(|| panic!("{} entry has no 'hashes' list!", cmd.regex))
-        .as_array()
-        .unwrap_or_else(|| panic!("{} hashes entry must be a list of strings!", cmd.regex));
-
-    let keygen = find_file(KEYGEN);
-    let keyuser = find_file(if cmd.debug { KEYUSER_DEBUG } else { KEYUSER });
-
-    use std::process::Command as Cmd;
-
-    let keygen_cmd = Cmd::new(keygen.path())
-        .stdout(std::process::Stdio::piped())
-        .arg(regex)
-        .arg("-n")
-        .arg(format!("{}", cmd.keys))
-        .arg("-s")
-        .arg(format!("{}", cmd.keygen_seed))
-        .spawn()
-        .expect("failed to spawn keygen command");
-
-    let keygen_out = keygen_cmd.stdout.expect("failed to open keygen stdout");
-
-    let mut keyuser_cmd = Cmd::new(keyuser.path());
-
-    keyuser_cmd
-        .stdin(std::process::Stdio::from(keygen_out))
-        .arg("-i")
-        .arg(format!("{}", (cmd.insert * 100.0) as u64))
-        .arg("-s")
-        .arg(format!("{}", (cmd.search * 100.0) as u64))
-        .arg("-e")
-        .arg(format!("{}", (cmd.elimination * 100.0) as u64))
-        .arg("-n")
-        .arg(format!("{}", cmd.operations))
-        .arg("-seed")
-        .arg(format!("{}", cmd.keyuser_seed));
-
-    if cmd.verbose {
-        keyuser_cmd.arg("--verbose");
+    if cmd.regexes.contains(&"ALL".to_string()) {
+        cmd.regexes.clear();
+        cmd.regexes = regex_table.keys().map(|key| key.to_string()).collect();
     }
 
-    keyuser_cmd.arg("--hashes");
-    for hash in hashes {
+    for cmd_regex in cmd.regexes {
+        let values = match regex_table.get(&cmd_regex) {
+            Some(r) => r,
+            None => {
+                eprintln!("there is {} entry in {}", cmd_regex, TOML_FILENAME);
+                continue;
+            }
+        };
+
+        let regex = values
+            .get("regex")
+            .unwrap_or_else(|| panic!("{} entry has no 'regex' value!", cmd_regex))
+            .as_str()
+            .unwrap_or_else(|| panic!("{} regex entry must be a string!", cmd_regex));
+
+        let hashes = values
+            .get("hashes")
+            .unwrap_or_else(|| panic!("{} entry has no 'hashes' list!", cmd_regex))
+            .as_array()
+            .unwrap_or_else(|| panic!("{} hashes entry must be a list of strings!", cmd_regex));
+
+        let keygen = find_file(KEYGEN);
+        let keyuser = find_file(if cmd.debug { KEYUSER_DEBUG } else { KEYUSER });
+
+        use std::process::Command as Cmd;
+
+        let keygen_cmd = Cmd::new(keygen.path())
+            .stdout(std::process::Stdio::piped())
+            .arg(regex)
+            .arg("-n")
+            .arg(format!("{}", cmd.keys))
+            .arg("-s")
+            .arg(format!("{}", cmd.keygen_seed))
+            .spawn()
+            .expect("failed to spawn keygen command");
+
+        let keygen_out = keygen_cmd.stdout.expect("failed to open keygen stdout");
+
+        let mut keyuser_cmd = Cmd::new(keyuser.path());
+
         keyuser_cmd
-            .arg(hash.as_str().unwrap_or_else(|| {
-                panic!("{} hashes entry must be a list of strings!", cmd.regex)
+            .stdin(std::process::Stdio::from(keygen_out))
+            .arg("-i")
+            .arg(format!("{}", (cmd.insert * 100.0) as u64))
+            .arg("-s")
+            .arg(format!("{}", (cmd.search * 100.0) as u64))
+            .arg("-e")
+            .arg(format!("{}", (cmd.elimination * 100.0) as u64))
+            .arg("-n")
+            .arg(format!("{}", cmd.operations))
+            .arg("-seed")
+            .arg(format!("{}", cmd.keyuser_seed));
+
+        if cmd.verbose {
+            keyuser_cmd.arg("--verbose");
+        }
+
+        keyuser_cmd.arg("--hashes");
+        for hash in hashes {
+            keyuser_cmd.arg(hash.as_str().unwrap_or_else(|| {
+                panic!("{} hashes entry must be a list of strings!", cmd_regex)
             }));
-    }
+        }
 
-    println!("\nExecuting {} regex: {}", cmd.regex, regex);
-    if cmd.verbose {
-        println!("Configuration: {:#?}", cmd);
-    }
+        println!("\nExecuting {} regex: {}", cmd_regex, regex);
+        if cmd.verbose {
+            println!("    Configuration:");
+            println!("        Debug: {}", cmd.debug);
+            println!("        Keys Generated:       {}", cmd.keys);
+            println!("        Number of Operations: {}", cmd.operations);
+            println!(
+                "        [Insertion, Search, Elimination ] Percentages: [{}, {}, {}]",
+                cmd.insert, cmd.search, cmd.elimination
+            );
+        }
 
-    let keyuser_out = keyuser_cmd
-        .output()
-        .expect("failed to spawn keyuser command");
+        let keyuser_out = keyuser_cmd
+            .output()
+            .expect("failed to spawn keyuser command");
 
-    if !keyuser_out.status.success() {
-        eprintln!("        !!!FAILED!!!");
+        if !keyuser_out.status.success() {
+            eprintln!("        !!!FAILED!!!");
+        }
+        std::io::stdout().write_all(&keyuser_out.stdout).unwrap();
+        std::io::stderr().write_all(&keyuser_out.stderr).unwrap();
     }
-    std::io::stdout().write_all(&keyuser_out.stdout).unwrap();
-    std::io::stderr().write_all(&keyuser_out.stderr).unwrap();
 }
