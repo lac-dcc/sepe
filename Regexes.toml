@@ -1,0 +1,47 @@
+[CPF]
+regex = "(([0-9]{3})\\.){2}[0-9]{3}-[0-9]{2}"
+hashes = ["STDHash", "FNVHash", "IPV4HashGeneric", "CPFHashBitOps", "CPFHashVectorizedMul"]
+
+[SSN]
+regex = "[0-9]{3}-[0-9]{2}-[0-9]{4}"
+hashes = ["STDHash", "FNVHash", "IPV4HashGeneric", "SSNHashBitOps"]
+
+[IPV4]
+regex = "(([0-9]{3})\\.){3}[0-9]{3}"
+hashes = ["STDHash", "FNVHash", "IPV4HashGeneric", "IPV4HashMove", "IPV4HashUnrolled"]
+
+[IPV6]
+regex = "([0-9a-fA-F]{4}:){7}[0-9a-fA-F]{4}"
+hashes = ["STDHash", "FNVHash", "IPV4HashGeneric"]
+
+[INTEGER64]
+regex = "[0-9]{1,20}"
+hashes = ["STDHash", "FNVHash", "IPV4HashGeneric"]
+
+[INTEGER32]
+regex = "[0-9]{1,10}"
+hashes = ["STDHash", "FNVHash", "IPV4HashGeneric"]
+
+[FLOAT64]
+regex = "[1-9][0-9]{1,200}\\.[0-9]{1,100}"
+hashes = ["STDHash", "FNVHash", "IPV4HashGeneric"]
+
+[FLOAT32]
+regex = "[1-9][0-9]{1,30}\\.[0-9]{1,10}"
+hashes = ["STDHash", "FNVHash", "IPV4HashGeneric"]
+
+[OCTAL64]
+regex = "[0-7]{1,22}"
+hashes = ["STDHash", "FNVHash", "IPV4HashGeneric"]
+
+[OCTAL32]
+regex = "[0-7]{1,11}"
+hashes = ["STDHash", "FNVHash", "IPV4HashGeneric"]
+
+[HEX32]
+regex = "[0-9a-fA-F]{1,8}"
+hashes = ["STDHash", "FNVHash", "IPV4HashGeneric"]
+
+[HEX64]
+regex = "[0-9a-fA-F]{1,16}"
+hashes = ["STDHash", "FNVHash", "IPV4HashGeneric"]

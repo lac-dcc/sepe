@@ -1,37 +1,28 @@
-TARGET=keyuser
+all: bin bin/keygen bin/keyuser bin/keyuser-debug bin/bench-runner
 
-# Directories
-SRC_DIR := src
-OBJ_DIR := obj
+bin:
+	@mkdir -p bin/
 
-SRCS         := $(wildcard $(SRC_DIR)/*.cpp)
-OBJS         := $(patsubst $(SRC_DIR)/%.cpp,$(OBJ_DIR)/%.o,$(SRCS))
-DEBUG_OBJS   := $(patsubst $(SRC_DIR)/%.cpp,$(OBJ_DIR)/debug_%.o,$(SRCS))
+bin/keygen: $(shell find src/keygen/src/ -type f)
+	cd src/keygen && cargo build --release
+	cp src/keygen/target/release/keygen $@
 
-# Compilation variables
-COMMON_FLAGS  := -std=c++20 -Wall -Wextra -pedantic
-RELEASE_FLAGS := $(COMMON_FLAGS) -O2 -pipe -flto=auto -march=native -mtune=native
-DEBUG_FLAGS   := $(COMMON_FLAGS) -Og -g3 -fsanitize=address,undefined
+bin/keyuser: $(shell find src/keyuser/src/ -type f)
+	cd src/keyuser && make keyuser
+	cp src/keyuser/keyuser $@
 
-all: $(OBJ_DIR) $(TARGET) 
+bin/keyuser-debug: $(shell find src/keyuser/src/ -type f)
+	cd src/keyuser && make keyuser-debug
+	cp src/keyuser/keyuser-debug $@
 
-$(OBJ_DIR)/debug_%.o: $(SRC_DIR)/%.cpp
-	$(CXX) $(CXXFLAGS) $(DEBUG_FLAGS)  -c $< -o $@
-
-$(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp
-	$(CXX) $(CXXFLAGS) $(RELEASE_FLAGS) -c $< -o $@
-
-$(OBJ_DIR):
-	@mkdir -p obj/
-
-generator-debug: $(DEBUG_OBJS)
-	$(CXX) $(DEBUG_FLAGS) -o $@ $^
-
-generator: $(OBJS)
-	$(CXX) $(CXXFLAGS) $(RELEASE_FLAGS) -o $@ $^
+bin/bench-runner: $(shell find src/bench-runner/src/ -type f)
+	cd src/bench-runner && cargo build --release
+	cp src/bench-runner/target/release/bench-runner $@
 
 clean:
-	rm -vf $(TARGET) \
-		$(OBJS) $(DEBUG_OBJS)
+	cd src/keygen && cargo clean
+	cd src/keyuser && make clean
+	cd src/bench-runner && cargo clean
+	rm -rfv bin
 
-.PHONY: all clean tests
+.PHONY: all clean

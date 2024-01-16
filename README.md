@@ -21,63 +21,81 @@ These are the most important dependencies for building and running Sepe:
 Building and running with default parameters:
 
 ```
-$ ./bench-runner.sh
+make
+./bin/bench-runner [REGEX]
 ```
 
-Some important parameters are: NUM_KEYS_TO_GENERATE, NUM_OPERATIONS, KEYGEN_INSERT, KEYGEN_SEARCH, and KEYGEN_ELIMINATION.
+Valid regexes are listed in the `Regexes.toml` file.
 
 ## Building 
 
-### Building KeyGen
+`make` will build all binaries and move them to a `bin` file in the top level
+directory.
+
+### Building keygen
 
 Requires Rust.
 
 ```
-cd keygen/ && cargo build --release && cd -
+cd src/keygen
+cargo build --release
 ```
-*Binary output located at : keygen/target/release/keygen*
 
-### Building KeyUser
+*Binary output located at : src/keygen/target/release/keygen*
+
+### Building bench-runner
+
+Requires Rust.
+
+```
+cd src/bench-runner
+cargo build --release
+```
+
+*Binary output located at : src/bench-runner/target/release/bench-runner*
+
+### Building keyuser
 
 Requires C++.
 
 ```
-cd keyuser/ && make && cd -
+cd src/keyuser
+make
 ```
 
-*Binary output located at : keyuser/keyuser*
+*Binary output located at : src/keyuser/keyuser*
 
 ## Running
 
-### Running KeyGen
+### Running keygen
 
-KeyGen generates (stdandard output) n random keys from Regex. *Not all valid regexes are accepeted.*
+`keygen` generates (standard output) n random keys from Regex. *Not all valid regexes are accepeted.*
 
 ```
-./keygen <REGEX> [number_of_elements] [seed]
+./bin/keygen <REGEX> [number_of_elements] [seed]
 ```
 
 Example: *Generating 2 random IPV4 keys with seed 223554*
 
 ```
-./keygen/target/release/keygen "(([0-9]{3})\.){3}[0-9]{3}" -n 2 -s 223554
+./bin/keygen "(([0-9]{3})\.){3}[0-9]{3}" -n 2 -s 223554
 313.797.178.390
 445.982.868.308
 ```
 
 For more options, do:
 ```
-./keygen/target/release/keygen --help
+./bin/keygen --help
 ```
 
-KeyGen is independent from KeyUser.
+`keygen` is independent from `keyuser`.
 
-### Running KeyUser
+### Running keyuser
 
-KeyUser benchmarks custom hash functions with keys received from standard input.
+`keyuser` benchmarks custom hash functions with keys received from standard input.
 
 ```
-<standard_output_keys> | ./keyuser/keyuser [hashes] <num_operations> <insert> <search> <elimination> [seed] [verbose]
+<standard_output_keys> | ./bin/keyuser [hashes] <num_operations> <insert> <search> <elimination> [seed] [verbose]
 ```
 
 **If no [hashes] are specified, only generic hash functions are executed**
@@ -85,7 +103,7 @@ KeyUser benchmarks custom hash functions with keys received from standard input.
 Example: *Benchmarking 2 IPV4 Keys with 10 total operations using STDHash IPV4HashGeneric hash functions. 50% insertions, 30% search, and 20% elimination operations.*
 
 ```
-./keygen/target/release/keygen "(([0-9]{3})\.){3}[0-9]{3}" -n 2 -s 223554 | ./keyuser/keyuser --hashes STDHash IPV4HashGeneric -n 10 -i 50 -s 30 -e 20
+./bin/keygen "(([0-9]{3})\.){3}[0-9]{3}" -n 2 -s 223554 | ./bin/keyuser --hashes STDHash IPV4HashGeneric -n 10 -i 50 -s 30 -e 20
  Interweaved execution mode (50% batched inserts):
                 ------> IPV4HashGeneric           Average time: 0.000004 (s)    Geomean time: 0.000004 (s)    Total Collision Count (Buckets) 4
                 ------> STDHash                   Average time: 0.000005 (s)    Geomean time: 0.000004 (s)    Total Collision Count (Buckets) 4
@@ -96,6 +114,24 @@ Example: *Benchmarking 2 IPV4 Keys with 10 total operations using STDHash IPV4Ha
 
 For more options, do:
 ```
-./keyuser/keyuser --help
+./bin/keyuser --help
 ```
 
+### Running bench-runner
+
+`bench-runner` is a helper program that connects `keygen` and `keyuser` together.
+
+```
+./bin/bench-runner <Regex entry in Regexes.toml>
+```
+
+Example: *Running the IPV4 Benchmark*
+
+```
+./bin/bench-runner IPV4
+```
+
+For more options, do:
+```
+./bin/bench-runner --help
+```

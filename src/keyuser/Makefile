@@ -25,12 +25,12 @@ COMMON_FLAGS  := -std=c++20 -Wall -Wextra -pedantic
 RELEASE_FLAGS := $(COMMON_FLAGS) -O2 -pipe -flto=auto -march=native
 DEBUG_FLAGS   := $(COMMON_FLAGS) -Og -g3 -fsanitize=address,undefined -mbmi2 -msse2 -msse3
 
-all: $(OBJ_DIR) $(TARGET) 
+all: $(TARGET) 
 
-$(OBJ_DIR)/debug_%.o: $(SRC_DIR)/%.cpp
+$(OBJ_DIR)/debug_%.o: $(SRC_DIR)/%.cpp $(OBJ_DIR) Makefile
 	$(CXX) $(CXXFLAGS) $(DEBUG_FLAGS)  -c $< -o $@
 
-$(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp
+$(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp $(OBJ_DIR) Makefile
 	$(CXX) $(CXXFLAGS) $(RELEASE_FLAGS) -c $< -o $@
 
 $(OBJ_DIR):
@@ -46,7 +46,8 @@ keyuser: $(OBJS)
 # 	$(CXX) -I$(ABSL_INC) -L$(ABSL_LIB) $(CXXFLAGS) $(RELEASE_FLAGS) -o $@ $^ $(ABSL_LIB_FILES) 
 
 clean:
-	rm -vf $(TARGET) \
-		$(OBJS) $(DEBUG_OBJS)
+	rm -vf keyuser keyuser-debug  \
+		$(DEBUG_OBJS) \
+		$(OBJS)
 
 .PHONY: all clean tests
