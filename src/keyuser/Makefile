@@ -14,11 +14,11 @@ DEBUG_OBJS   := $(patsubst $(SRC_DIR)/%.cpp,$(OBJ_DIR)/debug_%.o,$(SRCS))
 # mkdir build && cd build
 # cmake -DABSL_BUILD_TESTING=ON -DABSL_USE_GOOGLETEST_HEAD=ON -DCMAKE_CXX_STANDARD=17 -DCMAKE_INSTALL_PREFIX=/path/to/your/abseil ..
 # cmake --build . --target install
-ABSL_DIR := /path/to/your/abseil
-ABSL_LIB := $(ABSL_DIR)/lib
-ABSL_INC := $(ABSL_DIR)/include
-ABSL_LIB_FILES := $(shell find $(ABSL_LIB) -iname "*.a" -exec basename -s .a {} \;)
-ABSL_LIB_FILES := $(patsubst lib%, -l%, $(ABSL_LIB_FILES))
+#ABSL_DIR := /path/to/your/abseil
+#ABSL_LIB := $(ABSL_DIR)/lib
+#ABSL_INC := $(ABSL_DIR)/include
+#ABSL_LIB_FILES := $(shell find $(ABSL_LIB) -iname "*.a" -exec basename -s .a {} \;)
+#ABSL_LIB_FILES := $(patsubst lib%, -l%, $(ABSL_LIB_FILES))
 
 # Compilation variables
 COMMON_FLAGS  := -std=c++20 -Wall -Wextra -pedantic
