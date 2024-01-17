@@ -1,5 +1,10 @@
 # Regexes with \. should be \\. inside the TOML parser
 
+
+[URL_COMPLEX]
+regex = "http:/google\\.github\\.io/[a-z]{10}/version[0-9]{3}/doxygen/html/[a-z0-9]{20}\\.html"
+hashes = ["STDHash", "FNVHash", "UrlCompress"]
+
 [URL_GENERIC]
 regex = "https://www\\.[!~]{100,200}"
 hashes = ["STDHash", "FNVHash", "UrlGenericHashBitOps"]

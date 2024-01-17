@@ -128,6 +128,31 @@ std::size_t MacAddressHashBitOps::operator()(const std::string& key) const{
 	return low ^ (high << 21);
 }
 
+std::size_t UrlCompress::operator()(const std::string& key) const {
+	
+// http:/google.github.io/[a-z]{10}/version[0-9]{2}/doxygen/html/[a-z0-9]{20}.html
+
+//[a-z] 1F -- 10 bytes
+	constexpr std::size_t mask1 = 0x1F1F1F1F1F1F1F1F;
+	const std::size_t low1 = _pext_u64(load_u64_le(key.c_str()+23), mask1);
+	constexpr std::size_t mask2 = 0x0000000000001F1F;
+	const std::size_t high1 = _pext_u64(load_u64_le(key.c_str()+31), mask2);
+
+//[0-9] 0F -- 2 bytes
+	constexpr std::size_t mask3 = 0x0000000000000F0F;
+	const std::size_t low2 = _pext_u64(load_u64_le(key.c_str()+41), mask3);
+
+//[a-z0-9] 7F -- 16 bytes
+	constexpr std::size_t mask4 = 0x7F7F7F7F7F7F7F7F;
+	const std::size_t high2 = _pext_u64(load_u64_le(key.c_str()+58), mask4);
+	constexpr std::size_t mask5 = 0x7F7F7F7F7F7F7F7F;
+	const std::size_t low3 = _pext_u64(load_u64_le(key.c_str()+66), mask5);
+	constexpr std::size_t mask6 = 0x000000007F7F7F7F;
+	const std::size_t high3 = _pext_u64(load_u64_le(key.c_str()+74), mask6);
+
+	return (low1 ^ ( high1 << 24 )) ^ (low2 ^ ( high2 << 8 )) ^ (low3 ^ ( high3 << 24 ));
+}
+
 std::size_t UrlGenericHashBitOps::operator()(const std::string& key) const{
 	constexpr std::size_t mask1 = 0x3F3F3F3F3F3F3F3F;
 	const std::size_t low = _pext_u64(load_u64_le(key.c_str()), mask1);
