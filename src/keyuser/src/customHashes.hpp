@@ -117,4 +117,8 @@ struct IntSimdHash{
     std::size_t operator()(const std::string& key) const;
 };
 
+struct IntAvx2Hash{
+    std::size_t operator()(const std::string& key) const;
+};
+
 #endif

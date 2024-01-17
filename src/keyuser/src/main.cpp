@@ -114,6 +114,7 @@ int main(int argc, char** argv){
     REGISTER_BENCHMARKS(UrlGenericHashBitOps);
     REGISTER_BENCHMARKS(IntBitHash);
     REGISTER_BENCHMARKS(IntSimdHash);
+    REGISTER_BENCHMARKS(IntAvx2Hash);
 
     // Load keys from standard input into memory
     std::vector<std::string> keys;

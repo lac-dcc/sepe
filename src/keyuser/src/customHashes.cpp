@@ -166,9 +166,8 @@ std::size_t IntSimdHash::operator()(const std::string& key) const {
 	const __m128i xor_final = _mm_xor_si128(xor1, xor2);
 	std::size_t const * xor_final_ptr = (std::size_t const *)&xor_final;
 	return xor_final_ptr[0] ^ xor_final[1];
-
-
 }
+
 std::size_t IntBitHash::operator()(const std::string& key) const {
     constexpr std::size_t mask = 0x0F0F0F0F0F0F0F0F;
 
@@ -193,4 +192,28 @@ std::size_t IntBitHash::operator()(const std::string& key) const {
 	std::size_t bits7 = _pext_u64(load_u64_le(key.c_str() + 92), mask);
 
 	return bits1 ^ bits2 ^ bits3 ^ bits4 ^ bits5 ^ bits6 ^ bits7;
+}
+
+std::size_t IntAvx2Hash::operator()(const std::string& key) const {
+	__m256i bits[4] = {
+		_mm256_lddqu_si256((__m256i *)(key.c_str()     )),
+		_mm256_lddqu_si256((__m256i *)(key.c_str() + 32)),
+		_mm256_lddqu_si256((__m256i *)(key.c_str() + 64)),
+		_mm256_lddqu_si256((__m256i *)(key.c_str() + 78)),
+	};
+
+	bits[1] = _mm256_bslli_epi128(bits[1], 4);
+	bits[3] = _mm256_bslli_epi128(bits[3], 4);
+
+	const __m256i or1 = _mm256_or_si256(bits[0], bits[1]);
+	const __m256i or2 = _mm256_or_si256(bits[2], bits[3]);
+
+	const __m256i xor_256 = _mm256_xor_si256(or1, or2);
+
+	const __m128i * bits_128 =  (__m128i const *)&xor_256;
+
+	const __m128i xor_final = _mm_xor_si128(bits_128[0], bits_128[1]);
+
+	std::size_t const * xor_final_ptr = (std::size_t const *)&xor_final;
+	return xor_final_ptr[0] ^ xor_final[1];
 }
