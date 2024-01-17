@@ -109,11 +109,11 @@ struct UrlGenericHashBitOps{
     std::size_t operator()(const std::string& key) const;
 };
 
-/**
- * @struct UrlHashBitOps
- * @brief This struct provides a hash function for URLs that uses data compression..
- */
-struct IntHash{
+struct IntBitHash{
+    std::size_t operator()(const std::string& key) const;
+};
+
+struct IntSimdHash{
     std::size_t operator()(const std::string& key) const;
 };
 

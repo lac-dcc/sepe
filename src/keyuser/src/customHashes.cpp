@@ -141,10 +141,39 @@ std::size_t UrlGenericHashBitOps::operator()(const std::string& key) const{
 	return (low ^ (high2 << 36)) ^ (high << 2);
 }
 
-std::size_t IntHash::operator()(const std::string& key) const {
-	constexpr std::size_t mask = 0x0F0F0F0F0F0F0F0F;
+std::size_t IntSimdHash::operator()(const std::string& key) const {
+	__m128i bits[7] = {
+		_mm_loadu_si64(key.c_str()),
+		_mm_loadu_si64(key.c_str() + 16),
+		_mm_loadu_si64(key.c_str() + 32),
+		_mm_loadu_si64(key.c_str() + 48),
+		_mm_loadu_si64(key.c_str() + 64),
+		_mm_loadu_si64(key.c_str() + 80),
+		_mm_loadu_si64(key.c_str() + 84),
+	};
+
+	bits[1] = _mm_bslli_si128(bits[1], 4);
+	bits[3] = _mm_bslli_si128(bits[3], 4);
+	bits[5] = _mm_bslli_si128(bits[5], 4);
+
+	__m128i or1 = _mm_or_si128(bits[0], bits[1]);
+	__m128i or2 = _mm_or_si128(bits[2], bits[3]);
+	__m128i or3 = _mm_or_si128(bits[4], bits[5]);
+
+	__m128i xor1 = _mm_xor_si128(or1, or2);
+	__m128i xor2 = _mm_xor_si128(or3, bits[6]);
+
+	const __m128i xor_final = _mm_xor_si128(xor1, xor2);
+	std::size_t const * xor_final_ptr = (std::size_t const *)&xor_final;
+	return xor_final_ptr[0] ^ xor_final[1];
+
+
+}
+std::size_t IntBitHash::operator()(const std::string& key) const {
+    constexpr std::size_t mask = 0x0F0F0F0F0F0F0F0F;
+
 	std::size_t bits1 = _pext_u64(load_u64_le(key.c_str()), mask);
-	bits1 |= _pext_u64(load_u64_le(key.c_str() + 8), mask) << 32;
+    bits1 |= _pext_u64(load_u64_le(key.c_str() + 8), mask) << 32;
 
 	std::size_t bits2 = _pext_u64(load_u64_le(key.c_str() + 16), mask);
 	bits2 |= _pext_u64(load_u64_le(key.c_str() + 24), mask) << 32;
