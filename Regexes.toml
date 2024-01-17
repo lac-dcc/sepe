@@ -34,4 +34,4 @@ hashes = ["STDHash", "FNVHash", "IPV4HashGeneric"]
 
 [INTS]
 regex = "[0-9]{100}"
-hashes = ["STDHash", "FNVHash", "IntBitHash", "IntSimdHash", "IntAvx2Hash"]
+hashes = ["STDHash", "FNVHash", "IntBitHash", "IntSimdHash"]
