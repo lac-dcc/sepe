@@ -84,7 +84,6 @@ BenchmarkParameters parseArgs(int argc, char** argv){
 }
 
 int main(int argc, char** argv){
-    std::unordered_multiset<std::string, STDHash> mset;
 
     BenchmarkParameters args = parseArgs(argc, argv);
 
