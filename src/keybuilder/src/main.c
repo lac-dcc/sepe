@@ -11,6 +11,62 @@ typedef struct Range {
 	char end;
 } Range;
 
+enum Class {
+	Class_Num = 0x1,
+	Class_Lowercase = 0x2,
+	Class_UpperCase = 0x4,
+	Class_Punct = 0x8,
+};
+
+int range_class(const Range range) {
+	int class = 0;
+
+	if (range.start >= '0' && range.start <= '9')
+		class |= Class_Num;
+	else if (range.start >= 'A' && range.start <= 'Z')
+		class |= Class_UpperCase;
+	else if (range.start >= 'a' && range.start <= 'z')
+		class |= Class_Lowercase;
+	else 
+		class |= Class_Punct;
+
+	if (range.end >= '0' && range.end <= '9')
+		class |= Class_Num;
+	else if (range.end >= 'A' && range.end <= 'Z')
+		class |= Class_UpperCase;
+	else if (range.end >= 'a' && range.end <= 'z')
+		class |= Class_Lowercase;
+	else 
+		class |= Class_Punct;
+
+	return class;
+}
+
+void print_class(const Range range) {
+	char start = 0;
+	char end = 127;
+
+	if (range.start >= '0' && range.start <= '9')
+		start = '0';
+	else if (range.start >= 'A' && range.start <= 'Z')
+		start = 'A';
+	else if (range.start >= 'a' && range.start <= 'z')
+		start = 'a';
+	else 
+		start = '!';
+
+	if (range.end >= '0' && range.end <= '9')
+		end = '9';
+	else if (range.end >= 'A' && range.end <= 'Z')
+		end = 'Z';
+	else if (range.end >= 'a' && range.end <= 'z')
+		end = 'z';
+	else 
+		end = '}';
+
+	printf("[%c-%c]", start, end);
+}
+
 int is_special(const char ch) {
 	return ch == '\\'
 		|| ch == '['
@@ -64,25 +120,25 @@ int main(void) {
 
 	ssize_t i = 0;
 	while (i < line_size - 1) {
-		Range range = ranges[i++];
+		const Range range = ranges[i++];
 		if (range.start == range.end) {
-			if (is_special(range.start))
-				printf("\\%c",range.start);
-			else
-				printf("%c", range.start);
+			if (is_special(range.start)) {
+				putchar('\\');
+			}
+			putchar(range.start);
 		} else {
 			int repetitions = 1;
 			Range other = ranges[i++];
-			while (other.start == range.start && other.end == range.end) {
+			while (range_class(range) == range_class(other)) {
 				other = ranges[i++];
 				++repetitions;
 			}
 			--i;
 
-			if (repetitions == 1)
-				printf("[%c-%c]", range.start, range.end);
-			else 
-				printf("[%c-%c]{%d}", range.start, range.end, repetitions);
+			print_class(range);
+			if (repetitions > 1) {
+				printf("{%d}", repetitions);
+			}
 		}
 	}
 	puts("");
