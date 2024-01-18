@@ -48,12 +48,24 @@ int main(void) {
 	}
 	free(line);
 
-	for (ssize_t i = 0; i < line_size - 1; ++i) {
-		Range range = ranges[i];
+	ssize_t i = 0;
+	while (i < line_size - 1) {
+		Range range = ranges[i++];
 		if (range.start == range.end) {
-			printf("%c", range.start);
+			putchar(range.start);
 		} else {
-			printf("[%c-%c]", range.start, range.end);
+			int repetitions = 1;
+			Range other = ranges[i++];
+			while (other.start == range.start && other.end == range.end) {
+				other = ranges[i++];
+				++repetitions;
+			}
+			--i;
+
+			if (repetitions == 1)
+				printf("[%c-%c]", range.start, range.end);
+			else 
+				printf("[%c-%c]{%d}", range.start, range.end, repetitions);
 		}
 	}
 	puts("");
