@@ -1,8 +1,10 @@
+#define _GNU_SOURCE
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <errno.h>
 #include <string.h>
-#include <inttypes.h>
+#include <sys/types.h>
 
 typedef struct Range {
 	char start;

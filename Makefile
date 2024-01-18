@@ -1,4 +1,4 @@
-all: bin bin/keygen bin/keyuser bin/bench-runner
+all: bin bin/keygen bin/keyuser bin/bench-runner bin/keybuilder
 
 bin:
 	@mkdir -p bin/
@@ -14,6 +14,14 @@ bin/keyuser: $(shell find src/keyuser/src/ -type f)
 bin/keyuser-debug: $(shell find src/keyuser/src/ -type f)
 	cd src/keyuser && make keyuser-debug
 	cp src/keyuser/keyuser-debug $@
+
+bin/keybuilder: $(shell find src/keybuilder/src/ -type f)
+	cd src/keybuilder && make keybuilder
+	cp src/keybuilder/keybuilder $@
+
+bin/keybuilder-debug: $(shell find src/keybuilder/src/ -type f)
+	cd src/keybuilder && make keybuilder-debug
+	cp src/keybuilder/keybuilder-debug $@
 
 bin/bench-runner: $(shell find src/bench-runner/src/ -type f)
 	cd src/bench-runner && cargo build --release
