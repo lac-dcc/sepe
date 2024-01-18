@@ -9,6 +9,18 @@ typedef struct Range {
 	char end;
 } Range;
 
+int is_special(const char ch) {
+	return ch == '\\'
+		|| ch == '['
+		|| ch == '{'
+		|| ch == ')'
+		|| ch == '('
+		|| ch == '+'
+		|| ch == '*'
+		|| ch == '?'
+		|| ch == '.';
+}
+
 int main(void) {
 
 	char* line;
@@ -52,7 +64,10 @@ int main(void) {
 	while (i < line_size - 1) {
 		Range range = ranges[i++];
 		if (range.start == range.end) {
-			putchar(range.start);
+			if (is_special(range.start))
+				printf("\\%c",range.start);
+			else
+				printf("%c", range.start);
 		} else {
 			int repetitions = 1;
 			Range other = ranges[i++];
