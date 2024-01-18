@@ -12,6 +12,10 @@
 #include <vector>
 #include <numeric>
 
+struct STDHashMurmur{
+    std::size_t operator()(const std::string& key) const;
+};
+
 /**
  * @struct STDHash
  * @brief This struct provides a hash function using the standard library's hash function.

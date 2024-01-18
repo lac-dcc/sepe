@@ -11,6 +11,61 @@ inline static uint64_t load_u64_le(const char* b) {
     return Ret;
 }
 
+// C++ STD_HASH implementation extracted from 
+//https://github.com/gcc-mirror/gcc/blob/ee0717da1eb5dc5d17dcd0b35c88c99281385280/libstdc%2B%2B-v3/libsupc%2B%2B/hash_bytes.cc#L61
+static inline std::size_t unaligned_load(const char* p)
+{
+	std::size_t result;
+	__builtin_memcpy(&result, p, sizeof(result));
+	return result;
+}
+static inline std::size_t shift_mix(std::size_t v)
+{ return v ^ (v >> 47);}
+
+static inline std::size_t load_bytes(const char* p, int n)
+{
+    std::size_t result = 0;
+    --n;
+    do
+      result = (result << 8) + static_cast<unsigned char>(p[n]);
+    while (--n >= 0);
+    return result;
+}
+
+// Implementation of Murmur hash for 64-bit size_t.
+static size_t _Hash_bytes(const void* ptr, size_t len, size_t seed)
+{
+	static const size_t mul = (((size_t) 0xc6a4a793UL) << 32UL)
+					+ (size_t) 0x5bd1e995UL;
+	const char* const buf = static_cast<const char*>(ptr);
+
+	// Remove the bytes not divisible by the sizeof(size_t).  This
+	// allows the main loop to process the data as 64-bit integers.
+	const size_t len_aligned = len & ~(size_t)0x7;
+	const char* const end = buf + len_aligned;
+	size_t hash = seed ^ (len * mul);
+	for (const char* p = buf; p != end; p += 8)
+	{
+		const size_t data = shift_mix(unaligned_load(p) * mul) * mul;
+		hash ^= data;
+		hash *= mul;
+	}
+	if ((len & 0x7) != 0)
+	{
+		const size_t data = load_bytes(end, len & 0x7);
+		hash ^= data;
+		hash *= mul;
+	}
+	hash = shift_mix(hash) * mul;
+	hash = shift_mix(hash);
+	return hash;
+}
+
+std::size_t STDHashMurmur::operator()(const std::string& key) const{
+	size_t __seed = static_cast<size_t>(0xc70f6907UL);
+    return _Hash_bytes(key.c_str(), key.size(), __seed);
+}
+
 std::size_t STDHash::operator()(const std::string& key) const{
     return std::hash<std::string>{}(key);
 }
@@ -129,7 +184,6 @@ std::size_t MacAddressHashBitOps::operator()(const std::string& key) const{
 }
 
 std::size_t UrlCompress::operator()(const std::string& key) const {
-	
 // http:/google.github.io/[a-z]{10}/version[0-9]{2}/doxygen/html/[a-z0-9]{20}.html
 
 //[a-z] 1F -- 10 bytes
@@ -160,7 +214,7 @@ std::size_t UrlGenericHashBitOps::operator()(const std::string& key) const{
 	constexpr std::size_t mask2 = 0x3F3F3F3F3F3F3F3F;
 	const std::size_t high = _pext_u64(load_u64_le(key.c_str() + 8), mask2);
 
-	constexpr std::size_t mask3 = 0x3F3F3F3F00000000;
+	constexpr std::size_t mask3 = 0x000000003F3F3F3F;
 	const std::size_t high2 = _pext_u64(load_u64_le(key.c_str() + 12), mask3);
 
 	return (low ^ (high2 << 36)) ^ (high << 2);
