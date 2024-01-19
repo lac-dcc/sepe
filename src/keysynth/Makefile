@@ -8,7 +8,7 @@ DEBUG_FLAGS   := $(COMMON_FLAGS) -Og -g3 -fsanitize=address,undefined -mbmi2 -ms
 all: $(TARGET) 
 
 keysynth-debug: src/main.cpp
-	$(CXX)  $(CXXFLAGS) $(DEBUG_FLAGS) -o $@ $^
+	$(CXX) $(CXXFLAGS) $(DEBUG_FLAGS) -o $@ $^
 
 keysynth: src/main.cpp
 	$(CXX) $(CXXFLAGS) $(RELEASE_FLAGS) -o $@ $^
