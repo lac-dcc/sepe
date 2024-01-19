@@ -184,7 +184,7 @@ std::size_t MacAddressHashBitOps::operator()(const std::string& key) const{
 }
 
 std::size_t UrlCompress::operator()(const std::string& key) const {
-// http:/google.github.io/[a-z]{10}/version[0-9]{2}/doxygen/html/[a-z0-9]{20}.html
+// http:/google.github.io/[a-z]{2}/version[0-9]{2}/doxygen/html/[a-z0-9]{20}.html
 
 //[a-z] 1F -- 10 bytes
 	constexpr std::size_t mask1 = 0x1F1F1F1F1F1F1F1F;

@@ -1,7 +1,14 @@
 #include <iostream>
 #include <vector>
 
-inline std::string intToHex(size_t num){
+static const std::string load_u64_le = R"(inline static uint64_t load_u64_le(const char* b) {
+    uint64_t Ret;
+    // This is a way for the compiler to optimize this func to a single movq instruction
+    memcpy(&Ret, b, sizeof(uint64_t)); 
+    return Ret;
+})";
+
+static inline std::string intToHex(size_t num){
     char numStr[17];
     sprintf(numStr, "%02lx", num);
     return std::string(numStr);
@@ -47,13 +54,6 @@ inline bool isAlphanumerical(char c){
            (c >= 'A' && c <= 'Z');
 }
 
-const std::string load_u64_le = R"(inline static uint64_t load_u64_le(const char* b) {
-    uint64_t Ret;
-    // This is a way for the compiler to optimize this func to a single movq instruction
-    memcpy(&Ret, b, sizeof(uint64_t)); 
-    return Ret;
-})";
-
 inline bool nextIsContinuous(const std::vector<Range>& ranges, size_t rangeIdx){
     return ((size_t)ranges[rangeIdx+1].offset == ranges[rangeIdx].offset + ranges[rangeIdx].repetition);
 }
@@ -89,6 +89,16 @@ std::string recursivelyCalculateMask(const std::vector<Range>& ranges, size_t ra
 
 }
 
+static inline std::string hashable(int hashableID, int offset){
+    return "\tconst std::size_t hashable" + 
+                std::to_string(hashableID) + 
+                " = _pext_u64(load_u64_le(key.c_str()+" + 
+                std::to_string(offset) + 
+                "), mask" + 
+                std::to_string(hashableID) + 
+                ");\n";
+}
+
 std::string synthethiseHashFunc(std::string& regex){
 
     // Create ranges
@@ -107,14 +117,17 @@ std::string synthethiseHashFunc(std::string& regex){
                 ranges.push_back(Range(regex[i+1],regex[i+3],offset,1));
                 i += 4;
             }
+        } else if(regex[i] == '\\') {
+            i++;
+            offset++;
         } else {
             offset++;
         }
     }
 
-    // Print ranges
-    for(size_t i = 0; i < ranges.size(); i++){
-        ranges[i].print();
+    if(ranges.size() == 0){
+        //TODO: RETURN STD HASH
+        ;
     }
 
     std::string synthethisedHashFunc = "std::size_t synthethisedHashFunc(const std::string& key) const {\n";
@@ -152,29 +165,35 @@ std::string synthethiseHashFunc(std::string& regex){
             currMask = "00" + currMask;
         }
 
-        synthethisedHashFunc += "\tconstexpr std::size_t mask" + std::to_string(maskID) + " = 0x" + currMask + ";\n";
+        synthethisedHashFunc += "\tconstexpr std::size_t mask" + 
+                                std::to_string(maskID) + 
+                                " = 0x" + 
+                                currMask + 
+                                ";\n";
         maskID++;
     }
 
-    size_t hashableID = 0;
-    int localOffset = 0;
-    for(int i =0 ; i < ranges.size() ; i++){
-        for (size_t j = 0; j < ranges[i].repetition; j += 8) {
-            if(ranges[i].offset + j > localOffset){
-                localOffset = ranges[i].offset + j;
-            } else if(localOffset >= (ranges[i].offset + ranges[i].repetition)){
+    // Calculate offsets
+    size_t rangesID = 0;
+    int currOffset = ranges[rangesID].offset;
+    int hashableID = 0;
+    while( rangesID < ranges.size() ){
+        synthethisedHashFunc += hashable(hashableID++, currOffset);
+        currOffset += 8;
+        if( currOffset >= (ranges[rangesID].offset + ranges[rangesID].repetition) ){
+            rangesID++;
+            if(rangesID >= ranges.size()){
                 continue;
             }
-            synthethisedHashFunc += "\tconst std::size_t hashable" + 
-                std::to_string(hashableID) + 
-                " = _pext_u64(load_u64_le(key.c_str()+" + 
-                std::to_string(localOffset) + 
-                "), mask" + 
-                std::to_string(hashableID) + 
-                ");\n";
-            hashableID++;
+            if( currOffset >= ranges[rangesID].offset ){
+                while( rangesID < ranges.size() && currOffset >= (ranges[rangesID].offset + ranges[rangesID].repetition)){
+                    ++rangesID;
+                }
+                continue;
+            } else {
+                currOffset = ranges[rangesID].offset;
+            }
         }
-        localOffset += 8;
     }
 
     synthethisedHashFunc += "\treturn hash; \n";
