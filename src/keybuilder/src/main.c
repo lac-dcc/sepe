@@ -108,6 +108,7 @@ int main(void) {
 		if (in_bytes != line_size) {
 			fprintf(stderr, "ERROR: all lines must have the exact same size!\n");
 			free(line);
+			free(ranges);
 			return 1;
 		}
 
