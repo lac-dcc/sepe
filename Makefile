@@ -7,24 +7,28 @@ bin/keygen: $(shell find src/keygen/src/ -type f)
 	cd src/keygen && cargo build --release
 	cp src/keygen/target/release/keygen $@
 
-bin/keyuser: $(shell find src/keyuser/src/ -type f)
+bin/keyuser: $(shell find src/keyuser/src/ -type f) src/keyuser/Makefile
 	cd src/keyuser && make keyuser
 	cp src/keyuser/keyuser $@
 
-bin/keyuser-debug: $(shell find src/keyuser/src/ -type f)
+bin/keyuser-debug: $(shell find src/keyuser/src/ -type f) src/keyuser/Makefile
 	cd src/keyuser && make keyuser-debug
 	cp src/keyuser/keyuser-debug $@
 
-bin/keybuilder: $(shell find src/keybuilder/src/ -type f)
+bin/keybuilder: $(shell find src/keybuilder/src/ -type f) src/keybuilder/Makefile
 	cd src/keybuilder && make keybuilder
 	cp src/keybuilder/keybuilder $@
 
-bin/keybuilder-debug: $(shell find src/keybuilder/src/ -type f)
+bin/keybuilder-debug: $(shell find src/keybuilder/src/ -type f) src/keybuilder/Makefile
 	cd src/keybuilder && make keybuilder-debug
 	cp src/keybuilder/keybuilder-debug $@
 
-bin/keysynth:  $(shell find src/keysynth/src/ -type f)
+bin/keysynth:  $(shell find src/keysynth/src/ -type f) src/keysynth/Makefile
 	cd src/keysynth && make keysynth
+	cp src/keysynth/keysynth $@
+
+bin/keysynth-debug:  $(shell find src/keysynth/src/ -type f) src/keysynth/Makefile
+	cd src/keysynth && make keysynth-debug
 	cp src/keysynth/keysynth $@
 
 bin/bench-runner: $(shell find src/bench-runner/src/ -type f)
