@@ -118,33 +118,37 @@ printf("%s, %s, %s, %s, %s, %s, %s, %s, %s, %s\n",
                         args.elimination);
 
     // Execution modes are hard coded since we do not expect to add new ones or modify existing ones
-    for (const auto& bench : benchmarks){
+    for(int r=0; r < args.repetitions; ++r){
+        for (const auto& bench : benchmarks){
 
-        // Execute benchmark
-        auto start = std::chrono::system_clock::now();
-        executeInterweaved(bench, keys, args);
-        auto end = std::chrono::system_clock::now();
-        std::chrono::duration<double> elapsed_seconds = end-start;
+            // Execute benchmark
+            auto start = std::chrono::system_clock::now();
+            executeInterweaved(bench, keys, args);
+            auto end = std::chrono::system_clock::now();
+            std::chrono::duration<double> elapsed_seconds = end-start;
 
-        // Update Hash Function metrics
-        hashInfo[bench->getHashName()].collisionCountBuckets += bench->calculateCollisionCountBuckets();
-        hashInfo[bench->getHashName()].samples.push_back(elapsed_seconds.count());
+            // Update Hash Function metrics
+            hashInfo[bench->getHashName()].collisionCountBuckets += bench->calculateCollisionCountBuckets();
+            hashInfo[bench->getHashName()].samples.push_back(elapsed_seconds.count());
 
+        }
     }
     reportHashMetricsCSV(hashInfo, argsString, "Interweaved");
 
-    for (const auto& bench : benchmarks){
+    for(int r=0; r < args.repetitions; ++r){
+        for (const auto& bench : benchmarks){
 
-        // Execute benchmark
-        auto start = std::chrono::system_clock::now();
-        executeBatched(bench, keys, args);
-        auto end = std::chrono::system_clock::now();
-        std::chrono::duration<double> elapsed_seconds = end-start;
+            // Execute benchmark
+            auto start = std::chrono::system_clock::now();
+            executeBatched(bench, keys, args);
+            auto end = std::chrono::system_clock::now();
+            std::chrono::duration<double> elapsed_seconds = end-start;
 
-        // Update Hash Function metrics
-        hashInfo[bench->getHashName()].collisionCountBuckets += bench->calculateCollisionCountBuckets();
-        hashInfo[bench->getHashName()].samples.push_back(elapsed_seconds.count());
+            // Update Hash Function metrics
+            hashInfo[bench->getHashName()].collisionCountBuckets += bench->calculateCollisionCountBuckets();
+            hashInfo[bench->getHashName()].samples.push_back(elapsed_seconds.count());
 
+        }
     }
 
     reportHashMetricsCSV(hashInfo, argsString, "Batched");

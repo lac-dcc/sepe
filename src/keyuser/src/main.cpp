@@ -23,7 +23,8 @@ std::string correctBenchUsage(){
            "       -s or --search: integer that represents the percentage of search operations\n"
            "       -e or --elimination: integer that represents the percentage of elimination operations\n"
            "               The sum of -i, -s, and -e shoud be 100.\n"
-           "       -n or --num-operations: integer that represents the number of times to perform a hash operation on the benchmark\n"
+           "       -n or --num-operations: integer that represents the number of 'times to perform a hash operation on the benchmark\n"
+           "       -r or --repetitions: number of times to repeat the benchmark\n"
            "       -seed: integer that represents the seed for the random number generator\n "
            "       -v or --verbose: print the results of each operation\n"
            "       -h or --help: print this message\n"
@@ -56,6 +57,10 @@ BenchmarkParameters parseArgs(int argc, char** argv){
         }else if(strcmp(argv[i], "-n") == 0 || 
                  strcmp(argv[i], "--num-operations") == 0){
             args.numOperations = atoi(argv[i+1]);
+            i+=2;
+        }else if(strcmp(argv[i], "-r") == 0 || 
+                 strcmp(argv[i], "--repetitions") == 0){
+            args.repetitions = atoi(argv[i+1]);
             i+=2;
         }else if(strcmp(argv[i], "-seed") == 0){
             args.seed = atoi(argv[i+1]);

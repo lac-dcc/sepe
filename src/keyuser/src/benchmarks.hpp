@@ -319,6 +319,7 @@ struct BenchmarkParameters{
     int elimination     = -1;
     int numOperations   = -1;
     int seed            = 223554; // Chosen by a fair dice roll
+    int repetitions     = 1;
     bool verbose        = false;
 };
 
