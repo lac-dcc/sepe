@@ -89,7 +89,7 @@ std::string recursivelyCalculateMask(const std::vector<Range>& ranges, size_t ra
 
 }
 
-static inline std::string hashable(int hashableID, int offset){
+static inline std::string hashable(int hashableID, size_t offset){
     return "\tconst std::size_t hashable" + 
                 std::to_string(hashableID) + 
                 " = _pext_u64(load_u64_le(key.c_str()+" + 
@@ -103,7 +103,7 @@ std::string synthethiseHashFunc(std::string& regex){
 
     // Create ranges
     std::vector<Range> ranges;
-    int offset = 0;
+    size_t offset = 0;
     for(size_t i = 0; i < regex.size(); i++){
         if(regex[i] == '['){
             if(regex[i+5] == '{'){
@@ -126,8 +126,10 @@ std::string synthethiseHashFunc(std::string& regex){
     }
 
     if(ranges.size() == 0){
-        //TODO: RETURN STD HASH
-        ;
+		return "\
+			std::size_t synthethisedHashFunc::operator()(const std::string& key) const {\n\
+    			\treturn std::hash<std::string>{}(key);\n\
+			}";
     }
 
     // Calculate offsets
@@ -138,13 +140,13 @@ std::string synthethiseHashFunc(std::string& regex){
         // synthethisedHashFunc += hashable(hashableID++, currOffset);
         offsets.push_back(currOffset);
         currOffset += 8;
-        if( currOffset >= (ranges[rangesID].offset + ranges[rangesID].repetition) ){
+        if( currOffset >= (ranges[rangesID].offset + (int)ranges[rangesID].repetition) ){
             rangesID++;
             if(rangesID >= ranges.size()){
                 continue;
             }
             if( currOffset >= ranges[rangesID].offset ){
-                while( rangesID < ranges.size() && currOffset >= (ranges[rangesID].offset + ranges[rangesID].repetition)){
+                while( rangesID < ranges.size() && currOffset >= (ranges[rangesID].offset + (int)ranges[rangesID].repetition)){
                     ++rangesID;
                 }
                 continue;
@@ -200,7 +202,7 @@ std::string synthethiseHashFunc(std::string& regex){
 
         // Fix last mask to avoid out of bounds memory access
         if(i + 16 >= mask.size()){
-            for( int j = 0; j < lastMaskShift; j++ ){
+            for( size_t j = 0; j < lastMaskShift; j++ ) {
                 currMask = currMask + "00";
             }
             currMask = currMask.substr(lastMaskShift*2,currMask.size());
@@ -216,7 +218,7 @@ std::string synthethiseHashFunc(std::string& regex){
 
     int hashableID = 0;
     for(const auto& off : offsets){
-        synthethisedHashFunc += hashable(hashableID++, currOffset);
+        synthethisedHashFunc += hashable(hashableID++, off);
     }
 
     synthethisedHashFunc += "\treturn hash; \n";
