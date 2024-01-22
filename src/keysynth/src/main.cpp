@@ -130,9 +130,42 @@ std::string synthethiseHashFunc(std::string& regex){
         ;
     }
 
+    // Calculate offsets
+    std::vector<size_t> offsets;
+    size_t rangesID = 0;
+    int currOffset = ranges[rangesID].offset;
+    while( rangesID < ranges.size() ){
+        // synthethisedHashFunc += hashable(hashableID++, currOffset);
+        offsets.push_back(currOffset);
+        currOffset += 8;
+        if( currOffset >= (ranges[rangesID].offset + ranges[rangesID].repetition) ){
+            rangesID++;
+            if(rangesID >= ranges.size()){
+                continue;
+            }
+            if( currOffset >= ranges[rangesID].offset ){
+                while( rangesID < ranges.size() && currOffset >= (ranges[rangesID].offset + ranges[rangesID].repetition)){
+                    ++rangesID;
+                }
+                continue;
+            } else {
+                currOffset = ranges[rangesID].offset;
+            }
+        }
+    }
+
+    // Avoid out of bounds memory access on the last mask/offset
+    size_t lastMaskShift = 0;
+    if (offsets[offsets.size()-1] + 8 >= offset){
+        lastMaskShift = offsets[offsets.size()-1] - (offset - 8);
+        offsets[offsets.size()-1] = offset - 8;
+    }
+    printf("Last mask shift: %lu\n", lastMaskShift);
+
     std::string synthethisedHashFunc = "std::size_t synthethisedHashFunc(const std::string& key) const {\n";
     
     std::string mask = recursivelyCalculateMask(ranges, 0, 0);
+    // printf("Mask: %s\n", mask.c_str());
     int numZeroes = mask.size() % 16;
     if(numZeroes > 0){
         for(int i = 0; i < (16-numZeroes); i++){
@@ -165,6 +198,14 @@ std::string synthethiseHashFunc(std::string& regex){
             currMask = "00" + currMask;
         }
 
+        // Fix last mask to avoid out of bounds memory access
+        if(i + 16 >= mask.size()){
+            for( int j = 0; j < lastMaskShift; j++ ){
+                currMask = currMask + "00";
+            }
+            currMask = currMask.substr(lastMaskShift*2,currMask.size());
+        }
+
         synthethisedHashFunc += "\tconstexpr std::size_t mask" + 
                                 std::to_string(maskID) + 
                                 " = 0x" + 
@@ -173,27 +214,9 @@ std::string synthethiseHashFunc(std::string& regex){
         maskID++;
     }
 
-    // Calculate offsets
-    size_t rangesID = 0;
-    int currOffset = ranges[rangesID].offset;
     int hashableID = 0;
-    while( rangesID < ranges.size() ){
+    for(const auto& off : offsets){
         synthethisedHashFunc += hashable(hashableID++, currOffset);
-        currOffset += 8;
-        if( currOffset >= (ranges[rangesID].offset + ranges[rangesID].repetition) ){
-            rangesID++;
-            if(rangesID >= ranges.size()){
-                continue;
-            }
-            if( currOffset >= ranges[rangesID].offset ){
-                while( rangesID < ranges.size() && currOffset >= (ranges[rangesID].offset + ranges[rangesID].repetition)){
-                    ++rangesID;
-                }
-                continue;
-            } else {
-                currOffset = ranges[rangesID].offset;
-            }
-        }
     }
 
     synthethisedHashFunc += "\treturn hash; \n";
