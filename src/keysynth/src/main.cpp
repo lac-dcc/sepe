@@ -49,6 +49,16 @@ struct Range{
     
 };
 
+int countZeros(const size_t x) {
+	int zeros = 0;
+	for (size_t i = 0; i < sizeof(size_t) * 8; ++i) {
+		if ((x & (1L << i)) == 0) {
+			++zeros;
+		}
+	}
+	return zeros;
+}
+
 inline bool isAlphanumerical(char c){
     return (c >= '0' && c <= '9') || 
            (c >= 'a' && c <= 'z') || 
@@ -163,7 +173,6 @@ std::string synthethiseHashFunc(std::string& regex){
         lastMaskShift = offsets[offsets.size()-1] - (offset - 8);
         offsets[offsets.size()-1] = offset - 8;
     }
-    printf("Last mask shift: %lu\n", lastMaskShift);
 
     std::string synthethisedHashFunc = "std::size_t synthethisedHashFunc(const std::string& key) const {\n";
     
@@ -210,14 +219,8 @@ std::string synthethiseHashFunc(std::string& regex){
             currMask = currMask.substr(lastMaskShift*2,currMask.size());
         }
 
-		//int shift = 0;
-		//for (int j = 0; j < 16; j += 2) {
-		//	int byte = std::atoi(currMask.substr(j, 2).c_str());
-		//	int leading_zeros = __builtin_clz(byte);
-		//	shift = __builtin_clz(byte);
-		//}
 		long maskInt = std::stold("0x" + currMask);
-		shifts.push_back(__builtin_clzll(maskInt));
+		shifts.push_back(countZeros(maskInt));
 
         synthethisedHashFunc += "\tconstexpr std::size_t mask" + 
                                 std::to_string(maskID) + 
