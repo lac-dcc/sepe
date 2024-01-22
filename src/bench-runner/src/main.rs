@@ -1,4 +1,4 @@
-use std::{fs, io::Write, str::FromStr};
+use std::{fs, io::Write, path::PathBuf, str::FromStr};
 
 use clap::Parser;
 use toml::Table;
@@ -46,6 +46,10 @@ struct Command {
     /// Prints configuration and runs keyuser in verbose mode
     #[clap(short, long, default_value = "false")]
     verbose: bool,
+
+    /// Suffix of output files
+    #[clap(long, default_value = "_results.csv")]
+    outfile: String,
 
     /// regexes we will benchmark
     regexes: Vec<String>,
@@ -176,6 +180,10 @@ fn main() {
         if !keyuser_out.status.success() {
             eprintln!("        !!!FAILED!!!");
         }
+
+        let mut outfile =
+            std::fs::File::create(cmd_regex + &cmd.outfile).expect("failed to create output file!");
+        outfile.write_all(&keyuser_out.stdout).unwrap();
         std::io::stdout().write_all(&keyuser_out.stdout).unwrap();
         std::io::stderr().write_all(&keyuser_out.stderr).unwrap();
     }
