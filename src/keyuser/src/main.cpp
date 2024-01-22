@@ -117,6 +117,7 @@ int main(int argc, char** argv){
 
     REGISTER_BENCHMARKS(UrlGenericHashBitOps);
     REGISTER_BENCHMARKS(UrlCompress);
+    REGISTER_BENCHMARKS(Synth);
 
     // Load keys from standard input into memory
     std::vector<std::string> keys;

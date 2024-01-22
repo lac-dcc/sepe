@@ -183,7 +183,7 @@ std::size_t MacAddressHashBitOps::operator()(const std::string& key) const{
 	return low ^ (high << 21);
 }
 
-std::size_t UrlSynth::operator()(const std::string& key) const {
+std::size_t Synth::operator()(const std::string& key) const {
         constexpr std::size_t mask0 = 0x1f1f1f1f1f1f1f1f;
         constexpr std::size_t mask1 = 0x0000000000001f1f;
         constexpr std::size_t mask2 = 0x00000000000f0f0f;
