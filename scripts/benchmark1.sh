@@ -22,7 +22,6 @@ DISTRIBUTIONS="0.7 0.2 0.1
 0.4 0.3 0.3"
 
 for REGEX in $REGEXES; do
-	echo "RESET"
 	COUNT=0
 	for NUM_KEY in $NUM_KEYS; do
 		for NUM_OP in $NUM_OPS; do
