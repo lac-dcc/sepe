@@ -1,5 +1,6 @@
 #include <iostream>
 #include <vector>
+#include <queue>
 
 static const std::string load_u64_le = R"(inline static uint64_t load_u64_le(const char* b) {
     uint64_t Ret;
@@ -176,6 +177,7 @@ std::string synthethiseHashFunc(std::string& regex){
     }
 
     int maskID = 0;
+	std::vector<int> shifts;
     for(size_t i = 0; i < mask.size(); i+=16){
         std::string currMask = mask.substr(i,16);
 
@@ -208,6 +210,15 @@ std::string synthethiseHashFunc(std::string& regex){
             currMask = currMask.substr(lastMaskShift*2,currMask.size());
         }
 
+		//int shift = 0;
+		//for (int j = 0; j < 16; j += 2) {
+		//	int byte = std::atoi(currMask.substr(j, 2).c_str());
+		//	int leading_zeros = __builtin_clz(byte);
+		//	shift = __builtin_clz(byte);
+		//}
+		long maskInt = std::stold("0x" + currMask);
+		shifts.push_back(__builtin_clzll(maskInt));
+
         synthethisedHashFunc += "\tconstexpr std::size_t mask" + 
                                 std::to_string(maskID) + 
                                 " = 0x" + 
@@ -221,7 +232,32 @@ std::string synthethiseHashFunc(std::string& regex){
         synthethisedHashFunc += hashable(hashableID++, off);
     }
 
-    synthethisedHashFunc += "\treturn hash; \n";
+	for (int i = 0; i < hashableID; ++i) {
+		if (i % 2 == 0) {
+			synthethisedHashFunc += "\tsize_t shift" + std::to_string(i) + " = " + "hashable" + std::to_string(i) + ";\n";
+		} else {
+			synthethisedHashFunc += "\tsize_t shift" + std::to_string(i) + " = " + "hashable" + std::to_string(i) + " << " + std::to_string(shifts[i]) + ";\n";
+		}
+	}
+
+	std::queue<std::string> queue;
+	for (int i = 0; i < hashableID; ++i) {
+		queue.push("shift" + std::to_string(i));
+	}
+
+
+	int tmpID = 0;
+	while (queue.size() > 1) {
+		std::string id1 = queue.front();
+		queue.pop();
+		std::string id2 = queue.front();
+		queue.pop();
+		std::string tmpVar = "tmp" + std::to_string(tmpID++);
+		synthethisedHashFunc += "\tsize_t " + tmpVar + " = " + id1 + " ^ " +id2 + ";\n";
+		queue.push(tmpVar);
+	}
+
+    synthethisedHashFunc += "\treturn " + queue.front() + "; \n";
     synthethisedHashFunc += "}\n";
     return synthethisedHashFunc;
 }
