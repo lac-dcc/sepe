@@ -41,6 +41,6 @@ clean:
 	cd src/keyuser && make clean
 	cd src/keysynth && make clean
 	cd src/keybuilder && make clean
-	rm -rfv bin *.csv
+	rm -rfv bin output *.csv
 
 .PHONY: all clean
