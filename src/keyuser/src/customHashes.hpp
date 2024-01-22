@@ -125,4 +125,8 @@ struct UrlCompress{
     std::size_t operator()(const std::string& key) const;
 };
 
+struct UrlSynth{
+    std::size_t operator()(const std::string& key) const;
+};
+
 #endif

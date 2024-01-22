@@ -3,7 +3,7 @@
 
 [URL_COMPLEX]
 regex = "http:/google\\.github\\.io/[a-z]{10}/version[0-9]{3}/doxygen/html/[a-z0-9]{20}\\.html"
-hashes = ["STDHash",  "STDHashMurmur", "FNVHash", "UrlCompress"]
+hashes = ["STDHash",  "STDHashMurmur", "FNVHash", "UrlCompress", "UrlSynth"]
 
 [URL_GENERIC]
 regex = "https://www\\.[!~]{100,200}"

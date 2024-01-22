@@ -183,6 +183,33 @@ std::size_t MacAddressHashBitOps::operator()(const std::string& key) const{
 	return low ^ (high << 21);
 }
 
+std::size_t UrlSynth::operator()(const std::string& key) const {
+        constexpr std::size_t mask0 = 0x1f1f1f1f1f1f1f1f;
+        constexpr std::size_t mask1 = 0x0000000000001f1f;
+        constexpr std::size_t mask2 = 0x00000000000f0f0f;
+        constexpr std::size_t mask3 = 0x0000007f7f7f7f7f;
+        constexpr std::size_t mask4 = 0x7f7f7f7f7f7f7f7f;
+        constexpr std::size_t mask5 = 0x007f7f7f7f7f7f7f;
+        const std::size_t hashable0 = _pext_u64(load_u64_le(key.c_str()+23), mask0);
+        const std::size_t hashable1 = _pext_u64(load_u64_le(key.c_str()+31), mask1);
+        const std::size_t hashable2 = _pext_u64(load_u64_le(key.c_str()+41), mask2);
+        const std::size_t hashable3 = _pext_u64(load_u64_le(key.c_str()+58), mask3);
+        const std::size_t hashable4 = _pext_u64(load_u64_le(key.c_str()+66), mask4);
+        const std::size_t hashable5 = _pext_u64(load_u64_le(key.c_str()+74), mask5);
+        size_t shift0 = hashable0;
+        size_t shift1 = hashable1 << 51;
+        size_t shift2 = hashable2;
+        size_t shift3 = hashable3 << 25;
+        size_t shift4 = hashable4;
+        size_t shift5 = hashable5 << 9;
+        size_t tmp0 = shift0 ^ shift1;
+        size_t tmp1 = shift2 ^ shift3;
+        size_t tmp2 = shift4 ^ shift5;
+        size_t tmp3 = tmp0 ^ tmp1;
+        size_t tmp4 = tmp2 ^ tmp3;
+        return tmp4;
+}
+
 std::size_t UrlCompress::operator()(const std::string& key) const {
 // http:/google.github.io/[a-z]{2}/version[0-9]{2}/doxygen/html/[a-z0-9]{20}.html
 
