@@ -177,7 +177,7 @@ std::string synthethiseHashFunc(std::string& regex){
     std::string synthethisedHashFunc = "std::size_t synthethisedHashFunc(const std::string& key) const {\n";
     
     std::string mask = recursivelyCalculateMask(ranges, 0, 0);
-    // printf("Mask: %s\n", mask.c_str());
+    //printf("Mask: %s\n", mask.c_str());
     int numZeroes = mask.size() % 16;
     if(numZeroes > 0){
         for(int i = 0; i < (16-numZeroes); i++){
