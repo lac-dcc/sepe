@@ -1,4 +1,4 @@
-use std::{fs, io::Write, path::PathBuf, str::FromStr};
+use std::{fs, io::Write, str::FromStr};
 
 use clap::Parser;
 use toml::Table;
@@ -27,6 +27,10 @@ struct Command {
     #[clap(long, default_value = "9764096")]
     keyuser_seed: u64,
 
+    /// Number of repetitions to forward to keyuser
+    #[clap(short, long, default_value = "1")]
+    repetitions: u64,
+
     /// Number of operations to run
     #[clap(short, long, default_value = "1000000")]
     operations: u64,
@@ -47,7 +51,7 @@ struct Command {
     #[clap(short, long, default_value = "false")]
     verbose: bool,
 
-    /// Suffix of output files
+    /// Suffix of output csv files
     #[clap(long, default_value = "_results.csv")]
     outfile: String,
 
@@ -148,7 +152,9 @@ fn main() {
             .arg("-n")
             .arg(format!("{}", cmd.operations))
             .arg("-seed")
-            .arg(format!("{}", cmd.keyuser_seed));
+            .arg(format!("{}", cmd.keyuser_seed))
+            .arg("-r")
+            .arg(format!("{}", cmd.repetitions));
 
         if cmd.verbose {
             keyuser_cmd.arg("--verbose");
