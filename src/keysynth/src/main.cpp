@@ -138,7 +138,7 @@ std::string synthethiseHashFunc(std::string& regex){
 
     if(ranges.size() == 0){
 		return "\
-			std::size_t synthethisedHashFunc::operator()(const std::string& key) const {\n\
+			std::size_t synthesizedHashFunc::operator()(const std::string& key) const {\n\
     			\treturn std::hash<std::string>{}(key);\n\
 			}";
     }
@@ -148,7 +148,7 @@ std::string synthethiseHashFunc(std::string& regex){
     size_t rangesID = 0;
     int currOffset = ranges[rangesID].offset;
     while( rangesID < ranges.size() ){
-        // synthethisedHashFunc += hashable(hashableID++, currOffset);
+        // synthesizedHashFunc += hashable(hashableID++, currOffset);
         offsets.push_back(currOffset);
         currOffset += 8;
         if( currOffset >= (ranges[rangesID].offset + (int)ranges[rangesID].repetition) ){
@@ -174,7 +174,7 @@ std::string synthethiseHashFunc(std::string& regex){
         offsets[offsets.size()-1] = offset - 8;
     }
 
-    std::string synthethisedHashFunc = "std::size_t synthethisedHashFunc(const std::string& key) const {\n";
+    std::string synthesizedHashFunc = "std::size_t synthesizedHashFunc(const std::string& key) const {\n";
     
     std::string mask = recursivelyCalculateMask(ranges, 0, 0);
     //printf("Mask: %s\n", mask.c_str());
@@ -222,7 +222,7 @@ std::string synthethiseHashFunc(std::string& regex){
 		long maskInt = std::stold("0x" + currMask);
 		shifts.push_back(countZeros(maskInt));
 
-        synthethisedHashFunc += "\tconstexpr std::size_t mask" + 
+        synthesizedHashFunc += "\tconstexpr std::size_t mask" + 
                                 std::to_string(maskID) + 
                                 " = 0x" + 
                                 currMask + 
@@ -232,14 +232,14 @@ std::string synthethiseHashFunc(std::string& regex){
 
     int hashableID = 0;
     for(const auto& off : offsets){
-        synthethisedHashFunc += hashable(hashableID++, off);
+        synthesizedHashFunc += hashable(hashableID++, off);
     }
 
 	for (int i = 0; i < hashableID; ++i) {
 		if (i % 2 == 0) {
-			synthethisedHashFunc += "\tsize_t shift" + std::to_string(i) + " = " + "hashable" + std::to_string(i) + ";\n";
+			synthesizedHashFunc += "\tsize_t shift" + std::to_string(i) + " = " + "hashable" + std::to_string(i) + ";\n";
 		} else {
-			synthethisedHashFunc += "\tsize_t shift" + std::to_string(i) + " = " + "hashable" + std::to_string(i) + " << " + std::to_string(shifts[i]) + ";\n";
+			synthesizedHashFunc += "\tsize_t shift" + std::to_string(i) + " = " + "hashable" + std::to_string(i) + " << " + std::to_string(shifts[i]) + ";\n";
 		}
 	}
 
@@ -256,13 +256,13 @@ std::string synthethiseHashFunc(std::string& regex){
 		std::string id2 = queue.front();
 		queue.pop();
 		std::string tmpVar = "tmp" + std::to_string(tmpID++);
-		synthethisedHashFunc += "\tsize_t " + tmpVar + " = " + id1 + " ^ " +id2 + ";\n";
+		synthesizedHashFunc += "\tsize_t " + tmpVar + " = " + id1 + " ^ " +id2 + ";\n";
 		queue.push(tmpVar);
 	}
 
-    synthethisedHashFunc += "\treturn " + queue.front() + "; \n";
-    synthethisedHashFunc += "}\n";
-    return synthethisedHashFunc;
+    synthesizedHashFunc += "\treturn " + queue.front() + "; \n";
+    synthesizedHashFunc += "}\n";
+    return synthesizedHashFunc;
 }
 
 int main(int argc, char** argv){

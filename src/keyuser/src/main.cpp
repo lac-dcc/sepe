@@ -122,7 +122,16 @@ int main(int argc, char** argv){
 
     REGISTER_BENCHMARKS(UrlGenericHashBitOps);
     REGISTER_BENCHMARKS(UrlCompress);
-    REGISTER_BENCHMARKS(Synth);
+
+    // Synthesized functions
+    REGISTER_BENCHMARKS(SynthUrlComplex);
+    REGISTER_BENCHMARKS(SynthUrl);
+    REGISTER_BENCHMARKS(SynthMac);
+    REGISTER_BENCHMARKS(SynthCPF);
+    REGISTER_BENCHMARKS(SynthSSN);
+    REGISTER_BENCHMARKS(SynthIPV4);
+    REGISTER_BENCHMARKS(SynthIPV6);
+    REGISTER_BENCHMARKS(SynthINTS);
 
     // Load keys from standard input into memory
     std::vector<std::string> keys;

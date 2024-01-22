@@ -183,33 +183,6 @@ std::size_t MacAddressHashBitOps::operator()(const std::string& key) const{
 	return low ^ (high << 21);
 }
 
-std::size_t Synth::operator()(const std::string& key) const {
-        constexpr std::size_t mask0 = 0x1f1f1f1f1f1f1f1f;
-        constexpr std::size_t mask1 = 0x0000000000001f1f;
-        constexpr std::size_t mask2 = 0x00000000000f0f0f;
-        constexpr std::size_t mask3 = 0x0000007f7f7f7f7f;
-        constexpr std::size_t mask4 = 0x7f7f7f7f7f7f7f7f;
-        constexpr std::size_t mask5 = 0x007f7f7f7f7f7f7f;
-        const std::size_t hashable0 = _pext_u64(load_u64_le(key.c_str()+23), mask0);
-        const std::size_t hashable1 = _pext_u64(load_u64_le(key.c_str()+31), mask1);
-        const std::size_t hashable2 = _pext_u64(load_u64_le(key.c_str()+41), mask2);
-        const std::size_t hashable3 = _pext_u64(load_u64_le(key.c_str()+58), mask3);
-        const std::size_t hashable4 = _pext_u64(load_u64_le(key.c_str()+66), mask4);
-        const std::size_t hashable5 = _pext_u64(load_u64_le(key.c_str()+74), mask5);
-        size_t shift0 = hashable0;
-        size_t shift1 = hashable1 << 51;
-        size_t shift2 = hashable2;
-        size_t shift3 = hashable3 << 25;
-        size_t shift4 = hashable4;
-        size_t shift5 = hashable5 << 9;
-        size_t tmp0 = shift0 ^ shift1;
-        size_t tmp1 = shift2 ^ shift3;
-        size_t tmp2 = shift4 ^ shift5;
-        size_t tmp3 = tmp0 ^ tmp1;
-        size_t tmp4 = tmp2 ^ tmp3;
-        return tmp4;
-}
-
 std::size_t UrlCompress::operator()(const std::string& key) const {
 // http:/google.github.io/[a-z]{2}/version[0-9]{2}/doxygen/html/[a-z0-9]{20}.html
 
@@ -298,4 +271,176 @@ std::size_t IntBitHash::operator()(const std::string& key) const {
 	std::size_t bits7 = _pext_u64(load_u64_le(key.c_str() + 92), mask);
 
 	return bits1 ^ bits2 ^ bits3 ^ bits4 ^ bits5 ^ bits6 ^ bits7;
+}
+
+// Synthesized functions
+
+
+std::size_t SynthUrlComplex::operator()(const std::string& key) const {
+        constexpr std::size_t mask0 = 0x1f1f1f1f1f1f1f1f;
+        constexpr std::size_t mask1 = 0x0000000000001f1f;
+        constexpr std::size_t mask2 = 0x00000000000f0f0f;
+        constexpr std::size_t mask3 = 0x0000007f7f7f7f7f;
+        constexpr std::size_t mask4 = 0x7f7f7f7f7f7f7f7f;
+        constexpr std::size_t mask5 = 0x007f7f7f7f7f7f7f;
+        const std::size_t hashable0 = _pext_u64(load_u64_le(key.c_str()+23), mask0);
+        const std::size_t hashable1 = _pext_u64(load_u64_le(key.c_str()+31), mask1);
+        const std::size_t hashable2 = _pext_u64(load_u64_le(key.c_str()+41), mask2);
+        const std::size_t hashable3 = _pext_u64(load_u64_le(key.c_str()+58), mask3);
+        const std::size_t hashable4 = _pext_u64(load_u64_le(key.c_str()+66), mask4);
+        const std::size_t hashable5 = _pext_u64(load_u64_le(key.c_str()+74), mask5);
+        size_t shift0 = hashable0;
+        size_t shift1 = hashable1 << 51;
+        size_t shift2 = hashable2;
+        size_t shift3 = hashable3 << 25;
+        size_t shift4 = hashable4;
+        size_t shift5 = hashable5 << 9;
+        size_t tmp0 = shift0 ^ shift1;
+        size_t tmp1 = shift2 ^ shift3;
+        size_t tmp2 = shift4 ^ shift5;
+        size_t tmp3 = tmp0 ^ tmp1;
+        size_t tmp4 = tmp2 ^ tmp3;
+        return tmp4;
+}
+
+std::size_t SynthUrl::operator()(const std::string& key) const {
+	constexpr std::size_t mask0 = 0x7f7f7f7f7f7f7f7f;
+	constexpr std::size_t mask1 = 0x7f7f7f7f7f7f7f7f;
+	constexpr std::size_t mask2 = 0x000000007f7f7f7f;
+	const std::size_t hashable0 = _pext_u64(load_u64_le(key.c_str()+45), mask0);
+	const std::size_t hashable1 = _pext_u64(load_u64_le(key.c_str()+53), mask1);
+	const std::size_t hashable2 = _pext_u64(load_u64_le(key.c_str()+61), mask2);
+	size_t shift0 = hashable0;
+	size_t shift1 = hashable1 << 8;
+	size_t shift2 = hashable2;
+	size_t tmp0 = shift0 ^ shift1;
+	size_t tmp1 = shift2 ^ tmp0;
+	return tmp1;
+}
+
+
+std::size_t SynthMac::operator()(const std::string& key) const {
+	constexpr std::size_t mask0 = 0x7f7f007f7f007f7f;
+	constexpr std::size_t mask1 = 0x007f007f7f007f7f;
+	constexpr std::size_t mask2 = 0x7f00000000000000;
+	const std::size_t hashable0 = _pext_u64(load_u64_le(key.c_str()+0), mask0);
+	const std::size_t hashable1 = _pext_u64(load_u64_le(key.c_str()+8), mask1);
+	const std::size_t hashable2 = _pext_u64(load_u64_le(key.c_str()+9), mask2);
+	size_t shift0 = hashable0;
+	size_t shift1 = hashable1 << 29;
+	size_t shift2 = hashable2;
+	size_t tmp0 = shift0 ^ shift1;
+	size_t tmp1 = shift2 ^ tmp0;
+	return tmp1;
+}
+
+std::size_t SynthCPF::operator()(const std::string& key) const {
+        constexpr std::size_t mask0 = 0x000f0f0f000f0f0f;
+        constexpr std::size_t mask1 = 0x0f0f000f0f0f0000;
+        const std::size_t hashable0 = _pext_u64(load_u64_le(key.c_str()+0), mask0);
+        const std::size_t hashable1 = _pext_u64(load_u64_le(key.c_str()+6), mask1);
+        size_t shift0 = hashable0;
+        size_t shift1 = hashable1 << 44;
+        size_t tmp0 = shift0 ^ shift1;
+        return tmp0;
+}
+
+std::size_t SynthSSN::operator()(const std::string& key) const {
+        constexpr std::size_t mask0 = 0x0f000f0f000f0f0f;
+        constexpr std::size_t mask1 = 0x0f0f0f0000000000;
+        const std::size_t hashable0 = _pext_u64(load_u64_le(key.c_str()+0), mask0);
+        const std::size_t hashable1 = _pext_u64(load_u64_le(key.c_str()+3), mask1);
+        size_t shift0 = hashable0;
+        size_t shift1 = hashable1 << 52;
+        size_t tmp0 = shift0 ^ shift1;
+        return tmp0;
+}
+
+std::size_t SynthIPV4::operator()(const std::string& key) const {
+        constexpr std::size_t mask0 = 0x000f0f0f000f0f0f;
+        constexpr std::size_t mask1 = 0x0f0f0f000f0f0f00;
+        const std::size_t hashable0 = _pext_u64(load_u64_le(key.c_str()+0), mask0);
+        const std::size_t hashable1 = _pext_u64(load_u64_le(key.c_str()+7), mask1);
+        size_t shift0 = hashable0;
+        size_t shift1 = hashable1 << 40;
+        size_t tmp0 = shift0 ^ shift1;
+        return tmp0;
+}
+
+std::size_t SynthIPV6::operator()(const std::string& key) const {
+        constexpr std::size_t mask0 = 0x7f7f7f007f7f7f7f;
+        constexpr std::size_t mask1 = 0x7f007f7f7f7f007f;
+        constexpr std::size_t mask2 = 0x7f7f7f7f007f7f7f;
+        constexpr std::size_t mask3 = 0x007f7f007f7f7f7f;
+        constexpr std::size_t mask4 = 0x7f7f7f7f007f7f00;
+        const std::size_t hashable0 = _pext_u64(load_u64_le(key.c_str()+0), mask0);
+        const std::size_t hashable1 = _pext_u64(load_u64_le(key.c_str()+8), mask1);
+        const std::size_t hashable2 = _pext_u64(load_u64_le(key.c_str()+16), mask2);
+        const std::size_t hashable3 = _pext_u64(load_u64_le(key.c_str()+24), mask3);
+        const std::size_t hashable4 = _pext_u64(load_u64_le(key.c_str()+31), mask4);
+        size_t shift0 = hashable0;
+        size_t shift1 = hashable1 << 22;
+        size_t shift2 = hashable2;
+        size_t shift3 = hashable3 << 22;
+        size_t shift4 = hashable4;
+        size_t tmp0 = shift0 ^ shift1;
+        size_t tmp1 = shift2 ^ shift3;
+        size_t tmp2 = shift4 ^ tmp0;
+        size_t tmp3 = tmp1 ^ tmp2;
+        return tmp3;
+}
+
+std::size_t SynthINTS::operator()(const std::string& key) const {
+        constexpr std::size_t mask0 = 0x0f0f0f0f0f0f0f0f;
+        constexpr std::size_t mask1 = 0x0f0f0f0f0f0f0f0f;
+        constexpr std::size_t mask2 = 0x0f0f0f0f0f0f0f0f;
+        constexpr std::size_t mask3 = 0x0f0f0f0f0f0f0f0f;
+        constexpr std::size_t mask4 = 0x0f0f0f0f0f0f0f0f;
+        constexpr std::size_t mask5 = 0x0f0f0f0f0f0f0f0f;
+        constexpr std::size_t mask6 = 0x0f0f0f0f0f0f0f0f;
+        constexpr std::size_t mask7 = 0x0f0f0f0f0f0f0f0f;
+        constexpr std::size_t mask8 = 0x0f0f0f0f0f0f0f0f;
+        constexpr std::size_t mask9 = 0x0f0f0f0f0f0f0f0f;
+        constexpr std::size_t mask10 = 0x0f0f0f0f0f0f0f0f;
+        constexpr std::size_t mask11 = 0x0f0f0f0f0f0f0f0f;
+        constexpr std::size_t mask12 = 0x0f0f0f0f00000000;
+        const std::size_t hashable0 = _pext_u64(load_u64_le(key.c_str()+0), mask0);
+        const std::size_t hashable1 = _pext_u64(load_u64_le(key.c_str()+8), mask1);
+        const std::size_t hashable2 = _pext_u64(load_u64_le(key.c_str()+16), mask2);
+        const std::size_t hashable3 = _pext_u64(load_u64_le(key.c_str()+24), mask3);
+        const std::size_t hashable4 = _pext_u64(load_u64_le(key.c_str()+32), mask4);
+        const std::size_t hashable5 = _pext_u64(load_u64_le(key.c_str()+40), mask5);
+        const std::size_t hashable6 = _pext_u64(load_u64_le(key.c_str()+48), mask6);
+        const std::size_t hashable7 = _pext_u64(load_u64_le(key.c_str()+56), mask7);
+        const std::size_t hashable8 = _pext_u64(load_u64_le(key.c_str()+64), mask8);
+        const std::size_t hashable9 = _pext_u64(load_u64_le(key.c_str()+72), mask9);
+        const std::size_t hashable10 = _pext_u64(load_u64_le(key.c_str()+80), mask10);
+        const std::size_t hashable11 = _pext_u64(load_u64_le(key.c_str()+88), mask11);
+        const std::size_t hashable12 = _pext_u64(load_u64_le(key.c_str()+92), mask12);
+        size_t shift0 = hashable0;
+        size_t shift1 = hashable1 << 32;
+        size_t shift2 = hashable2;
+        size_t shift3 = hashable3 << 32;
+        size_t shift4 = hashable4;
+        size_t shift5 = hashable5 << 32;
+        size_t shift6 = hashable6;
+        size_t shift7 = hashable7 << 32;
+        size_t shift8 = hashable8;
+        size_t shift9 = hashable9 << 32;
+        size_t shift10 = hashable10;
+        size_t shift11 = hashable11 << 32;
+        size_t shift12 = hashable12;
+        size_t tmp0 = shift0 ^ shift1;
+        size_t tmp1 = shift2 ^ shift3;
+        size_t tmp2 = shift4 ^ shift5;
+        size_t tmp3 = shift6 ^ shift7;
+        size_t tmp4 = shift8 ^ shift9;
+        size_t tmp5 = shift10 ^ shift11;
+        size_t tmp6 = shift12 ^ tmp0;
+        size_t tmp7 = tmp1 ^ tmp2;
+        size_t tmp8 = tmp3 ^ tmp4;
+        size_t tmp9 = tmp5 ^ tmp6;
+        size_t tmp10 = tmp7 ^ tmp8;
+        size_t tmp11 = tmp9 ^ tmp10;
+        return tmp11;
 }

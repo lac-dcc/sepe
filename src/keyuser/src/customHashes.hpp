@@ -125,7 +125,35 @@ struct UrlCompress{
     std::size_t operator()(const std::string& key) const;
 };
 
-struct Synth{
+struct SynthUrlComplex{
+    std::size_t operator()(const std::string& key) const;
+};
+
+struct SynthUrl{
+    std::size_t operator()(const std::string& key) const;
+};
+
+struct SynthMac{
+    std::size_t operator()(const std::string& key) const;
+};
+
+struct SynthCPF{
+    std::size_t operator()(const std::string& key) const;
+};
+
+struct SynthSSN{
+    std::size_t operator()(const std::string& key) const;
+};
+
+struct SynthIPV4{
+    std::size_t operator()(const std::string& key) const;
+};
+
+struct SynthIPV6{
+    std::size_t operator()(const std::string& key) const;
+};
+
+struct SynthINTS{
     std::size_t operator()(const std::string& key) const;
 };
 
