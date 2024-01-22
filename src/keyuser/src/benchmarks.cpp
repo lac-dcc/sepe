@@ -74,14 +74,18 @@ void printVerbose(Benchmark& bench, const std::chrono::duration<double>& elapsed
             bench.calculateCollisionCountBuckets());
 }
 
-void reportHashMetrics(std::unordered_map<std::string,HashBenchmarkInfo>& hashInfo){
+static void reportHashMetricsCSV(std::unordered_map<std::string,HashBenchmarkInfo>& hashInfo,
+                                 const char* argsString,
+                                 const char* execMode)
+{
     for(auto& hashBench : hashInfo){
-            printf( "\t\t------> %-25s Average time: %f (s)    Geomean time: %f (s)"
-                    "    Total Collision Count (Buckets) %d\n", 
-                    hashBench.first.c_str(),
-                    hashBench.second.averageTime(),
-                    hashBench.second.geomeanTime(),
-                    hashBench.second.collisionCountBuckets);
+        printf( "%s, %s, %s, %f, %f, %d\n",
+                execMode,
+                argsString,
+                hashBench.first.c_str(),
+                hashBench.second.averageTime(),
+                hashBench.second.geomeanTime(),
+                hashBench.second.collisionCountBuckets);
         hashBench.second.resetInternalState();
     }
 }
@@ -91,8 +95,29 @@ void benchmarkExecutor(const std::vector<Benchmark*>& benchmarks,
                        const BenchmarkParameters& args,
                        std::unordered_map<std::string,HashBenchmarkInfo>& hashInfo)
 {
+
+    // Init CSV File
+printf("%s, %s, %s, %s, %s, %s, %s, %s, %s, %s\n",
+       "Execution Mode", 
+       "Num Operations", 
+       "Num Keys", 
+       "Insertions (%)", 
+       "Searches (%)", 
+       "Eliminatons(%)", 
+       "Hash Function", 
+       "Average Time (s)", 
+       "Geomean Time (s)", 
+       "Collision Count");
+    
+    char* argsString = (char*)malloc(sizeof(char)*100);
+    sprintf(argsString, "%d, %ld, %d, %d, %d",
+                        args.numOperations,
+                        keys.size(),
+                        args.insert,
+                        args.search,
+                        args.elimination);
+
     // Execution modes are hard coded since we do not expect to add new ones or modify existing ones
-    printf("\tInterweaved execution mode (50%% batched inserts):\n");
     for (const auto& bench : benchmarks){
 
         // Execute benchmark
@@ -105,13 +130,9 @@ void benchmarkExecutor(const std::vector<Benchmark*>& benchmarks,
         hashInfo[bench->getHashName()].collisionCountBuckets += bench->calculateCollisionCountBuckets();
         hashInfo[bench->getHashName()].samples.push_back(elapsed_seconds.count());
 
-        if(args.verbose){
-            printVerbose(*bench, elapsed_seconds);
-        }
     }
-    reportHashMetrics(hashInfo);
+    reportHashMetricsCSV(hashInfo, argsString, "Interweaved");
 
-    printf("\tBatch execution mode:\n");
     for (const auto& bench : benchmarks){
 
         // Execute benchmark
@@ -124,13 +145,10 @@ void benchmarkExecutor(const std::vector<Benchmark*>& benchmarks,
         hashInfo[bench->getHashName()].collisionCountBuckets += bench->calculateCollisionCountBuckets();
         hashInfo[bench->getHashName()].samples.push_back(elapsed_seconds.count());
 
-        if(args.verbose){
-            printVerbose(*bench, elapsed_seconds);
-        }
     }
 
-    reportHashMetrics(hashInfo);
-
+    reportHashMetricsCSV(hashInfo, argsString, "Batched");
+    
     for(auto bench : benchmarks){
         delete bench;
     }
