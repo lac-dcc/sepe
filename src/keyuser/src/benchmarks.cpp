@@ -3,14 +3,6 @@
 #include <chrono>
 #include <algorithm>
 
-double geometricMean(const std::vector<double>& nums) {
-    double product = 1.0;
-    for (double num : nums) {
-        product *= num;
-    }
-    return std::pow(product, 1.0 / nums.size());
-}
-
 void executeInterweaved(Benchmark* bench, 
                         const std::vector<std::string>& keys, 
                         const BenchmarkParameters& args)
@@ -68,49 +60,49 @@ void executeBatched(Benchmark* bench,
 void printVerbose(Benchmark& bench, const std::chrono::duration<double>& elapsed_seconds){
     printf( "\t\t%-25s %25s    Elapsed time: %f (s)    "
             "Collision Count (Buckets): %d\n", 
-            bench.getName().c_str(), 
+            bench.getContainerName().c_str(), 
             bench.getHashName().c_str(), 
             elapsed_seconds.count(),
             bench.calculateCollisionCountBuckets());
 }
 
-static void reportHashMetricsCSV(std::unordered_map<std::string,HashBenchmarkInfo>& hashInfo,
+static void reportMetricsCSV(
+                                 const char* execMode,
                                  const char* argsString,
-                                 const char* execMode)
+                                 const char* containerName,
+                                 const char* hashFuncName,
+                                 const float execTime,
+                                 const int collisions)
 {
-    for(auto& hashBench : hashInfo){
-        printf( "%s, %s, %s, %f, %f, %d\n",
-                execMode,
-                argsString,
-                hashBench.first.c_str(),
-                hashBench.second.averageTime(),
-                hashBench.second.geomeanTime(),
-                hashBench.second.collisionCountBuckets);
-        hashBench.second.resetInternalState();
-    }
+    printf( "%s,%s,%s,%s,%f,%d\n",
+            execMode,
+            argsString,
+            containerName,
+            hashFuncName,
+            execTime,
+            collisions);
 }
 
 void benchmarkExecutor(const std::vector<Benchmark*>& benchmarks, 
                        const std::vector<std::string>& keys, 
-                       const BenchmarkParameters& args,
-                       std::unordered_map<std::string,HashBenchmarkInfo>& hashInfo)
+                       const BenchmarkParameters& args)
 {
 
     // Init CSV File
-printf("%s, %s, %s, %s, %s, %s, %s, %s, %s, %s\n",
-       "Execution Mode", 
-       "Num Operations", 
-       "Num Keys", 
-       "Insertions (%)", 
-       "Searches (%)", 
-       "Eliminatons(%)", 
-       "Hash Function", 
-       "Average Time (s)", 
-       "Geomean Time (s)", 
+printf("%s,%s,%s,%s,%s,%s,%s,%s,%s,%s\n",
+       "Execution Mode",
+       "Num Operations",
+       "Num Keys",
+       "Insertions (%)",
+       "Searches (%)",
+       "Eliminatons(%)",
+       "Hash Container",
+       "Hash Function",
+       "Execution Time (s)",
        "Collision Count");
     
     char* argsString = (char*)malloc(sizeof(char)*100);
-    sprintf(argsString, "%d, %ld, %d, %d, %d",
+    sprintf(argsString, "%d,%ld,%d,%d,%d",
                         args.numOperations,
                         keys.size(),
                         args.insert,
@@ -127,13 +119,15 @@ printf("%s, %s, %s, %s, %s, %s, %s, %s, %s, %s\n",
             auto end = std::chrono::system_clock::now();
             std::chrono::duration<double> elapsed_seconds = end-start;
 
-            // Update Hash Function metrics
-            hashInfo[bench->getHashName()].collisionCountBuckets += bench->calculateCollisionCountBuckets();
-            hashInfo[bench->getHashName()].samples.push_back(elapsed_seconds.count());
+            reportMetricsCSV("Interweaved",
+                             argsString,
+                             bench->getContainerName().c_str(),
+                             bench->getHashName().c_str(),
+                             elapsed_seconds.count(),
+                             bench->calculateCollisionCountBuckets());
 
         }
     }
-    reportHashMetricsCSV(hashInfo, argsString, "Interweaved");
 
     for(int r=0; r < args.repetitions; ++r){
         for (const auto& bench : benchmarks){
@@ -144,15 +138,17 @@ printf("%s, %s, %s, %s, %s, %s, %s, %s, %s, %s\n",
             auto end = std::chrono::system_clock::now();
             std::chrono::duration<double> elapsed_seconds = end-start;
 
-            // Update Hash Function metrics
-            hashInfo[bench->getHashName()].collisionCountBuckets += bench->calculateCollisionCountBuckets();
-            hashInfo[bench->getHashName()].samples.push_back(elapsed_seconds.count());
+            reportMetricsCSV("Batched",
+                             argsString,
+                             bench->getContainerName().c_str(),
+                             bench->getHashName().c_str(),
+                             elapsed_seconds.count(),
+                             bench->calculateCollisionCountBuckets());
 
         }
     }
-
-    reportHashMetricsCSV(hashInfo, argsString, "Batched");
     
+    free(argsString);
     for(auto bench : benchmarks){
         delete bench;
     }

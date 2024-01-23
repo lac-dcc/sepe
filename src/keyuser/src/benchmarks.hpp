@@ -14,55 +14,6 @@
 #include "customHashes.hpp"
 
 /**
- * @brief Calculates the geometric mean of a vector of doubles.
- * @param nums The vector of doubles.
- * @return The geometric mean.
- */
-double geometricMean(const std::vector<double>& nums);
-
-/**
- * @struct HashBenchmarkInfo
- * @brief This struct is used to store information about a hash benchmark.
- *
- * It contains variables that hold specific details about the benchmark such as
- * the name of the benchmark, the hashed name, and other relevant information.
- *
- * @var HashBenchmarkInfo::name
- * The name of the hash benchmark.
- *
- * @var HashBenchmarkInfo::hashName
- * The hashed name of the benchmark.
- *
- * @var HashBenchmarkInfo::collisionCount
- * The number of collisions that occurred during the benchmark.
- *
- * @var HashBenchmarkInfo::executionTime
- * The time it took to execute the benchmark.
- */
-struct HashBenchmarkInfo{
-
-    std::vector<double> samples;
-
-    int collisionCountBuckets;
-
-    HashBenchmarkInfo() : collisionCountBuckets(0) {}
-
-    void resetInternalState(){
-        samples.clear();
-        collisionCountBuckets = 0;
-    }
-
-    double averageTime(){
-        return accumulate(samples.begin(), samples.end(), 0.0) / samples.size();
-    }
-
-    double geomeanTime(){
-        return geometricMean(samples);
-    }
-};
-
-
-/**
  * @class Benchmark
  * @brief This class is used for benchmarking purposes.
  *
@@ -83,7 +34,7 @@ struct HashBenchmarkInfo{
 class Benchmark{
 
     /* Begin declaring class variables */
-    const std::string name;
+    const std::string containerName;
     const std::string hashName;
 
     protected:
@@ -102,11 +53,11 @@ class Benchmark{
         }
 
     public:
-        Benchmark(const std::string& _name, const std::string& _hashName) : 
-            name(_name),
+        Benchmark(const std::string& _containerName, const std::string& _hashName) : 
+            containerName(_containerName),
             hashName(_hashName)
             {}
-        std::string getName(){ return name; }
+        std::string getContainerName(){ return containerName; }
         std::string getHashName(){ return hashName; }
 
         virtual ~Benchmark() {}
@@ -376,7 +327,6 @@ void executeBatchedCollisionCount(Benchmark* bench,
  */
 void benchmarkExecutor(const std::vector<Benchmark*>& benchmarks, 
                        const std::vector<std::string>& keys, 
-                       const BenchmarkParameters& args,
-                       std::unordered_map<std::string,HashBenchmarkInfo>& hashInfo);
+                       const BenchmarkParameters& args);
 
 #endif

@@ -13,8 +13,7 @@
 #define REGISTER_BENCHMARKS(hashname)   benchmarks.push_back(DECLARE_ONE_BENCH(UnorderedMapBench, hashname)); \
                                         benchmarks.push_back(DECLARE_ONE_BENCH(UnorderedMultiMapBench, hashname)); \
                                         benchmarks.push_back(DECLARE_ONE_BENCH(UnorderedSetBench, hashname)); \
-                                        benchmarks.push_back(DECLARE_ONE_BENCH(UnorderedMultisetBench, hashname)); \
-                                        hashInfo[#hashname] = HashBenchmarkInfo();
+                                        benchmarks.push_back(DECLARE_ONE_BENCH(UnorderedMultisetBench, hashname));
 
 std::string correctBenchUsage(){
     return "Correct Usage: ./benchmarks -i <number> -s <number> -e <number> -n <number>\n"
@@ -95,9 +94,6 @@ int main(int argc, char** argv){
     // All benchmarks to run
     std::vector<Benchmark*> benchmarks;
 
-    // HashInfo contains all hash functions used in the benchmarks  
-    std::unordered_map<std::string,HashBenchmarkInfo> hashInfo;
-
     // Register Benchmarks
     REGISTER_BENCHMARKS(STDHash);
     REGISTER_BENCHMARKS(STDHashMurmur);
@@ -155,12 +151,11 @@ int main(int argc, char** argv){
         {
             filteredBenchmarks.push_back(bench);
         } else {
-            hashInfo.erase(bench->getHashName());
             delete bench;
         }
     }
 
     // Run benchmarks
-    benchmarkExecutor(filteredBenchmarks, keys, args, hashInfo);
+    benchmarkExecutor(filteredBenchmarks, keys, args);
 
 }
