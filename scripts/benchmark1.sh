@@ -48,3 +48,4 @@ for REGEX in $REGEXES; do
 done
 
 mv -v ./*.csv output/
+zip -o "$(date '+%Y-%m-%d_%Hh-%Mm-%Ss')".zip -r output/*
