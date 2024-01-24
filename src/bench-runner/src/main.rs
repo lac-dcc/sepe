@@ -190,7 +190,7 @@ fn main() {
         let mut outfile =
             std::fs::File::create(cmd_regex + &cmd.outfile).expect("failed to create output file!");
         outfile.write_all(&keyuser_out.stdout).unwrap();
-        std::io::stdout().write_all(&keyuser_out.stdout).unwrap();
+        // std::io::stdout().write_all(&keyuser_out.stdout).unwrap();
         std::io::stderr().write_all(&keyuser_out.stderr).unwrap();
     }
 }

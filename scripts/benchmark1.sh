@@ -12,23 +12,36 @@ fi
 
 make
 
-NUM_KEYS="100000 250000 500000 1000000"
-NUM_OPS="1000000"
+PHYSICAL_CORES=$(($(grep '^core id' /proc/cpuinfo | sort -u | wc -l) - 1))
+SPAWNED_PROCESSES=0
+SPAWNED_PIDS=""
+NUM_KEYS="500000 1000000"
+NUM_OPS="1000000 50000000"
 REGEXES="$(sed  -n 's/^\[\(.*\)\]/\1/p' Regexes.toml)"
-REPETITIONS="10"
-DISTRIBUTIONS="0.7 0.2 0.1
+REPETITIONS=3
+DISTRIBUTIONS="
+0.7 0.2 0.1
 0.6 0.2 0.2
-0.5 0.3 0.2
-0.4 0.3 0.3"
+0.4 0.3 0.3
+"
+DISTRIBUTIONS_COUNT="$(echo DISTRIBUTIONS | wc -w)"
+
 
 for REGEX in $REGEXES; do
 	COUNT=0
 	for NUM_KEY in $NUM_KEYS; do
 		for NUM_OP in $NUM_OPS; do
-			echo "$DISTRIBUTIONS" | while IFS= read -r DISTRIBUTION; do
-				INSERTION="$(echo "$DISTRIBUTION" | awk '{print $1}')"
-				SEARCH="$(echo "$DISTRIBUTION" | awk '{print $2}')"
-				ELIMINATION="$(echo "$DISTRIBUTION" | awk '{print $3}')"
+			for ARG in $(seq 1 3 "$DISTRIBUTIONS_COUNT"); do
+				if [ $SPAWNED_PROCESSES -ge "$PHYSICAL_CORES" ]; then
+					# shellcheck disable=SC2086 # Intended splitting of PIDS
+					wait $SPAWNED_PIDS
+					SPAWNED_PIDS=""
+					SPAWNED_PROCESSES=0
+				fi
+
+				INSERTION="$(  echo "$DISTRIBUTIONS" | tr '\n' ' ' | awk "{print \$$((ARG + 0))}")"
+				SEARCH="$(     echo "$DISTRIBUTIONS" | tr '\n' ' ' | awk "{print \$$((ARG + 1))}")"
+				ELIMINATION="$(echo "$DISTRIBUTIONS" | tr '\n' ' ' | awk "{print \$$((ARG + 2))}")"
 
 				./bin/bench-runner \
 					--verbose \
@@ -39,13 +52,20 @@ for REGEX in $REGEXES; do
 					--elimination "$ELIMINATION" \
 					--repetitions $REPETITIONS \
 					--outfile "${COUNT}.csv" \
-					"$REGEX"
+					"$REGEX" &
+
+				SPAWNED_PIDS="$SPAWNED_PROCESSES $!"
 				COUNT=$((COUNT + 1))
+				SPAWNED_PROCESSES=$((SPAWNED_PROCESSES + 1))
 			done
-			COUNT=$((COUNT + 4))
 		done
 	done
 done
 
+if [ -n "$SPAWNED_PIDS" ]; then
+	# shellcheck disable=SC2086 # Intended splitting of PIDS
+	wait $SPAWNED_PIDS
+fi
+
 mv -v ./*.csv output/
-zip -o "$(date '+%Y-%m-%d_%Hh-%Mm-%Ss')".zip -r output/*
+zip -9 -o "$(date '+%Y-%m-%d_%Hh-%Mm-%Ss')".zip -r output/*
