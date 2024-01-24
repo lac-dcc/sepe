@@ -89,17 +89,17 @@ void benchmarkExecutor(const std::vector<Benchmark*>& benchmarks,
 {
 
     // Init CSV File
-printf("%s,%s,%s,%s,%s,%s,%s,%s,%s,%s\n",
-       "Execution Mode",
-       "Num Operations",
-       "Num Keys",
-       "Insertions (%)",
-       "Searches (%)",
-       "Eliminatons(%)",
-       "Hash Container",
-       "Hash Function",
-       "Execution Time (s)",
-       "Collision Count");
+    printf("%s,%s,%s,%s,%s,%s,%s,%s,%s,%s\n",
+        "Execution Mode",
+        "Num Operations",
+        "Num Keys",
+        "Insertions (%)",
+        "Searches (%)",
+        "Eliminatons(%)",
+        "Hash Container",
+        "Hash Function",
+        "Execution Time (s)",
+        "Collision Count");
     
     char* argsString = (char*)malloc(sizeof(char)*100);
     sprintf(argsString, "%d,%ld,%d,%d,%d",
