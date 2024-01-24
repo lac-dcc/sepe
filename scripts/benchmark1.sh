@@ -12,7 +12,7 @@ fi
 
 make
 
-PHYSICAL_CORES=$(($(grep '^core id' /proc/cpuinfo | sort -u | wc -l) - 1))
+PHYSICAL_CORES=19
 SPAWNED_PROCESSES=0
 SPAWNED_PIDS=""
 NUM_KEYS="500000 1000000"
@@ -26,11 +26,10 @@ DISTRIBUTIONS="
 "
 DISTRIBUTIONS_COUNT="$(echo DISTRIBUTIONS | wc -w)"
 
-
 for REGEX in $REGEXES; do
 	COUNT=0
-	for NUM_KEY in $NUM_KEYS; do
-		for NUM_OP in $NUM_OPS; do
+	for NUM_OP in $NUM_OPS; do
+		for NUM_KEY in $NUM_KEYS; do
 			for ARG in $(seq 1 3 "$DISTRIBUTIONS_COUNT"); do
 				if [ $SPAWNED_PROCESSES -ge "$PHYSICAL_CORES" ]; then
 					# shellcheck disable=SC2086 # Intended splitting of PIDS
@@ -54,7 +53,7 @@ for REGEX in $REGEXES; do
 					--outfile "${COUNT}.csv" \
 					"$REGEX" &
 
-				SPAWNED_PIDS="$SPAWNED_PROCESSES $!"
+				SPAWNED_PIDS="$SPAWNED_PIDS $!"
 				COUNT=$((COUNT + 1))
 				SPAWNED_PROCESSES=$((SPAWNED_PROCESSES + 1))
 			done
