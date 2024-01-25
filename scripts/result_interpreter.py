@@ -1,7 +1,7 @@
 import sys
 import pandas as pd
 import matplotlib.pyplot as plt
-from scipy.stats import mannwhitneyu
+from scipy import stats
 
 def mannwhitneyu_from_dataframe(df, column_to_group, column_to_compare):
     grouped = df.groupby(column_to_group)
@@ -14,14 +14,15 @@ def mannwhitneyu_from_dataframe(df, column_to_group, column_to_compare):
         for hashFunc2 in groups:
             if hashFunc1 != hashFunc2:
                 # Calculate the Mann-Whitney U test between the first two groups
-                stat, p = mannwhitneyu(grouped.get_group(hashFunc1)[column_to_compare], grouped.get_group(hashFunc2)[column_to_compare])
-                # print('Statistics=%.3f, p=%.3f' % (stat, p))
+                stat, p = stats.mannwhitneyu(grouped.get_group(hashFunc1)[column_to_compare], grouped.get_group(hashFunc2)[column_to_compare])
+                # stat, p = stats.ttest_ind(grouped.get_group(hashFunc1)[column_to_compare], grouped.get_group(hashFunc2)[column_to_compare])
+                
                 # interpret
                 alpha = 0.05
                 if p > alpha:
                     print('{} and {} : p-value {} . Same distribution (fail to reject H0)'.format(hashFunc1, hashFunc2, p))
-                # else:
-                #     print('{} and {} : p-value {} . Different distribution (reject H0)'.format(hashFunc1, hashFunc2, p))
+                else:
+                    print('{} and {} : p-value {} . Different distribution (reject H0)'.format(hashFunc1, hashFunc2, p))
 
 def box_plot_dataframe(df, regex_name):
     grouped = df.groupby(['Execution Mode', 'Num Operations', 'Num Keys', 'Insertions (%)', 'Searches (%)', 'Eliminatons(%)'])
@@ -87,7 +88,7 @@ def main():
     mannwhitneyu_from_dataframe(df, 'Hash Function', 'Execution Time (s)')
     print("------------------")
     # mannwhitneyu_from_dataframe(df, 'Hash Function', 'Collision Count')
-    # box_plot_dataframe(df, regex_name)
+    box_plot_dataframe(df, regex_name)
     get_table(df, regex_name)
 
 main()
