@@ -4,11 +4,18 @@
 #include <pmmintrin.h>
 #include <immintrin.h>
 
+#include "absl/hash/hash.h"
+#include "absl/hash/internal/hash.h"
+
 inline static uint64_t load_u64_le(const char* b) {
     uint64_t Ret;
     // This is a way for the compiler to optimize this func to a single movq instruction
     memcpy(&Ret, b, sizeof(uint64_t)); 
     return Ret;
+}
+
+std::size_t AbseilHash::operator()(const std::string& key) const{
+    return absl::Hash<std::string>{}(key);
 }
 
 // C++ STD_HASH implementation extracted from 
@@ -61,12 +68,12 @@ static size_t _Hash_bytes(const void* ptr, size_t len, size_t seed)
 	return hash;
 }
 
-std::size_t STDHashMurmur::operator()(const std::string& key) const{
+std::size_t STDHashBin::operator()(const std::string& key) const{
 	size_t __seed = static_cast<size_t>(0xc70f6907UL);
     return _Hash_bytes(key.c_str(), key.size(), __seed);
 }
 
-std::size_t STDHash::operator()(const std::string& key) const{
+std::size_t STDHashSrc::operator()(const std::string& key) const{
     return std::hash<std::string>{}(key);
 }
 

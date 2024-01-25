@@ -95,8 +95,9 @@ int main(int argc, char** argv){
     std::vector<Benchmark*> benchmarks;
 
     // Register Benchmarks
-    REGISTER_BENCHMARKS(STDHash);
-    REGISTER_BENCHMARKS(STDHashMurmur);
+    REGISTER_BENCHMARKS(AbseilHash);
+    REGISTER_BENCHMARKS(STDHashSrc);
+    REGISTER_BENCHMARKS(STDHashBin);
     REGISTER_BENCHMARKS(FNVHash);
 
     REGISTER_BENCHMARKS(SSNHashBitOps);
@@ -129,6 +130,7 @@ int main(int argc, char** argv){
     REGISTER_BENCHMARKS(SynthIPV6);
     REGISTER_BENCHMARKS(SynthINTS);
 
+
     // Load keys from standard input into memory
     std::vector<std::string> keys;
     std::string line;
@@ -138,7 +140,7 @@ int main(int argc, char** argv){
 
     // Fill default hash functions to run
     if(args.hashesToRun.empty()){
-        args.hashesToRun.push_back("STDHash");
+        args.hashesToRun.push_back("STDHashSrc");
         args.hashesToRun.push_back("FNVHash");
     }
     // Delete benchmarks that are not in the list of hashes to run

@@ -32,7 +32,7 @@ struct Command {
     repetitions: u64,
 
     /// Number of operations to run
-    #[clap(short, long, default_value = "1000000")]
+    #[clap(short, long, default_value = "10000")]
     operations: u64,
 
     /// Percentage of insertion operations. **Must be in [0; 1] range**

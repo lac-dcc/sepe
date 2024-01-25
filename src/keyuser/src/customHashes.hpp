@@ -12,15 +12,19 @@
 #include <vector>
 #include <numeric>
 
-struct STDHashMurmur{
+struct AbseilHash{
+    std::size_t operator()(const std::string& key) const;
+};
+
+struct STDHashBin{
     std::size_t operator()(const std::string& key) const;
 };
 
 /**
- * @struct STDHash
+ * @struct STDHashSrc
  * @brief This struct provides a hash function using the standard library's hash function.
  */
-struct STDHash{
+struct STDHashSrc{
     std::size_t operator()(const std::string& key) const;
 };
 
