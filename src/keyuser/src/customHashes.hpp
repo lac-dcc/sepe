@@ -16,15 +16,15 @@ struct AbseilHash{
     std::size_t operator()(const std::string& key) const;
 };
 
-struct STDHashBin{
+struct STDHashSrc{
     std::size_t operator()(const std::string& key) const;
 };
 
 /**
- * @struct STDHashSrc
+ * @struct STDHashBin
  * @brief This struct provides a hash function using the standard library's hash function.
  */
-struct STDHashSrc{
+struct STDHashBin{
     std::size_t operator()(const std::string& key) const;
 };
 

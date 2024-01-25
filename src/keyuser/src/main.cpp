@@ -96,8 +96,8 @@ int main(int argc, char** argv){
 
     // Register Benchmarks
     REGISTER_BENCHMARKS(AbseilHash);
-    REGISTER_BENCHMARKS(STDHashSrc);
     REGISTER_BENCHMARKS(STDHashBin);
+    REGISTER_BENCHMARKS(STDHashSrc);
     REGISTER_BENCHMARKS(FNVHash);
 
     REGISTER_BENCHMARKS(SSNHashBitOps);
@@ -140,7 +140,7 @@ int main(int argc, char** argv){
 
     // Fill default hash functions to run
     if(args.hashesToRun.empty()){
-        args.hashesToRun.push_back("STDHashSrc");
+        args.hashesToRun.push_back("STDHashBin");
         args.hashesToRun.push_back("FNVHash");
     }
     // Delete benchmarks that are not in the list of hashes to run

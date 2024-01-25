@@ -68,12 +68,12 @@ static size_t _Hash_bytes(const void* ptr, size_t len, size_t seed)
 	return hash;
 }
 
-std::size_t STDHashBin::operator()(const std::string& key) const{
+std::size_t STDHashSrc::operator()(const std::string& key) const{
 	size_t __seed = static_cast<size_t>(0xc70f6907UL);
     return _Hash_bytes(key.c_str(), key.size(), __seed);
 }
 
-std::size_t STDHashSrc::operator()(const std::string& key) const{
+std::size_t STDHashBin::operator()(const std::string& key) const{
     return std::hash<std::string>{}(key);
 }
 

@@ -21,8 +21,8 @@ def mannwhitneyu_from_dataframe(df, column_to_group, column_to_compare):
                 alpha = 0.05
                 if p > alpha:
                     print('{} and {} : p-value {} . Same distribution (fail to reject H0)'.format(hashFunc1, hashFunc2, p))
-                else:
-                    print('{} and {} : p-value {} . Different distribution (reject H0)'.format(hashFunc1, hashFunc2, p))
+                # else:
+                #     print('{} and {} : p-value {} . Different distribution (reject H0)'.format(hashFunc1, hashFunc2, p))
 
 def box_plot_dataframe(df, regex_name):
     grouped = df.groupby(['Execution Mode', 'Num Operations', 'Num Keys', 'Insertions (%)', 'Searches (%)', 'Eliminatons(%)'])

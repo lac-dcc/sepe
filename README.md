@@ -100,16 +100,16 @@ For more options, do:
 
 **If no [hashes] are specified, only generic hash functions are executed**
 
-Example: *Benchmarking 2 IPV4 Keys with 10 total operations using STDHashSrc IPV4HashGeneric hash functions. 50% insertions, 30% search, and 20% elimination operations.*
+Example: *Benchmarking 2 IPV4 Keys with 10 total operations using STDHashBin IPV4HashGeneric hash functions. 50% insertions, 30% search, and 20% elimination operations.*
 
 ```
-./bin/keygen "(([0-9]{3})\.){3}[0-9]{3}" -n 2 -s 223554 | ./bin/keyuser --hashes STDHashSrc IPV4HashGeneric -n 10 -i 50 -s 30 -e 20
+./bin/keygen "(([0-9]{3})\.){3}[0-9]{3}" -n 2 -s 223554 | ./bin/keyuser --hashes STDHashBin IPV4HashGeneric -n 10 -i 50 -s 30 -e 20
  Interweaved execution mode (50% batched inserts):
                 ------> IPV4HashGeneric           Average time: 0.000004 (s)    Geomean time: 0.000004 (s)    Total Collision Count (Buckets) 4
-                ------> STDHashSrc                   Average time: 0.000005 (s)    Geomean time: 0.000004 (s)    Total Collision Count (Buckets) 4
+                ------> STDHashBin                   Average time: 0.000005 (s)    Geomean time: 0.000004 (s)    Total Collision Count (Buckets) 4
         Batch execution mode:
                 ------> IPV4HashGeneric           Average time: 0.000004 (s)    Geomean time: 0.000004 (s)    Total Collision Count (Buckets) 4
-                ------> STDHashSrc                   Average time: 0.000004 (s)    Geomean time: 0.000004 (s)    Total Collision Count (Buckets) 4
+                ------> STDHashBin                   Average time: 0.000004 (s)    Geomean time: 0.000004 (s)    Total Collision Count (Buckets) 4
 ```
 
 For more options, do:
