@@ -15,7 +15,7 @@ make
 NUM_OPS=10000
 NUM_KEYS="500 2000 10000"
 REGEXES="$(sed  -n 's/^\[\(.*\)\]/\1/p' Regexes.toml)"
-REPETITIONS=10
+REPETITIONS=100
 DISTRIBUTIONS="
 0.7 0.2 0.1
 0.6 0.2 0.2

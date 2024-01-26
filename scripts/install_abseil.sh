@@ -32,7 +32,3 @@ cmake -DABSL_BUILD_TESTING=ON -DABSL_USE_GOOGLETEST_HEAD=ON -DCMAKE_CXX_STANDARD
 cmake --build . --target install -j$(nproc)
 cd "$CURRENT_DIR"
 rm -rf abseil-cpp
-
-
-
-

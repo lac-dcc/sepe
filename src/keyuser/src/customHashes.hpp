@@ -12,6 +12,14 @@
 #include <vector>
 #include <numeric>
 
+struct CityHash{
+    std::size_t operator()(const std::string& key) const;
+};
+
+struct FarmHash{
+    std::size_t operator()(const std::string& key) const;
+};
+
 struct AbseilHash{
     std::size_t operator()(const std::string& key) const;
 };
@@ -158,6 +166,10 @@ struct SynthIPV6{
 };
 
 struct SynthINTS{
+    std::size_t operator()(const std::string& key) const;
+};
+
+struct IPV6SIMDHash{
     std::size_t operator()(const std::string& key) const;
 };
 

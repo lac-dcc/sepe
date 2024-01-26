@@ -4,18 +4,31 @@
 #include <pmmintrin.h>
 #include <immintrin.h>
 
+#include "city.hpp"
 #include "absl/hash/hash.h"
 #include "absl/hash/internal/hash.h"
+
+// #include "farm.hpp"
+
+std::size_t AbseilHash::operator()(const std::string& key) const{
+    return absl::Hash<std::string>{}(key);
+}
+
+std::size_t CityHash::operator()(const std::string& key) const{
+    return CityHash64(key.c_str(), key.size());
+}
+
+std::size_t FarmHash::operator()(const std::string& key) const{
+    // size_t __seed = static_cast<size_t>(0xc70f6907UL);
+    // return Hash64(key.c_str(), key.size(), __seed);d
+    return 0;
+}
 
 inline static uint64_t load_u64_le(const char* b) {
     uint64_t Ret;
     // This is a way for the compiler to optimize this func to a single movq instruction
     memcpy(&Ret, b, sizeof(uint64_t)); 
     return Ret;
-}
-
-std::size_t AbseilHash::operator()(const std::string& key) const{
-    return absl::Hash<std::string>{}(key);
 }
 
 // C++ STD_HASH implementation extracted from 
@@ -282,7 +295,6 @@ std::size_t IntBitHash::operator()(const std::string& key) const {
 
 // Synthesized functions
 
-
 std::size_t SynthUrlComplex::operator()(const std::string& key) const {
         constexpr std::size_t mask0 = 0x1f1f1f1f1f1f1f1f;
         constexpr std::size_t mask1 = 0x0000000000001f1f;
@@ -450,4 +462,21 @@ std::size_t SynthINTS::operator()(const std::string& key) const {
         size_t tmp10 = tmp7 ^ tmp8;
         size_t tmp11 = tmp9 ^ tmp10;
         return tmp11;
+}
+
+std::size_t IPV6SIMDHash::operator()(const std::string& key) const {
+
+	__m128i bits[3] = {
+		_mm_loadu_si64(key.c_str()),
+		_mm_loadu_si64(key.c_str() + 16),
+		_mm_loadu_si64(key.c_str() + 23)
+	};
+
+	bits[1] = _mm_bslli_si128(bits[1], 1);
+
+	__m128i xor1 = _mm_xor_si128(bits[0], bits[1]);
+
+	const __m128i xor_final = _mm_xor_si128(xor1, bits[2]);
+	std::size_t const * xor_final_ptr = (std::size_t const *)&xor_final;
+	return xor_final_ptr[0] ^ xor_final[1];
 }

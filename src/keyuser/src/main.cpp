@@ -95,10 +95,13 @@ int main(int argc, char** argv){
     std::vector<Benchmark*> benchmarks;
 
     // Register Benchmarks
+
     REGISTER_BENCHMARKS(AbseilHash);
     REGISTER_BENCHMARKS(STDHashBin);
     REGISTER_BENCHMARKS(STDHashSrc);
     REGISTER_BENCHMARKS(FNVHash);
+    REGISTER_BENCHMARKS(CityHash);
+    REGISTER_BENCHMARKS(FarmHash);
 
     REGISTER_BENCHMARKS(SSNHashBitOps);
 
@@ -129,6 +132,8 @@ int main(int argc, char** argv){
     REGISTER_BENCHMARKS(SynthIPV4);
     REGISTER_BENCHMARKS(SynthIPV6);
     REGISTER_BENCHMARKS(SynthINTS);
+
+    REGISTER_BENCHMARKS(IPV6SIMDHash);
 
 
     // Load keys from standard input into memory
