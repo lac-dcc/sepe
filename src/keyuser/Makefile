@@ -9,7 +9,7 @@ OBJS         := $(patsubst $(SRC_DIR)/%.cpp,$(OBJ_DIR)/%.o,$(SRCS))
 DEBUG_OBJS   := $(patsubst $(SRC_DIR)/%.cpp,$(OBJ_DIR)/debug_%.o,$(SRCS))
 
 # ABSL
-ABSL_DIR :=/home/renato/abseil
+ABSL_DIR := $(shell realpath ../../deps/abseil)
 ABSL_LIB := $(ABSL_DIR)/lib
 ABSL_INC := $(ABSL_DIR)/include
 ABSL_LIB_FILES :=-labsl_hash -labsl_city -labsl_low_level_hash

@@ -4,18 +4,20 @@
 
 set -e
 
-ABSEIL_PATH=.
+ABSEIL_PATH="../deps/"
 
 # Parse arguments
 if [ $# -eq 1 ]; then
     ABSEIL_PATH=$1
+else
+    mkdir -p ../deps
 fi
 
 # Check if directory exists
-if [ ! -d "$ABSEIL_PATH" ]; then
-    echo "Installation directory $ABSEIL_PATH DOES NOT exists!"
-    exit 1
-fi
+#if [ ! -d "$ABSEIL_PATH" ]; then
+#    echo "Installation directory $ABSEIL_PATH DOES NOT exists!"
+#    exit 1
+#fi
 
 # Convert into absolute path
 ABSEIL_PATH=$(cd "$ABSEIL_PATH"; pwd)
