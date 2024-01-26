@@ -464,6 +464,126 @@ std::size_t SynthINTS::operator()(const std::string& key) const {
         return tmp11;
 }
 
+// Naive functions
+std::size_t NaiveUrlComplex::operator()(const std::string& key) const {
+	std::size_t var0 = load_u64_le(key.c_str() + 0);
+    std::size_t var1 = load_u64_le(key.c_str() + 8);
+    std::size_t var2 = load_u64_le(key.c_str() + 16);
+    std::size_t var3 = load_u64_le(key.c_str() + 24);
+    std::size_t var4 = load_u64_le(key.c_str() + 32);
+    std::size_t var5 = load_u64_le(key.c_str() + 40);
+    std::size_t var6 = load_u64_le(key.c_str() + 48);
+    std::size_t var7 = load_u64_le(key.c_str() + 56);
+    std::size_t var8 = load_u64_le(key.c_str() + 64);
+    std::size_t var9 = load_u64_le(key.c_str() + 72);
+    std::size_t var10 = load_u64_le(key.c_str() + 75);
+    std::size_t xor0 = var10 ^ var9;
+    std::size_t xor1 = var8 ^ var7;
+    std::size_t xor2 = var6 ^ var5;
+    std::size_t xor3 = var4 ^ var3;
+    std::size_t xor4 = var2 ^ var1;
+    std::size_t xor5 = var0 ^ xor0;
+    std::size_t xor6 = xor1 ^ xor2;
+    std::size_t xor7 = xor3 ^ xor4;
+    std::size_t xor8 = xor5 ^ xor6;
+    std::size_t xor9 = xor7 ^ xor8;
+    return xor9 ;
+}
+
+std::size_t NaiveUrl::operator()(const std::string& key) const {
+	std::size_t var0 = load_u64_le(key.c_str() + 0);
+    std::size_t var1 = load_u64_le(key.c_str() + 8);
+    std::size_t var2 = load_u64_le(key.c_str() + 16);
+    std::size_t var3 = load_u64_le(key.c_str() + 24);
+    std::size_t var4 = load_u64_le(key.c_str() + 32);
+    std::size_t var5 = load_u64_le(key.c_str() + 40);
+    std::size_t var6 = load_u64_le(key.c_str() + 48);
+    std::size_t var7 = load_u64_le(key.c_str() + 56);
+    std::size_t var8 = load_u64_le(key.c_str() + 62);
+    std::size_t xor0 = var8 ^ var7;
+    std::size_t xor1 = var6 ^ var5;
+    std::size_t xor2 = var4 ^ var3;
+    std::size_t xor3 = var2 ^ var1;
+    std::size_t xor4 = var0 ^ xor0;
+    std::size_t xor5 = xor1 ^ xor2;
+    std::size_t xor6 = xor3 ^ xor4;
+    std::size_t xor7 = xor5 ^ xor6;
+    return xor7 ;
+}
+
+
+std::size_t NaiveMac::operator()(const std::string& key) const {
+	std::size_t var0 = load_u64_le(key.c_str() + 0);
+    std::size_t var1 = load_u64_le(key.c_str() + 8);
+    std::size_t var2 = load_u64_le(key.c_str() + 9);
+    std::size_t xor0 = var2 ^ var1;
+    std::size_t xor1 = var0 ^ xor0;
+    return xor1 ;
+}
+
+std::size_t NaiveCPF::operator()(const std::string& key) const {
+	std::size_t var0 = load_u64_le(key.c_str() + 0);
+    std::size_t var1 = load_u64_le(key.c_str() + 6);
+    std::size_t xor0 = var1 ^ var0;
+    return xor0 ;
+}
+
+std::size_t NaiveSSN::operator()(const std::string& key) const {
+	std::size_t var0 = load_u64_le(key.c_str() + 0);
+    std::size_t var1 = load_u64_le(key.c_str() + 3);
+    std::size_t xor0 = var1 ^ var0;
+    return xor0 ;
+}
+
+std::size_t NaiveIPV4::operator()(const std::string& key) const {
+	std::size_t var0 = load_u64_le(key.c_str() + 0);
+    std::size_t var1 = load_u64_le(key.c_str() + 7);
+    std::size_t xor0 = var1 ^ var0;
+    return xor0 ;
+}
+
+std::size_t NaiveIPV6::operator()(const std::string& key) const {
+	std::size_t var0 = load_u64_le(key.c_str() + 0);
+    std::size_t var1 = load_u64_le(key.c_str() + 8);
+    std::size_t var2 = load_u64_le(key.c_str() + 16);
+    std::size_t var3 = load_u64_le(key.c_str() + 24);
+    std::size_t var4 = load_u64_le(key.c_str() + 31);
+    std::size_t xor0 = var4 ^ var3;
+    std::size_t xor1 = var2 ^ var1;
+    std::size_t xor2 = var0 ^ xor0;
+    std::size_t xor3 = xor1 ^ xor2;
+    return xor3 ;
+}
+
+std::size_t NaiveINTS::operator()(const std::string& key) const {
+	std::size_t var0 = load_u64_le(key.c_str() + 0);
+    std::size_t var1 = load_u64_le(key.c_str() + 8);
+    std::size_t var2 = load_u64_le(key.c_str() + 16);
+    std::size_t var3 = load_u64_le(key.c_str() + 24);
+    std::size_t var4 = load_u64_le(key.c_str() + 32);
+    std::size_t var5 = load_u64_le(key.c_str() + 40);
+    std::size_t var6 = load_u64_le(key.c_str() + 48);
+    std::size_t var7 = load_u64_le(key.c_str() + 56);
+    std::size_t var8 = load_u64_le(key.c_str() + 64);
+    std::size_t var9 = load_u64_le(key.c_str() + 72);
+    std::size_t var10 = load_u64_le(key.c_str() + 80);
+    std::size_t var11 = load_u64_le(key.c_str() + 88);
+    std::size_t var12 = load_u64_le(key.c_str() + 92);
+    std::size_t xor0 = var12 ^ var11;
+    std::size_t xor1 = var10 ^ var9;
+    std::size_t xor2 = var8 ^ var7;
+    std::size_t xor3 = var6 ^ var5;
+    std::size_t xor4 = var4 ^ var3;
+    std::size_t xor5 = var2 ^ var1;
+    std::size_t xor6 = var0 ^ xor0;
+    std::size_t xor7 = xor1 ^ xor2;
+    std::size_t xor8 = xor3 ^ xor4;
+    std::size_t xor9 = xor5 ^ xor6;
+    std::size_t xor10 = xor7 ^ xor8;
+    std::size_t xor11 = xor9 ^ xor10;
+    return xor11 ;
+}
+
 std::size_t IPV6SIMDHash::operator()(const std::string& key) const {
 
 	__m128i bits[3] = {
