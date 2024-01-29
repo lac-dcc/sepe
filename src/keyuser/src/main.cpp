@@ -101,7 +101,6 @@ int main(int argc, char** argv){
     REGISTER_BENCHMARKS(STDHashSrc);
     REGISTER_BENCHMARKS(FNVHash);
     REGISTER_BENCHMARKS(CityHash);
-    REGISTER_BENCHMARKS(FarmHash);
 
     REGISTER_BENCHMARKS(SSNHashBitOps);
 
@@ -142,9 +141,9 @@ int main(int argc, char** argv){
     REGISTER_BENCHMARKS(NaiveIPV6);
     REGISTER_BENCHMARKS(NaiveINTS);
 
-
     REGISTER_BENCHMARKS(IPV6SIMDHash);
 
+    REGISTER_BENCHMARKS(NaiveSIMDUrlComplex);
 
     // Load keys from standard input into memory
     std::vector<std::string> keys;

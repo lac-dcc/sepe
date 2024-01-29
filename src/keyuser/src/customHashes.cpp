@@ -8,20 +8,12 @@
 #include "absl/hash/hash.h"
 #include "absl/hash/internal/hash.h"
 
-// #include "farm.hpp"
-
 std::size_t AbseilHash::operator()(const std::string& key) const{
     return absl::Hash<std::string>{}(key);
 }
 
 std::size_t CityHash::operator()(const std::string& key) const{
     return CityHash64(key.c_str(), key.size());
-}
-
-std::size_t FarmHash::operator()(const std::string& key) const{
-    // size_t __seed = static_cast<size_t>(0xc70f6907UL);
-    // return Hash64(key.c_str(), key.size(), __seed);d
-    return 0;
 }
 
 inline static uint64_t load_u64_le(const char* b) {
@@ -464,7 +456,20 @@ std::size_t SynthINTS::operator()(const std::string& key) const {
         return tmp11;
 }
 
-// Naive functions
+std::size_t NaiveSIMDUrlComplex::operator()(const std::string& key) const {
+
+    // http:/google.github.io/idisztftvi/version904/doxygen/html/pt65h5x2md6opo05zpke.html
+
+    __m128i var1 = _mm_lddqu_si128((const __m128i *)(key.c_str()+23));
+    __m128i var2 = _mm_lddqu_si128((const __m128i *)(key.c_str()+41));
+    __m128i var3 = _mm_lddqu_si128((const __m128i *)(key.c_str()+66));
+
+    __m128i xor1 = _mm_xor_si128(var1, var2);
+    __m128i xor2 = _mm_xor_si128(var3, xor1);
+
+    return _mm_extract_epi64(xor2, 0) ^ _mm_extract_epi64(xor2, 1);
+}
+
 std::size_t NaiveUrlComplex::operator()(const std::string& key) const {
 	std::size_t var0 = load_u64_le(key.c_str() + 0);
     std::size_t var1 = load_u64_le(key.c_str() + 8);
@@ -487,7 +492,7 @@ std::size_t NaiveUrlComplex::operator()(const std::string& key) const {
     std::size_t xor7 = xor3 ^ xor4;
     std::size_t xor8 = xor5 ^ xor6;
     std::size_t xor9 = xor7 ^ xor8;
-    return xor9 ;
+    return xor9;
 }
 
 std::size_t NaiveUrl::operator()(const std::string& key) const {

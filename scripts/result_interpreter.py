@@ -88,7 +88,7 @@ def main():
     mannwhitneyu_from_dataframe(df, 'Hash Function', 'Execution Time (s)')
     print("------------------")
     # mannwhitneyu_from_dataframe(df, 'Hash Function', 'Collision Count')
-    box_plot_dataframe(df, regex_name)
+    # box_plot_dataframe(df, regex_name)
     get_table(df, regex_name)
 
 main()

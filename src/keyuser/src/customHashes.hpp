@@ -12,11 +12,11 @@
 #include <vector>
 #include <numeric>
 
-struct CityHash{
+struct NaiveSIMDUrlComplex{
     std::size_t operator()(const std::string& key) const;
 };
 
-struct FarmHash{
+struct CityHash{
     std::size_t operator()(const std::string& key) const;
 };
 
