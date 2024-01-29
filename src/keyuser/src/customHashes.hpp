@@ -45,14 +45,6 @@ struct FNVHash {
 };
 
 /**
- * @struct IPV4HashGeneric
- * @brief This struct provides a generic hash function for IPV4 addresses.
- */
-struct IPV4HashGeneric{
-    std::size_t operator()(const std::string& key) const;
-};
-
-/**
  * @struct IPV4HashUnrolled
  * @brief This struct provides an unrolled hash function for IPV4 addresses.
  */
@@ -117,14 +109,6 @@ struct MacAddressHashBitOps{
     std::size_t operator()(const std::string& key) const;
 };
 
-/**
- * @struct UrlHashBitOps
- * @brief This struct provides a hash function for URLs that uses data compression..
- */
-struct UrlGenericHashBitOps{
-    std::size_t operator()(const std::string& key) const;
-};
-
 struct IntBitHash{
     std::size_t operator()(const std::string& key) const;
 };
@@ -153,6 +137,10 @@ DECLARE_SYNTH_AND_NAIVE_FUNCTIONS(SSN)
 DECLARE_SYNTH_AND_NAIVE_FUNCTIONS(IPV4)
 DECLARE_SYNTH_AND_NAIVE_FUNCTIONS(IPV6)
 DECLARE_SYNTH_AND_NAIVE_FUNCTIONS(INTS)
+
+struct NaiveSimdINTS {
+	std::size_t operator()(const std::string& key) const;
+}; 
 
 struct IPV6SIMDHash{
     std::size_t operator()(const std::string& key) const;

@@ -4,39 +4,34 @@
 regex = "http:/google\\.github\\.io/[a-z]{10}/version[0-9]{3}/doxygen/html/[a-z0-9]{20}\\.html"
 hashes = ["STDHashBin",  "STDHashSrc", "AbseilHash", "CityHash", "FNVHash", "UrlCompress", "SynthUrlComplex", "NaiveSIMDUrlComplex", "NaiveUrlComplex"]
 
-[URL_GENERIC]
-regex = "https://www\\.[!~]{100,200}"
-hashes = ["STDHashBin",  "STDHashSrc", "AbseilHash", "CityHash", "FNVHash", "UrlGenericHashBitOps"]
-
 [URL_FIXED_PATTERN]
 regex = "http:/google\\.github\\.io/farmhash/doxygen/html/[a-z0-9]{20}\\.html"
-
-hashes = ["STDHashBin",  "STDHashSrc", "AbseilHash", "CityHash", "FNVHash", "UrlGenericHashBitOps", "SynthUrl"]
+hashes = ["STDHashBin",  "STDHashSrc", "AbseilHash", "CityHash", "FNVHash", "SynthUrl", "NaiveUrl"]
 
 [URL_FIXED_PATTERN_INTERNAL]
 regex = "[a-z0-9]{20}"
-hashes = ["STDHashBin",  "STDHashSrc", "AbseilHash", "CityHash", "FNVHash", "UrlGenericHashBitOps"]
+hashes = ["STDHashBin",  "STDHashSrc", "AbseilHash", "CityHash", "FNVHash"]
 
 [MAC]
 regex = "([0-9a-fA-F]{2}-){5}[0-9a-fA-F]{2}"
-hashes = ["STDHashBin",  "STDHashSrc", "AbseilHash", "CityHash", "FNVHash", "MacAddressHashBitOps" , "SynthMac"]
+hashes = ["STDHashBin",  "STDHashSrc", "AbseilHash", "CityHash", "FNVHash", "MacAddressHashBitOps" , "SynthMac", "NaiveMac"]
 
 [CPF]
 regex = "(([0-9]{3})\\.){2}[0-9]{3}-[0-9]{2}"
-hashes = ["STDHashBin",  "STDHashSrc", "AbseilHash", "CityHash", "FNVHash",  "CPFHashBitOps", "CPFHashVectorizedMul", "SynthCPF"]
+hashes = ["STDHashBin",  "STDHashSrc", "AbseilHash", "CityHash", "FNVHash", "CPFHashBitOps", "CPFHashVectorizedMul", "SynthCPF", "NaiveCPF"]
 
 [SSN]
 regex = "[0-9]{3}-[0-9]{2}-[0-9]{4}"
-hashes = ["STDHashBin",  "STDHashSrc", "AbseilHash", "CityHash", "FNVHash",  "SSNHashBitOps", "SynthSSN"]
+hashes = ["STDHashBin",  "STDHashSrc", "AbseilHash", "CityHash", "FNVHash", "SSNHashBitOps", "SynthSSN", "NaiveSSN"]
 
 [IPV4]
 regex = "(([0-9]{3})\\.){3}[0-9]{3}"
-hashes = ["STDHashBin",  "STDHashSrc", "AbseilHash", "CityHash", "FNVHash", "IPV4HashGeneric", "IPV4HashMove", "IPV4HashUnrolled", "IPV4HashBitOps", "SynthIPV4"]
+hashes = ["STDHashBin",  "STDHashSrc", "AbseilHash", "CityHash", "FNVHash", "IPV4HashMove", "IPV4HashUnrolled", "IPV4HashBitOps", "SynthIPV4", "NaiveIPV4"]
 
 [IPV6]
 regex = "([0-9a-fA-F]{4}:){7}[0-9a-fA-F]{4}"
-hashes = ["STDHashBin",  "STDHashSrc", "AbseilHash", "CityHash", "FNVHash", "IPV4HashGeneric", "SynthIPV6", "IPV6SIMDHash"]
+hashes = ["STDHashBin",  "STDHashSrc", "AbseilHash", "CityHash", "FNVHash", "SynthIPV6", "IPV6SIMDHash", "NaiveIPV6"]
 
 [INTS]
 regex = "[0-9]{100}"
-hashes = ["STDHashBin",  "STDHashSrc", "AbseilHash", "CityHash", "FNVHash", "IntBitHash", "IntSimdHash", "SynthINTS"]
+hashes = ["STDHashBin",  "STDHashSrc", "AbseilHash", "CityHash", "FNVHash", "IntBitHash", "IntSimdHash", "SynthINTS", "NaiveINTS", "NaiveSIMDINTS"]

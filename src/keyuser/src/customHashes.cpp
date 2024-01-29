@@ -94,15 +94,6 @@ std::size_t FNVHash::operator()(const std::string& key) const {
     return hash;
 }
 
-std::size_t IPV4HashGeneric::operator()(const std::string& key) const {
-    std::size_t hash_code = 0;
-    for(const auto ch : key){
-        hash_code *= 10;
-        hash_code += ch - '0';
-    }
-    return hash_code;
-}
-
 std::size_t IPV4HashUnrolled::operator()(const std::string& key) const {
 
     std::size_t hash_code = (std::size_t)(key[0] - '0')
@@ -217,19 +208,6 @@ std::size_t UrlCompress::operator()(const std::string& key) const {
 	const std::size_t high3 = _pext_u64(load_u64_le(key.c_str()+74), mask6);
 
 	return (low1 ^ ( high1 << 24 )) ^ (low2 ^ ( high2 << 8 )) ^ (low3 ^ ( high3 << 24 ));
-}
-
-std::size_t UrlGenericHashBitOps::operator()(const std::string& key) const{
-	constexpr std::size_t mask1 = 0x3F3F3F3F3F3F3F3F;
-	const std::size_t low = _pext_u64(load_u64_le(key.c_str()), mask1);
-
-	constexpr std::size_t mask2 = 0x3F3F3F3F3F3F3F3F;
-	const std::size_t high = _pext_u64(load_u64_le(key.c_str() + 8), mask2);
-
-	constexpr std::size_t mask3 = 0x000000003F3F3F3F;
-	const std::size_t high2 = _pext_u64(load_u64_le(key.c_str() + 12), mask3);
-
-	return (low ^ (high2 << 36)) ^ (high << 2);
 }
 
 std::size_t IntSimdHash::operator()(const std::string& key) const {
@@ -587,6 +565,23 @@ std::size_t NaiveINTS::operator()(const std::string& key) const {
     std::size_t xor10 = xor7 ^ xor8;
     std::size_t xor11 = xor9 ^ xor10;
     return xor11 ;
+}
+
+std::size_t NaiveSimdINTS::operator()(const std::string& key) const {
+    __m128i var0 = _mm_lddqu_si128((const __m128i *)(key.c_str() + 0));
+    __m128i var1 = _mm_lddqu_si128((const __m128i *)(key.c_str() + 16));
+    __m128i var2 = _mm_lddqu_si128((const __m128i *)(key.c_str() + 32));
+    __m128i var3 = _mm_lddqu_si128((const __m128i *)(key.c_str() + 48));
+    __m128i var4 = _mm_lddqu_si128((const __m128i *)(key.c_str() + 64));
+    __m128i var5 = _mm_lddqu_si128((const __m128i *)(key.c_str() + 80));
+    __m128i var6 = _mm_lddqu_si128((const __m128i *)(key.c_str() + 84));
+    __m128i xor0 = _mm_xor_si128(var6, var5);
+    __m128i xor1 = _mm_xor_si128(var4, var3);
+    __m128i xor2 = _mm_xor_si128(var2, var1);
+    __m128i xor3 = _mm_xor_si128(var0, xor0);
+    __m128i xor4 = _mm_xor_si128(xor1, xor2);
+    __m128i xor5 = _mm_xor_si128(xor3, xor4);
+    return _mm_extract_epi64(xor5 , 0) ^ _mm_extract_epi64(xor5 , 1);
 }
 
 std::size_t IPV6SIMDHash::operator()(const std::string& key) const {

@@ -107,7 +107,6 @@ int main(int argc, char** argv){
     REGISTER_BENCHMARKS(CPFHashBitOps);
     REGISTER_BENCHMARKS(CPFHashVectorizedMul);
 
-    REGISTER_BENCHMARKS(IPV4HashGeneric);
     REGISTER_BENCHMARKS(IPV4HashUnrolled);
     REGISTER_BENCHMARKS(IPV4HashMove);
     REGISTER_BENCHMARKS(IPV4HashBitOps);
@@ -119,7 +118,6 @@ int main(int argc, char** argv){
     REGISTER_BENCHMARKS(IntSimdHash);
     REGISTER_BENCHMARKS(IntBitHash);
 
-    REGISTER_BENCHMARKS(UrlGenericHashBitOps);
     REGISTER_BENCHMARKS(UrlCompress);
 
     // Synthesized functions
