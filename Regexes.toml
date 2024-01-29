@@ -2,11 +2,11 @@
 
 [URL_COMPLEX]
 regex = "http:/google\\.github\\.io/[a-z]{10}/version[0-9]{3}/doxygen/html/[a-z0-9]{20}\\.html"
-hashes = ["STDHashBin",  "STDHashSrc", "AbseilHash", "CityHash", "FNVHash", "UrlCompress", "PextUrlComplex", "OffXorUrlComplex", "NaiveSimdUrlComplex", "NaiveUrlComplex"]
+hashes = ["STDHashBin",  "STDHashSrc", "AbseilHash", "CityHash", "FNVHash", "UrlCompress", "PextUrlComplex", "OffXorUrlComplex", "OffXorSimdUrlComplex", "NaiveSimdUrlComplex", "NaiveUrlComplex"]
 
 [URL_FIXED_PATTERN]
 regex = "http:/google\\.github\\.io/farmhash/doxygen/html/[a-z0-9]{20}\\.html"
-hashes = ["STDHashBin",  "STDHashSrc", "AbseilHash", "CityHash", "FNVHash", "PextUrl", "OffXorUrl","NaiveUrl", "NaiveSimdUrl"]
+hashes = ["STDHashBin",  "STDHashSrc", "AbseilHash", "CityHash", "FNVHash", "PextUrl", "OffXorUrl", "OffXorSimdUrl", "NaiveUrl", "NaiveSimdUrl"]
 
 [MAC]
 regex = "([0-9a-fA-F]{2}-){5}[0-9a-fA-F]{2}"
@@ -26,8 +26,8 @@ hashes = ["STDHashBin",  "STDHashSrc", "AbseilHash", "CityHash", "FNVHash", "IPV
 
 [IPV6]
 regex = "([0-9a-fA-F]{4}:){7}[0-9a-fA-F]{4}"
-hashes = ["STDHashBin",  "STDHashSrc", "AbseilHash", "CityHash", "FNVHash", "PextIPV6", "OffXorIPV6", "NaiveIPV6", "NaiveSimdIPV6"]
+hashes = ["STDHashBin",  "STDHashSrc", "AbseilHash", "CityHash", "FNVHash", "PextIPV6", "OffXorIPV6", "OffXorSimdIPV6", "NaiveIPV6", "NaiveSimdIPV6"]
 
 [INTS]
 regex = "[0-9]{100}"
-hashes = ["STDHashBin",  "STDHashSrc", "AbseilHash", "CityHash", "FNVHash", "IntBitHash", "IntSimdHash", "PextINTS", "OffXorINTS", "NaiveINTS", "NaiveSimdINTS"]
+hashes = ["STDHashBin",  "STDHashSrc", "AbseilHash", "CityHash", "FNVHash", "IntBitHash", "IntSimdHash", "PextINTS", "OffXorINTS", "OffXorSimdINTS", "NaiveINTS", "NaiveSimdINTS"]

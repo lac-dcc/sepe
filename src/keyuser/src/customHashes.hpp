@@ -137,6 +137,22 @@ DECLARE_SYNTH_OFFXOR_AND_NAIVE_FUNCTIONS(IPV4)
 DECLARE_SYNTH_OFFXOR_AND_NAIVE_FUNCTIONS(IPV6)
 DECLARE_SYNTH_OFFXOR_AND_NAIVE_FUNCTIONS(INTS)
 
+struct OffXorSimdUrlComplex{
+    std::size_t operator()(const std::string& key) const;
+};
+
+struct OffXorSimdUrl {
+    std::size_t operator()(const std::string& key) const;
+};
+
+struct OffXorSimdIPV6 {
+    std::size_t operator()(const std::string& key) const;
+}; 
+
+struct OffXorSimdINTS {
+    std::size_t operator()(const std::string& key) const;
+}; 
+
 struct NaiveSimdUrlComplex{
     std::size_t operator()(const std::string& key) const;
 };
