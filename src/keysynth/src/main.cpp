@@ -95,7 +95,7 @@ static std::string recursivelyCalculateMask(const std::vector<Range>& ranges, si
 
 }
 
-static std::string hashable(int hashableID, size_t offset){
+static std::string hashablePext(int hashableID, size_t offset){
     return "\tconst std::size_t hashable" + 
                 std::to_string(hashableID) + 
                 " = _pext_u64(load_u64_le(key.c_str()+" + 
@@ -105,14 +105,30 @@ static std::string hashable(int hashableID, size_t offset){
                 ");\n";
 }
 
-static std::vector<size_t> calculateOffsets(std::vector<Range>& ranges){
+static std::string hashableNaive(int hashableID, size_t offset){
+    return "\tconst std::size_t hashable" + 
+                std::to_string(hashableID) + 
+                " = load_u64_le(key.c_str()+" + 
+                std::to_string(offset) + 
+                ");\n";
+}
+
+static std::string hashableNaiveSIMD(int hashableID, size_t offset){
+    return "\tconst __m128i hashable" + 
+                std::to_string(hashableID) + 
+                " = _mm_lddqu_si128((const __m128i *)(key.c_str()+" + 
+                std::to_string(offset) + 
+                "));\n";
+}
+
+static std::vector<size_t> calculateOffsets(std::vector<Range>& ranges, int regSize=8){
     size_t rangesID = 0;
     std::vector<size_t> offsets;
     int currOffset = ranges[rangesID].offset;
     while( rangesID < ranges.size() ){
-        // synthesizedHashFunc += hashable(hashableID++, currOffset);
+        // synthesizedHashFunc += hashablePext(hashableID++, currOffset);
         offsets.push_back(currOffset);
-        currOffset += 8;
+        currOffset += regSize;
         if( currOffset >= (ranges[rangesID].offset + (int)ranges[rangesID].repetition) ){
             rangesID++;
             if(rangesID >= ranges.size()){
@@ -178,6 +194,21 @@ static std::string cascadeXorVars(std::queue<std::string>& queue){
 		queue.pop();
 		std::string tmpVar = "tmp" + std::to_string(tmpID++);
 		xorCascade += "\tsize_t " + tmpVar + " = " + id1 + " ^ " +id2 + ";\n";
+		queue.push(tmpVar);
+	}
+    return xorCascade;
+}
+
+static std::string cascadeXorVarsSIMD(std::queue<std::string>& queue){
+    std::string xorCascade;
+	int tmpID = 0;
+	while (queue.size() > 1) {
+		std::string id1 = queue.front();
+		queue.pop();
+		std::string id2 = queue.front();
+		queue.pop();
+		std::string tmpVar = "tmp" + std::to_string(tmpID++);
+		xorCascade += "\t__m128i " + tmpVar + " = _mm_xor_si128(" + id1 + ", " +id2 + ");\n";
 		queue.push(tmpVar);
 	}
     return xorCascade;
@@ -254,7 +285,7 @@ std::string synthethisePextHashFunc(std::string& regex){
         offsets[offsets.size()-1] = offset - 8;
     }
 
-    std::string synthesizedHashFunc = "std::size_t synthesizedHashFunc(const std::string& key) const {\n";
+    std::string synthesizedHashFunc = "std::size_t synthesizedPextHash(const std::string& key) const {\n";
     
     // Calculate all concatenated masks based on ranges
     std::string mask = recursivelyCalculateMask(ranges, 0, 0);
@@ -276,7 +307,7 @@ std::string synthethisePextHashFunc(std::string& regex){
     // Create hashables
     int hashableID = 0;
     for(const auto& off : offsets){
-        synthesizedHashFunc += hashable(hashableID++, off);
+        synthesizedHashFunc += hashablePext(hashableID++, off);
     }
 
     // Create hashable variables and left shift them as much as possible for better collision
@@ -306,6 +337,89 @@ std::string synthethisePextHashFunc(std::string& regex){
     return synthesizedHashFunc;
 }
 
+std::string synthethiseNaiveHashFunc(std::string& regex){
+
+    // Create ranges
+    size_t offset;
+    std::vector<Range> ranges;
+    std::pair<std::vector<Range>,size_t> res = calculateRanges(regex);
+
+    ranges = res.first;
+    offset = res.second;
+
+    // Calculate offsets
+    std::vector<size_t> offsets = calculateOffsets(ranges);
+
+    // Avoid out of bounds memory access on the last mask/offset
+    if (offsets[offsets.size()-1] + 8 >= offset){
+        offsets[offsets.size()-1] = offset - 8;
+    }
+
+    std::string synthesizedHashFunc = "std::size_t synthesizedNaiveHash(const std::string& key) const {\n";
+
+    // Create hashables
+    int hashableID = 0;
+    for(const auto& off : offsets){
+        synthesizedHashFunc += hashableNaive(hashableID++, off);
+    }
+
+    // Create queue of "XORable" variables
+	std::queue<std::string> queue;
+	for (int i = 0; i < hashableID; ++i) {
+		queue.push("hashable" + std::to_string(i));
+	}
+
+    // Cascade XOR variables
+    synthesizedHashFunc += cascadeXorVars(queue);
+
+    synthesizedHashFunc += "\treturn " + queue.front() + "; \n";
+    synthesizedHashFunc += "}\n";
+
+    return synthesizedHashFunc;
+}
+
+std::string synthethiseNaiveSIMDFunc(std::string& regex){
+
+    // Create ranges
+    size_t offset;
+    std::vector<Range> ranges;
+    std::pair<std::vector<Range>,size_t> res = calculateRanges(regex);
+
+    ranges = res.first;
+    offset = res.second;
+
+    // Calculate offsets
+    std::vector<size_t> offsets = calculateOffsets(ranges, 16);
+
+    // Avoid out of bounds memory access on the last mask/offset
+    if (offsets[offsets.size()-1] + 16 >= offset){
+        offsets[offsets.size()-1] = offset - 16;
+    }
+
+    std::string synthesizedHashFunc = "std::size_t synthesizedNaiveHash(const std::string& key) const {\n";
+
+    // Create hashables
+    int hashableID = 0;
+    for(const auto& off : offsets){
+        synthesizedHashFunc += hashableNaiveSIMD(hashableID++, off);
+    }
+
+    // Create queue of "XORable" variables
+	std::queue<std::string> queue;
+	for (int i = 0; i < hashableID; ++i) {
+		queue.push("hashable" + std::to_string(i));
+	}
+
+    // Cascade XOR variables
+    synthesizedHashFunc += cascadeXorVarsSIMD(queue);
+
+    synthesizedHashFunc += "\treturn _mm_extract_epi64("+queue.front()+", 0) ^ _mm_extract_epi64("+queue.front()+" , 1); \n";
+    synthesizedHashFunc += "}\n";
+    synthesizedHashFunc =  "#include <immintrin.h>\n" + synthesizedHashFunc;
+
+    return synthesizedHashFunc;
+}
+
 int main(int argc, char** argv){
 
     if(argc < 2){
@@ -316,7 +430,12 @@ int main(int argc, char** argv){
 
     std::string regexStr = std::string(argv[1]);
 
-    printf("%s", synthethisePextHashFunc(regexStr).c_str());
+    printf("%s\n", synthethisePextHashFunc(regexStr).c_str());
+    if(regexStr.size() < 32){
+        printf("%s", synthethiseNaiveHashFunc(regexStr).c_str());
+    } else {
+        printf("%s", synthethiseNaiveSIMDFunc(regexStr).c_str());
+    }
 
     return 0;
 
