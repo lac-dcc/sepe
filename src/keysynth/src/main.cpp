@@ -329,7 +329,7 @@ std::string synthethisePextHashFunc(std::vector<Range>& ranges, size_t offset){
     return synthesizedHashFunc;
 }
 
-std::string synthethiseNaiveHashFunc(std::vector<Range>& ranges, size_t offset){
+std::string synthethiseOffXorHashFunc(std::vector<Range>& ranges, size_t offset){
 
     // Calculate offsets
     std::vector<size_t> offsets = calculateOffsets(ranges);
@@ -339,7 +339,7 @@ std::string synthethiseNaiveHashFunc(std::vector<Range>& ranges, size_t offset){
         offsets[offsets.size()-1] = offset - 8;
     }
 
-    std::string synthesizedHashFunc = "std::size_t synthesizedNaiveHash(const std::string& key) const {\n";
+    std::string synthesizedHashFunc = "std::size_t synthesizedOffXorHash(const std::string& key) const {\n";
 
     // Create hashables
     int hashableID = 0;
@@ -362,8 +362,7 @@ std::string synthethiseNaiveHashFunc(std::vector<Range>& ranges, size_t offset){
     return synthesizedHashFunc;
 }
 
-std::string synthethiseNaiveSIMDFunc(std::vector<Range>& ranges, size_t offset){
-
+std::string synthethiseOffXorSimdFunc(std::vector<Range>& ranges, size_t offset) {
     // Calculate offsets
     std::vector<size_t> offsets = calculateOffsets(ranges, 16);
 
@@ -372,7 +371,7 @@ std::string synthethiseNaiveSIMDFunc(std::vector<Range>& ranges, size_t offset){
         offsets[offsets.size()-1] = offset - 16;
     }
 
-    std::string synthesizedHashFunc = "std::size_t synthesizedNaiveHash(const std::string& key) const {\n";
+    std::string synthesizedHashFunc = "std::size_t synthesizeOffXorSimdHash(const std::string& key) const {\n";
 
     // Create hashables
     int hashableID = 0;
@@ -415,9 +414,9 @@ int main(int argc, char** argv){
 
     printf("%s\n", synthethisePextHashFunc(ranges,offset).c_str());
     if(regexStr.size() < 32){
-        printf("%s", synthethiseNaiveHashFunc(ranges,offset).c_str());
+        printf("%s", synthethiseOffXorHashFunc(ranges,offset).c_str());
     } else {
-        printf("%s", synthethiseNaiveSIMDFunc(ranges,offset).c_str());
+        printf("%s", synthethiseOffXorSimdFunc(ranges,offset).c_str());
     }
 
     return 0;
