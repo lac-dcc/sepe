@@ -12,10 +12,6 @@
 #include <vector>
 #include <numeric>
 
-struct NaiveSIMDUrlComplex{
-    std::size_t operator()(const std::string& key) const;
-};
-
 struct CityHash{
     std::size_t operator()(const std::string& key) const;
 };
@@ -138,12 +134,20 @@ DECLARE_SYNTH_AND_NAIVE_FUNCTIONS(IPV4)
 DECLARE_SYNTH_AND_NAIVE_FUNCTIONS(IPV6)
 DECLARE_SYNTH_AND_NAIVE_FUNCTIONS(INTS)
 
-struct NaiveSimdINTS {
-	std::size_t operator()(const std::string& key) const;
-}; 
-
-struct IPV6SIMDHash{
+struct NaiveSimdUrlComplex{
     std::size_t operator()(const std::string& key) const;
 };
+
+struct NaiveSimdUrl {
+    std::size_t operator()(const std::string& key) const;
+};
+
+struct NaiveSimdIPV6 {
+    std::size_t operator()(const std::string& key) const;
+}; 
+
+struct NaiveSimdINTS {
+    std::size_t operator()(const std::string& key) const;
+}; 
 
 #endif

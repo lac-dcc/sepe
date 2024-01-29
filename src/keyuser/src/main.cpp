@@ -139,9 +139,10 @@ int main(int argc, char** argv){
     REGISTER_BENCHMARKS(NaiveIPV6);
     REGISTER_BENCHMARKS(NaiveINTS);
 
-    REGISTER_BENCHMARKS(IPV6SIMDHash);
-
-    REGISTER_BENCHMARKS(NaiveSIMDUrlComplex);
+    REGISTER_BENCHMARKS(NaiveSimdUrlComplex);
+    REGISTER_BENCHMARKS(NaiveSimdUrl);
+    REGISTER_BENCHMARKS(NaiveSimdIPV6);
+    REGISTER_BENCHMARKS(NaiveSimdINTS);
 
     // Load keys from standard input into memory
     std::vector<std::string> keys;
