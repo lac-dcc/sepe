@@ -265,15 +265,7 @@ unrollMasks_calculateShift(std::string& mask, size_t lastMaskShift){
     return std::make_pair(shifts, masksStr);
 }
 
-std::string synthethisePextHashFunc(std::string& regex){
-
-    // Create ranges
-    size_t offset;
-    std::vector<Range> ranges;
-    std::pair<std::vector<Range>,size_t> res = calculateRanges(regex);
-
-    ranges = res.first;
-    offset = res.second;
+std::string synthethisePextHashFunc(std::vector<Range>& ranges, size_t offset){
 
     // Calculate offsets
     std::vector<size_t> offsets = calculateOffsets(ranges);
@@ -337,15 +329,7 @@ std::string synthethisePextHashFunc(std::string& regex){
     return synthesizedHashFunc;
 }
 
-std::string synthethiseNaiveHashFunc(std::string& regex){
-
-    // Create ranges
-    size_t offset;
-    std::vector<Range> ranges;
-    std::pair<std::vector<Range>,size_t> res = calculateRanges(regex);
-
-    ranges = res.first;
-    offset = res.second;
+std::string synthethiseNaiveHashFunc(std::vector<Range>& ranges, size_t offset){
 
     // Calculate offsets
     std::vector<size_t> offsets = calculateOffsets(ranges);
@@ -378,15 +362,7 @@ std::string synthethiseNaiveHashFunc(std::string& regex){
     return synthesizedHashFunc;
 }
 
-std::string synthethiseNaiveSIMDFunc(std::string& regex){
-
-    // Create ranges
-    size_t offset;
-    std::vector<Range> ranges;
-    std::pair<std::vector<Range>,size_t> res = calculateRanges(regex);
-
-    ranges = res.first;
-    offset = res.second;
+std::string synthethiseNaiveSIMDFunc(std::vector<Range>& ranges, size_t offset){
 
     // Calculate offsets
     std::vector<size_t> offsets = calculateOffsets(ranges, 16);
@@ -430,11 +406,18 @@ int main(int argc, char** argv){
 
     std::string regexStr = std::string(argv[1]);
 
-    printf("%s\n", synthethisePextHashFunc(regexStr).c_str());
+    // Create ranges
+    size_t offset;
+    std::vector<Range> ranges;
+    std::pair<std::vector<Range>,size_t> res = calculateRanges(regexStr);
+    ranges = res.first;
+    offset = res.second;
+
+    printf("%s\n", synthethisePextHashFunc(ranges,offset).c_str());
     if(regexStr.size() < 32){
-        printf("%s", synthethiseNaiveHashFunc(regexStr).c_str());
+        printf("%s", synthethiseNaiveHashFunc(ranges,offset).c_str());
     } else {
-        printf("%s", synthethiseNaiveSIMDFunc(regexStr).c_str());
+        printf("%s", synthethiseNaiveSIMDFunc(ranges,offset).c_str());
     }
 
     return 0;
