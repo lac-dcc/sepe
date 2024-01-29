@@ -1,6 +1,7 @@
 #include <iostream>
 #include <vector>
 #include <queue>
+#include <utility>
 
 static const std::string load_u64_le = R"(inline static uint64_t load_u64_le(const char* b) {
     uint64_t Ret;
@@ -9,7 +10,7 @@ static const std::string load_u64_le = R"(inline static uint64_t load_u64_le(con
     return Ret;
 })";
 
-static inline std::string intToHex(size_t num){
+static std::string intToHex(size_t num){
     char numStr[17];
     sprintf(numStr, "%02lx", num);
     return std::string(numStr);
@@ -49,7 +50,7 @@ struct Range{
     
 };
 
-int countZeros(const size_t x) {
+static inline int countZeros(const size_t x) {
 	int zeros = 0;
 	for (size_t i = 0; i < sizeof(size_t) * 8; ++i) {
 		if ((x & (1L << i)) == 0) {
@@ -59,17 +60,11 @@ int countZeros(const size_t x) {
 	return zeros;
 }
 
-inline bool isAlphanumerical(char c){
-    return (c >= '0' && c <= '9') || 
-           (c >= 'a' && c <= 'z') || 
-           (c >= 'A' && c <= 'Z');
-}
-
-inline bool nextIsContinuous(const std::vector<Range>& ranges, size_t rangeIdx){
+static bool nextIsContinuous(const std::vector<Range>& ranges, size_t rangeIdx){
     return ((size_t)ranges[rangeIdx+1].offset == ranges[rangeIdx].offset + ranges[rangeIdx].repetition);
 }
 
-std::string recursivelyCalculateMask(const std::vector<Range>& ranges, size_t rangeIdx, size_t numRepetitions){
+static std::string recursivelyCalculateMask(const std::vector<Range>& ranges, size_t rangeIdx, size_t numRepetitions){
 
     // Stop condition
     if(rangeIdx >= ranges.size()){
@@ -100,7 +95,7 @@ std::string recursivelyCalculateMask(const std::vector<Range>& ranges, size_t ra
 
 }
 
-static inline std::string hashable(int hashableID, size_t offset){
+static std::string hashable(int hashableID, size_t offset){
     return "\tconst std::size_t hashable" + 
                 std::to_string(hashableID) + 
                 " = _pext_u64(load_u64_le(key.c_str()+" + 
@@ -110,9 +105,34 @@ static inline std::string hashable(int hashableID, size_t offset){
                 ");\n";
 }
 
-std::string synthethiseHashFunc(std::string& regex){
+static std::vector<size_t> calculateOffsets(std::vector<Range>& ranges){
+    size_t rangesID = 0;
+    std::vector<size_t> offsets;
+    int currOffset = ranges[rangesID].offset;
+    while( rangesID < ranges.size() ){
+        // synthesizedHashFunc += hashable(hashableID++, currOffset);
+        offsets.push_back(currOffset);
+        currOffset += 8;
+        if( currOffset >= (ranges[rangesID].offset + (int)ranges[rangesID].repetition) ){
+            rangesID++;
+            if(rangesID >= ranges.size()){
+                continue;
+            }
+            if( currOffset >= ranges[rangesID].offset ){
+                while( rangesID < ranges.size() && currOffset >= (ranges[rangesID].offset + (int)ranges[rangesID].repetition)){
+                    ++rangesID;
+                }
+                continue;
+            } else {
+                currOffset = ranges[rangesID].offset;
+            }
+        }
+    }
+    return offsets;
+}
 
-    // Create ranges
+static std::pair<std::vector<Range>,size_t> 
+calculateRanges(std::string& regex){
     std::vector<Range> ranges;
     size_t offset = 0;
     for(size_t i = 0; i < regex.size(); i++){
@@ -137,56 +157,38 @@ std::string synthethiseHashFunc(std::string& regex){
     }
 
     if(ranges.size() == 0){
-		return "\
+		std::cout << "// No regex ranges in the key. Using default Function. \n\
 			std::size_t synthesizedHashFunc::operator()(const std::string& key) const {\n\
     			\treturn std::hash<std::string>{}(key);\n\
 			}";
+            exit(0);
     }
 
-    // Calculate offsets
-    std::vector<size_t> offsets;
-    size_t rangesID = 0;
-    int currOffset = ranges[rangesID].offset;
-    while( rangesID < ranges.size() ){
-        // synthesizedHashFunc += hashable(hashableID++, currOffset);
-        offsets.push_back(currOffset);
-        currOffset += 8;
-        if( currOffset >= (ranges[rangesID].offset + (int)ranges[rangesID].repetition) ){
-            rangesID++;
-            if(rangesID >= ranges.size()){
-                continue;
-            }
-            if( currOffset >= ranges[rangesID].offset ){
-                while( rangesID < ranges.size() && currOffset >= (ranges[rangesID].offset + (int)ranges[rangesID].repetition)){
-                    ++rangesID;
-                }
-                continue;
-            } else {
-                currOffset = ranges[rangesID].offset;
-            }
-        }
-    }
+    return std::make_pair(ranges,offset);
+}
 
-    // Avoid out of bounds memory access on the last mask/offset
-    size_t lastMaskShift = 0;
-    if (offsets[offsets.size()-1] + 8 >= offset){
-        lastMaskShift = offsets[offsets.size()-1] - (offset - 8);
-        offsets[offsets.size()-1] = offset - 8;
-    }
 
-    std::string synthesizedHashFunc = "std::size_t synthesizedHashFunc(const std::string& key) const {\n";
-    
-    std::string mask = recursivelyCalculateMask(ranges, 0, 0);
-    //printf("Mask: %s\n", mask.c_str());
-    int numZeroes = mask.size() % 16;
-    if(numZeroes > 0){
-        for(int i = 0; i < (16-numZeroes); i++){
-            mask += "0";
-        }
-    }
+static std::string cascadeXorVars(std::queue<std::string>& queue){
+    std::string xorCascade;
+	int tmpID = 0;
+	while (queue.size() > 1) {
+		std::string id1 = queue.front();
+		queue.pop();
+		std::string id2 = queue.front();
+		queue.pop();
+		std::string tmpVar = "tmp" + std::to_string(tmpID++);
+		xorCascade += "\tsize_t " + tmpVar + " = " + id1 + " ^ " +id2 + ";\n";
+		queue.push(tmpVar);
+	}
+    return xorCascade;
+}
 
+// Yes, this functions does two things. How about that clean coders?
+static std::pair<std::vector<int>, std::string> 
+unrollMasks_calculateShift(std::string& mask, size_t lastMaskShift){
     int maskID = 0;
 	std::vector<int> shifts;
+    std::string masksStr;
     for(size_t i = 0; i < mask.size(); i+=16){
         std::string currMask = mask.substr(i,16);
 
@@ -220,21 +222,64 @@ std::string synthethiseHashFunc(std::string& regex){
         }
 
 		long maskInt = std::stold("0x" + currMask);
-		shifts.push_back(countZeros(maskInt));
+		shifts.push_back(countZeros(maskInt)-1);
 
-        synthesizedHashFunc += "\tconstexpr std::size_t mask" + 
-                                std::to_string(maskID) + 
-                                " = 0x" + 
-                                currMask + 
-                                ";\n";
+        masksStr += "\tconstexpr std::size_t mask" + 
+                    std::to_string(maskID) + 
+                    " = 0x" + 
+                    currMask + 
+                    ";\n";
         maskID++;
     }
+    return std::make_pair(shifts, masksStr);
+}
 
+std::string synthethisePextHashFunc(std::string& regex){
+
+    // Create ranges
+    size_t offset;
+    std::vector<Range> ranges;
+    std::pair<std::vector<Range>,size_t> res = calculateRanges(regex);
+
+    ranges = res.first;
+    offset = res.second;
+
+    // Calculate offsets
+    std::vector<size_t> offsets = calculateOffsets(ranges);
+
+    // Avoid out of bounds memory access on the last mask/offset
+    size_t lastMaskShift = 0;
+    if (offsets[offsets.size()-1] + 8 >= offset){
+        lastMaskShift = offsets[offsets.size()-1] - (offset - 8);
+        offsets[offsets.size()-1] = offset - 8;
+    }
+
+    std::string synthesizedHashFunc = "std::size_t synthesizedHashFunc(const std::string& key) const {\n";
+    
+    // Calculate all concatenated masks based on ranges
+    std::string mask = recursivelyCalculateMask(ranges, 0, 0);
+
+    // Add zeroes to fill 8 bytes 
+        // (number 16 because we are using Hex numbers, so two hex = 1 byte)
+    int numZeroes = mask.size() % 16;
+    if(numZeroes > 0){
+        for(int i = 0; i < (16-numZeroes); i++){
+            mask += "0";
+        }
+    }
+
+    // Unroll Masks and calculate shifts
+    std::pair<std::vector<int>, std::string> res_thank_you_cpp_compiler = unrollMasks_calculateShift(mask, lastMaskShift);
+    std::vector<int> shifts = res_thank_you_cpp_compiler.first; 
+    synthesizedHashFunc += res_thank_you_cpp_compiler.second;
+
+    // Create hashables
     int hashableID = 0;
     for(const auto& off : offsets){
         synthesizedHashFunc += hashable(hashableID++, off);
     }
 
+    // Create hashable variables and left shift them as much as possible for better collision
 	for (int i = 0; i < hashableID; ++i) {
 		if (i % 2 == 0) {
 			synthesizedHashFunc += "\tsize_t shift" + std::to_string(i) + " = " + "hashable" + std::to_string(i) + ";\n";
@@ -243,25 +288,21 @@ std::string synthethiseHashFunc(std::string& regex){
 		}
 	}
 
+    // Create queue of "XORable" variables
 	std::queue<std::string> queue;
 	for (int i = 0; i < hashableID; ++i) {
 		queue.push("shift" + std::to_string(i));
 	}
 
-
-	int tmpID = 0;
-	while (queue.size() > 1) {
-		std::string id1 = queue.front();
-		queue.pop();
-		std::string id2 = queue.front();
-		queue.pop();
-		std::string tmpVar = "tmp" + std::to_string(tmpID++);
-		synthesizedHashFunc += "\tsize_t " + tmpVar + " = " + id1 + " ^ " +id2 + ";\n";
-		queue.push(tmpVar);
-	}
+    // Cascade XOR variables
+    synthesizedHashFunc += cascadeXorVars(queue);
 
     synthesizedHashFunc += "\treturn " + queue.front() + "; \n";
     synthesizedHashFunc += "}\n";
+
+    // load_u64_le function header
+    synthesizedHashFunc = load_u64_le + "\n" + synthesizedHashFunc;
+
     return synthesizedHashFunc;
 }
 
@@ -275,7 +316,7 @@ int main(int argc, char** argv){
 
     std::string regexStr = std::string(argv[1]);
 
-    printf("%s", synthethiseHashFunc(regexStr).c_str());
+    printf("%s", synthethisePextHashFunc(regexStr).c_str());
 
     return 0;
 
