@@ -19,11 +19,11 @@ std::size_t CityHash::operator()(const std::string& key) const{
 inline static uint64_t load_u64_le(const char* b) {
     uint64_t Ret;
     // This is a way for the compiler to optimize this func to a single movq instruction
-    memcpy(&Ret, b, sizeof(uint64_t)); 
+    memcpy(&Ret, b, sizeof(uint64_t));
     return Ret;
 }
 
-// C++ STD_HASH implementation extracted from 
+// C++ STD_HASH implementation extracted from
 //https://github.com/gcc-mirror/gcc/blob/ee0717da1eb5dc5d17dcd0b35c88c99281385280/libstdc%2B%2B-v3/libsupc%2B%2B/hash_bytes.cc#L61
 static inline std::size_t unaligned_load(const char* p)
 {
@@ -97,16 +97,16 @@ std::size_t FNVHash::operator()(const std::string& key) const {
 std::size_t IPV4HashUnrolled::operator()(const std::string& key) const {
 
     std::size_t hash_code = (std::size_t)(key[0] - '0')
-    + (std::size_t)(key[1] - '0')*10 
-    + (std::size_t)(key[2] - '0')*100 
-    + (std::size_t)(key[4] - '0')*1000 
-    + (std::size_t)(key[5] - '0')*10000 
-    + (std::size_t)(key[6] - '0')*100000 
-    + (std::size_t)(key[8] - '0')*1000000 
-    + (std::size_t)(key[9] - '0')*10000000 
-    + (std::size_t)(key[10] - '0')*100000000 
-    + (std::size_t)(key[12] - '0')*1000000000 
-    + (std::size_t)(key[13] - '0')*10000000000 
+    + (std::size_t)(key[1] - '0')*10
+    + (std::size_t)(key[2] - '0')*100
+    + (std::size_t)(key[4] - '0')*1000
+    + (std::size_t)(key[5] - '0')*10000
+    + (std::size_t)(key[6] - '0')*100000
+    + (std::size_t)(key[8] - '0')*1000000
+    + (std::size_t)(key[9] - '0')*10000000
+    + (std::size_t)(key[10] - '0')*100000000
+    + (std::size_t)(key[12] - '0')*1000000000
+    + (std::size_t)(key[13] - '0')*10000000000
     + (std::size_t)(key[14] - '0')*100000000000;
 
     return hash_code;
@@ -134,16 +134,16 @@ std::size_t CPFHashVectorizedMul::operator()(const std::string& key) const {
     __m128i sub = _mm_sub_epi8(vector, zeros);
 
     char* subptr = (char *)(&sub);
-    std::size_t hash_code = (std::size_t)subptr[0] 
-        + (std::size_t)subptr[1] *  10 
+    std::size_t hash_code = (std::size_t)subptr[0]
+        + (std::size_t)subptr[1] *  10
         + (std::size_t)subptr[2] *  100
-        + (std::size_t)subptr[4] *  1000 
-        + (std::size_t)subptr[5] *  10000 
-        + (std::size_t)subptr[6] *  100000 
-        + (std::size_t)subptr[8] *  1000000 
-        + (std::size_t)subptr[9] *  10000000 
-        + (std::size_t)subptr[10] * 100000000 
-        + (std::size_t)subptr[12] * 1000000000 
+        + (std::size_t)subptr[4] *  1000
+        + (std::size_t)subptr[5] *  10000
+        + (std::size_t)subptr[6] *  100000
+        + (std::size_t)subptr[8] *  1000000
+        + (std::size_t)subptr[9] *  10000000
+        + (std::size_t)subptr[10] * 100000000
+        + (std::size_t)subptr[12] * 1000000000
         + (std::size_t)subptr[13] * 10000000000;
     return hash_code;
 }
@@ -265,7 +265,7 @@ std::size_t IntBitHash::operator()(const std::string& key) const {
 
 // Synthesized functions
 
-std::size_t SynthUrlComplex::operator()(const std::string& key) const {
+std::size_t PextUrlComplex::operator()(const std::string& key) const {
         constexpr std::size_t mask0 = 0x1f1f1f1f1f1f1f1f;
         constexpr std::size_t mask1 = 0x0000000000001f1f;
         constexpr std::size_t mask2 = 0x00000000000f0f0f;
@@ -292,7 +292,7 @@ std::size_t SynthUrlComplex::operator()(const std::string& key) const {
         return tmp4;
 }
 
-std::size_t SynthUrl::operator()(const std::string& key) const {
+std::size_t PextUrl::operator()(const std::string& key) const {
     constexpr std::size_t mask0 = 0x7f7f7f7f7f7f7f7f;
     constexpr std::size_t mask1 = 0x7f7f7f7f7f7f7f7f;
     constexpr std::size_t mask2 = 0x000000007f7f7f7f;
@@ -308,7 +308,7 @@ std::size_t SynthUrl::operator()(const std::string& key) const {
 }
 
 
-std::size_t SynthMac::operator()(const std::string& key) const {
+std::size_t PextMac::operator()(const std::string& key) const {
     constexpr std::size_t mask0 = 0x7f7f007f7f007f7f;
     constexpr std::size_t mask1 = 0x007f007f7f007f7f;
     constexpr std::size_t mask2 = 0x7f00000000000000;
@@ -323,7 +323,7 @@ std::size_t SynthMac::operator()(const std::string& key) const {
     return tmp1;
 }
 
-std::size_t SynthCPF::operator()(const std::string& key) const {
+std::size_t PextCPF::operator()(const std::string& key) const {
         constexpr std::size_t mask0 = 0x000f0f0f000f0f0f;
         constexpr std::size_t mask1 = 0x0f0f000f0f0f0000;
         const std::size_t hashable0 = _pext_u64(load_u64_le(key.c_str()+0), mask0);
@@ -334,7 +334,7 @@ std::size_t SynthCPF::operator()(const std::string& key) const {
         return tmp0;
 }
 
-std::size_t SynthSSN::operator()(const std::string& key) const {
+std::size_t PextSSN::operator()(const std::string& key) const {
         constexpr std::size_t mask0 = 0x0f000f0f000f0f0f;
         constexpr std::size_t mask1 = 0x0f0f0f0000000000;
         const std::size_t hashable0 = _pext_u64(load_u64_le(key.c_str()+0), mask0);
@@ -345,7 +345,7 @@ std::size_t SynthSSN::operator()(const std::string& key) const {
         return tmp0;
 }
 
-std::size_t SynthIPV4::operator()(const std::string& key) const {
+std::size_t PextIPV4::operator()(const std::string& key) const {
         constexpr std::size_t mask0 = 0x000f0f0f000f0f0f;
         constexpr std::size_t mask1 = 0x0f0f0f000f0f0f00;
         const std::size_t hashable0 = _pext_u64(load_u64_le(key.c_str()+0), mask0);
@@ -356,7 +356,7 @@ std::size_t SynthIPV4::operator()(const std::string& key) const {
         return tmp0;
 }
 
-std::size_t SynthIPV6::operator()(const std::string& key) const {
+std::size_t PextIPV6::operator()(const std::string& key) const {
         constexpr std::size_t mask0 = 0x7f7f7f007f7f7f7f;
         constexpr std::size_t mask1 = 0x7f007f7f7f7f007f;
         constexpr std::size_t mask2 = 0x7f7f7f7f007f7f7f;
@@ -379,7 +379,7 @@ std::size_t SynthIPV6::operator()(const std::string& key) const {
         return tmp3;
 }
 
-std::size_t SynthINTS::operator()(const std::string& key) const {
+std::size_t PextINTS::operator()(const std::string& key) const {
         constexpr std::size_t mask0 = 0x0f0f0f0f0f0f0f0f;
         constexpr std::size_t mask1 = 0x0f0f0f0f0f0f0f0f;
         constexpr std::size_t mask2 = 0x0f0f0f0f0f0f0f0f;
@@ -432,6 +432,99 @@ std::size_t SynthINTS::operator()(const std::string& key) const {
         size_t tmp10 = tmp7 ^ tmp8;
         size_t tmp11 = tmp9 ^ tmp10;
         return tmp11;
+}
+
+std::size_t OffXorUrlComplex::operator()(const std::string& key) const {
+	const std::size_t hashable0 = load_u64_le(key.c_str()+23);
+	const std::size_t hashable1 = load_u64_le(key.c_str()+31);
+	const std::size_t hashable2 = load_u64_le(key.c_str()+41);
+	const std::size_t hashable3 = load_u64_le(key.c_str()+58);
+	const std::size_t hashable4 = load_u64_le(key.c_str()+66);
+	const std::size_t hashable5 = load_u64_le(key.c_str()+74);
+	size_t tmp0 = hashable0 ^ hashable1;
+	size_t tmp1 = hashable2 ^ hashable3;
+	size_t tmp2 = hashable4 ^ hashable5;
+	size_t tmp3 = tmp0 ^ tmp1;
+	size_t tmp4 = tmp2 ^ tmp3;
+	return tmp4;
+}
+std::size_t OffXorUrl::operator()(const std::string& key) const {
+	const std::size_t hashable0 = load_u64_le(key.c_str()+45);
+	const std::size_t hashable1 = load_u64_le(key.c_str()+53);
+	const std::size_t hashable2 = load_u64_le(key.c_str()+61);
+	size_t tmp0 = hashable0 ^ hashable1;
+	size_t tmp1 = hashable2 ^ tmp0;
+	return tmp1;
+}
+std::size_t OffXorMac::operator()(const std::string& key) const {
+	const std::size_t hashable0 = load_u64_le(key.c_str()+0);
+	const std::size_t hashable1 = load_u64_le(key.c_str()+8);
+	const std::size_t hashable2 = load_u64_le(key.c_str()+10);
+	size_t tmp0 = hashable0 ^ hashable1;
+	size_t tmp1 = hashable2 ^ tmp0;
+	return tmp1;
+}
+std::size_t OffXorCPF::operator()(const std::string& key) const {
+	const std::size_t hashable0 = load_u64_le(key.c_str()+0);
+	const std::size_t hashable1 = load_u64_le(key.c_str()+7);
+	size_t tmp0 = hashable0 ^ hashable1;
+	return tmp0;
+}
+
+std::size_t OffXorSSN::operator()(const std::string& key) const {
+	const std::size_t hashable0 = load_u64_le(key.c_str()+0);
+	const std::size_t hashable1 = load_u64_le(key.c_str()+4);
+	size_t tmp0 = hashable0 ^ hashable1;
+	return tmp0;
+}
+
+std::size_t OffXorIPV4::operator()(const std::string& key) const {
+	const std::size_t hashable0 = load_u64_le(key.c_str()+0);
+	const std::size_t hashable1 = load_u64_le(key.c_str()+8);
+	size_t tmp0 = hashable0 ^ hashable1;
+	return tmp0;
+}
+
+std::size_t OffXorIPV6::operator()(const std::string& key) const {
+	const std::size_t hashable0 = load_u64_le(key.c_str()+0);
+	const std::size_t hashable1 = load_u64_le(key.c_str()+8);
+	const std::size_t hashable2 = load_u64_le(key.c_str()+16);
+	const std::size_t hashable3 = load_u64_le(key.c_str()+24);
+	const std::size_t hashable4 = load_u64_le(key.c_str()+32);
+	size_t tmp0 = hashable0 ^ hashable1;
+	size_t tmp1 = hashable2 ^ hashable3;
+	size_t tmp2 = hashable4 ^ tmp0;
+	size_t tmp3 = tmp1 ^ tmp2;
+	return tmp3;
+}
+
+std::size_t OffXorINTS::operator()(const std::string& key) const {
+	const std::size_t hashable0 = load_u64_le(key.c_str()+0);
+	const std::size_t hashable1 = load_u64_le(key.c_str()+8);
+	const std::size_t hashable2 = load_u64_le(key.c_str()+16);
+	const std::size_t hashable3 = load_u64_le(key.c_str()+24);
+	const std::size_t hashable4 = load_u64_le(key.c_str()+32);
+	const std::size_t hashable5 = load_u64_le(key.c_str()+40);
+	const std::size_t hashable6 = load_u64_le(key.c_str()+48);
+	const std::size_t hashable7 = load_u64_le(key.c_str()+56);
+	const std::size_t hashable8 = load_u64_le(key.c_str()+64);
+	const std::size_t hashable9 = load_u64_le(key.c_str()+72);
+	const std::size_t hashable10 = load_u64_le(key.c_str()+80);
+	const std::size_t hashable11 = load_u64_le(key.c_str()+88);
+	const std::size_t hashable12 = load_u64_le(key.c_str()+93);
+	size_t tmp0 = hashable0 ^ hashable1;
+	size_t tmp1 = hashable2 ^ hashable3;
+	size_t tmp2 = hashable4 ^ hashable5;
+	size_t tmp3 = hashable6 ^ hashable7;
+	size_t tmp4 = hashable8 ^ hashable9;
+	size_t tmp5 = hashable10 ^ hashable11;
+	size_t tmp6 = hashable12 ^ tmp0;
+	size_t tmp7 = tmp1 ^ tmp2;
+	size_t tmp8 = tmp3 ^ tmp4;
+	size_t tmp9 = tmp5 ^ tmp6;
+	size_t tmp10 = tmp7 ^ tmp8;
+	size_t tmp11 = tmp9 ^ tmp10;
+	return tmp11;
 }
 
 std::size_t NaiveSimdUrlComplex::operator()(const std::string& key) const {

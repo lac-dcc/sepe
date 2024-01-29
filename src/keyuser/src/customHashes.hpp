@@ -117,22 +117,25 @@ struct UrlCompress{
     std::size_t operator()(const std::string& key) const;
 };
 
-#define DECLARE_SYNTH_AND_NAIVE_FUNCTIONS(NAME) \
-    struct Synth ## NAME { \
+#define DECLARE_SYNTH_OFFXOR_AND_NAIVE_FUNCTIONS(NAME) \
+    struct Pext ## NAME { \
+        std::size_t operator()(const std::string& key) const; \
+    }; \
+    struct OffXor ## NAME { \
         std::size_t operator()(const std::string& key) const; \
     }; \
     struct Naive ## NAME { \
         std::size_t operator()(const std::string& key) const; \
     }; 
 
-DECLARE_SYNTH_AND_NAIVE_FUNCTIONS(UrlComplex)
-DECLARE_SYNTH_AND_NAIVE_FUNCTIONS(Url)
-DECLARE_SYNTH_AND_NAIVE_FUNCTIONS(Mac)
-DECLARE_SYNTH_AND_NAIVE_FUNCTIONS(CPF)
-DECLARE_SYNTH_AND_NAIVE_FUNCTIONS(SSN)
-DECLARE_SYNTH_AND_NAIVE_FUNCTIONS(IPV4)
-DECLARE_SYNTH_AND_NAIVE_FUNCTIONS(IPV6)
-DECLARE_SYNTH_AND_NAIVE_FUNCTIONS(INTS)
+DECLARE_SYNTH_OFFXOR_AND_NAIVE_FUNCTIONS(UrlComplex)
+DECLARE_SYNTH_OFFXOR_AND_NAIVE_FUNCTIONS(Url)
+DECLARE_SYNTH_OFFXOR_AND_NAIVE_FUNCTIONS(Mac)
+DECLARE_SYNTH_OFFXOR_AND_NAIVE_FUNCTIONS(CPF)
+DECLARE_SYNTH_OFFXOR_AND_NAIVE_FUNCTIONS(SSN)
+DECLARE_SYNTH_OFFXOR_AND_NAIVE_FUNCTIONS(IPV4)
+DECLARE_SYNTH_OFFXOR_AND_NAIVE_FUNCTIONS(IPV6)
+DECLARE_SYNTH_OFFXOR_AND_NAIVE_FUNCTIONS(INTS)
 
 struct NaiveSimdUrlComplex{
     std::size_t operator()(const std::string& key) const;
