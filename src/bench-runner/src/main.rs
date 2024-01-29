@@ -55,6 +55,10 @@ struct Command {
     #[clap(long, default_value = "_results.csv")]
     outfile: String,
 
+    /// Generate the synthesized function for the given regex, do not run experiments
+    #[clap(long)]
+    synthesize: bool,
+
     /// regexes we will benchmark
     regexes: Vec<String>,
 }
@@ -138,6 +142,27 @@ fn main() {
             .expect("failed to spawn keygen command");
 
         let keygen_out = keygen_cmd.stdout.expect("failed to open keygen stdout");
+
+        if cmd.synthesize {
+            let keybuilder_output = Cmd::new(find_file("keybuilder").path())
+                .stdin(std::process::Stdio::from(keygen_out))
+                .output()
+                .expect("failed to spawn keybuilder!");
+
+            let keysynth_output = Cmd::new(find_file("keysynth").path())
+                .arg(
+                    String::from_utf8(keybuilder_output.stdout)
+                        .expect("failed to read keybuilder output"),
+                )
+                .output()
+                .expect("failed to spawn keysynth!");
+
+            println!(
+                "{}",
+                String::from_utf8(keysynth_output.stdout).expect("failed to read keysynth output")
+            );
+            continue;
+        }
 
         let mut keyuser_cmd = Cmd::new(keyuser.path());
 
