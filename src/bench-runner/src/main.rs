@@ -59,6 +59,14 @@ struct Command {
     #[clap(long)]
     synthesize: bool,
 
+    /// Generate the distribution histogram for the given regex, do not run experiments
+    #[clap(long)]
+    histogram: bool,
+
+    /// Whether to generate the keys incrementaly, rather than randomly (VERY SLOW)
+    #[clap(long)]
+    incremental_generation: bool,
+
     /// regexes we will benchmark
     regexes: Vec<String>,
 }
@@ -131,15 +139,18 @@ fn main() {
 
         use std::process::Command as Cmd;
 
-        let keygen_cmd = Cmd::new(keygen.path())
+        let mut keygen_cmd = Cmd::new(keygen.path());
+        keygen_cmd
             .stdout(std::process::Stdio::piped())
             .arg(regex)
             .arg("-n")
             .arg(format!("{}", cmd.keys))
             .arg("-s")
-            .arg(format!("{}", cmd.keygen_seed))
-            .spawn()
-            .expect("failed to spawn keygen command");
+            .arg(format!("{}", cmd.keygen_seed));
+        if cmd.incremental_generation {
+            keygen_cmd.arg("--incremental");
+        }
+        let keygen_cmd = keygen_cmd.spawn().expect("failed to spawn keygen command");
 
         let keygen_out = keygen_cmd.stdout.expect("failed to open keygen stdout");
 
@@ -185,6 +196,10 @@ fn main() {
             keyuser_cmd.arg("--verbose");
         }
 
+        if cmd.histogram {
+            keyuser_cmd.arg("--test-distribution");
+        }
+
         keyuser_cmd.arg("--hashes");
         for hash in hashes {
             keyuser_cmd.arg(hash.as_str().unwrap_or_else(|| {
@@ -209,13 +224,12 @@ fn main() {
             .expect("failed to spawn keyuser command");
 
         if !keyuser_out.status.success() {
-            eprintln!("        !!!FAILED!!!");
+            eprintln!("        !!!FAILED: {}!!!", keyuser_out.status);
+        } else {
+            let mut outfile = std::fs::File::create(cmd_regex + &cmd.outfile)
+                .expect("failed to create output file!");
+            outfile.write_all(&keyuser_out.stdout).unwrap();
         }
-
-        let mut outfile =
-            std::fs::File::create(cmd_regex + &cmd.outfile).expect("failed to create output file!");
-        outfile.write_all(&keyuser_out.stdout).unwrap();
-        // std::io::stdout().write_all(&keyuser_out.stdout).unwrap();
         std::io::stderr().write_all(&keyuser_out.stderr).unwrap();
     }
 }
