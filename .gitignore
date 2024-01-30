@@ -4,3 +4,7 @@ bin/
 output/
 results/
 deps/
+__pycache__/
+*.png
+*.svg
+

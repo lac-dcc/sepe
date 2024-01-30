@@ -1,0 +1,4 @@
+array*.py
+*.png
+*.svg
+__pycache__/
