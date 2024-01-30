@@ -2,6 +2,7 @@
 
 #include <chrono>
 #include <algorithm>
+#include <map>
 
 void executeInterweaved(Benchmark* bench, 
                         const std::vector<std::string>& keys, 
@@ -149,6 +150,42 @@ void benchmarkExecutor(const std::vector<Benchmark*>& benchmarks,
     }
     
     free(argsString);
+
+    for(auto bench : benchmarks){
+        delete bench;
+    }
+}
+
+void testDistribution(const std::vector<Benchmark*>& benchmarks, 
+                       const std::vector<std::string>& keys){
+
+    std::unordered_set<std::string> hashFuncExecuted;
+    
+    for (const auto& bench : benchmarks){
+        if(hashFuncExecuted.find(bench->getHashName()) != hashFuncExecuted.end()){
+            continue;
+        }
+        hashFuncExecuted.insert(bench->getHashName());
+
+        std::vector<size_t> buckets;
+        auto hashFunc = bench->getHashFunction();
+
+        for(const auto& key : keys){
+            size_t hashID = hashFunc(key);
+            buckets.push_back(hashID);
+        }
+
+        std::sort(buckets.begin(), buckets.end());
+        printf(" array_%s = np.array([\n", bench->getHashName().c_str());
+        for (size_t i = 0; i < buckets.size(); ++i) {
+            printf("%lu,",buckets[i]);
+            std::cout << buckets[i];
+        }
+        printf("])\n");
+    }
+}
+
+void freeBenchmarks(std::vector<Benchmark*>& benchmarks){
     for(auto bench : benchmarks){
         delete bench;
     }

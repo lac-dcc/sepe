@@ -25,6 +25,7 @@ std::string correctBenchUsage(){
            "       -n or --num-operations: integer that represents the number of 'times to perform a hash operation on the benchmark\n"
            "       -r or --repetitions: number of times to repeat the benchmark\n"
            "       -seed: integer that represents the seed for the random number generator\n "
+           "       --test-distribution: test the distribution of '--hashes' specified hash functions\n"
            "       -v or --verbose: print the results of each operation\n"
            "       -h or --help: print this message\n"
            ;
@@ -67,6 +68,9 @@ BenchmarkParameters parseArgs(int argc, char** argv){
         }else if(strcmp(argv[i], "-v") == 0 || 
                  strcmp(argv[i], "--verbose") == 0){
             args.verbose = true;
+            i++;
+        }else if(strcmp(argv[i], "--test-distribution") == 0){
+            args.testDistribution = true;
             i++;
         }else if(strcmp(argv[i], "-h") == 0 || 
                  strcmp(argv[i], "--help") == 0){
@@ -185,6 +189,12 @@ int main(int argc, char** argv){
     }
 
     // Run benchmarks
+    if(args.testDistribution){
+        testDistribution(filteredBenchmarks, keys);
+        freeBenchmarks(filteredBenchmarks);
+        return 0;
+    }
     benchmarkExecutor(filteredBenchmarks, keys, args);
+    freeBenchmarks(filteredBenchmarks);
 
 }

@@ -9,7 +9,7 @@
 #include <iostream>
 #include <unordered_map>
 #include <unordered_set>
-#include <any>
+#include <functional>
 
 #include "customHashes.hpp"
 
@@ -44,11 +44,16 @@ class Benchmark{
         template <typename UnorderedContainer>
         int internalcalculateCollisionCountBuckets(const UnorderedContainer& container) {
             int colcount = 0;
+            int empty = 0;
             for (size_t bucket = 0; bucket < container.bucket_count(); ++bucket) {
                 if (container.bucket_size(bucket) > 1) {
                     colcount += container.bucket_size(bucket) - 1;
+                } else {
+                    ++empty;
                 }
             }
+            printf("Empty buckets: %d\n", empty);
+            printf("Total buckets: %ld\n", container.bucket_count());
             return colcount;
         }
 
@@ -65,6 +70,7 @@ class Benchmark{
         virtual bool search(const std::string& key) = 0;
         virtual void elimination(const std::string& key) = 0;
         virtual int calculateCollisionCountBuckets(void) = 0;
+        virtual std::function<std::size_t(const std::string&)> getHashFunction(void) = 0;
 };
 
 
@@ -89,6 +95,7 @@ class Benchmark{
 template <typename HashFuncT>
 class UnorderedMapBench : public Benchmark{
     std::unordered_map<std::string, int, HashFuncT> map;
+    HashFuncT hashFunctor;
 
     public:
         UnorderedMapBench(std::string _name, std::string _hashName) : 
@@ -109,6 +116,10 @@ class UnorderedMapBench : public Benchmark{
 
         int calculateCollisionCountBuckets(void) override {
             return internalcalculateCollisionCountBuckets(map);
+        }
+
+        virtual std::function<std::size_t(const std::string&)> getHashFunction(void) override {
+            return map.hash_function();
         }
 };
 
@@ -153,6 +164,10 @@ class UnorderedMultiMapBench : public Benchmark{
 
         int calculateCollisionCountBuckets(void) override {
             return internalcalculateCollisionCountBuckets(mmap);
+        }
+
+        virtual std::function<std::size_t(const std::string&)> getHashFunction(void) override {
+            return mmap.hash_function();
         }
 };
 
@@ -199,6 +214,10 @@ class UnorderedSetBench : public Benchmark{
             return internalcalculateCollisionCountBuckets(set);
         }
 
+        virtual std::function<std::size_t(const std::string&)> getHashFunction(void) override {
+            return set.hash_function();
+        }
+
 };
 
 /**
@@ -243,6 +262,10 @@ class UnorderedMultisetBench : public Benchmark{
         int calculateCollisionCountBuckets(void) override {
             return internalcalculateCollisionCountBuckets(mset);
         }
+
+        virtual std::function<std::size_t(const std::string&)> getHashFunction(void) override {
+            return mset.hash_function();
+        }
 };
 
 /**
@@ -272,6 +295,7 @@ struct BenchmarkParameters{
     int seed            = 223554; // Chosen by a fair dice roll
     int repetitions     = 1;
     bool verbose        = false;
+    bool testDistribution = false;
 };
 
 /**
@@ -328,5 +352,11 @@ void executeBatchedCollisionCount(Benchmark* bench,
 void benchmarkExecutor(const std::vector<Benchmark*>& benchmarks, 
                        const std::vector<std::string>& keys, 
                        const BenchmarkParameters& args);
+
+
+void testDistribution(const std::vector<Benchmark*>& benchmarks, 
+                       const std::vector<std::string>& keys);
+
+void freeBenchmarks(std::vector<Benchmark*>& benchmarks);
 
 #endif
