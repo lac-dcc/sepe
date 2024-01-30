@@ -226,8 +226,13 @@ fn main() {
         if !keyuser_out.status.success() {
             eprintln!("        !!!FAILED: {}!!!", keyuser_out.status);
         } else {
-            let mut outfile = std::fs::File::create(cmd_regex + &cmd.outfile)
-                .expect("failed to create output file!");
+            let filename = if cmd.histogram && &cmd.outfile == "_results.csv" {
+                cmd_regex + "_histogram.py"
+            } else {
+                cmd_regex + &cmd.outfile
+            };
+            let mut outfile =
+                std::fs::File::create(filename).expect("failed to create output file!");
             outfile.write_all(&keyuser_out.stdout).unwrap();
         }
         std::io::stderr().write_all(&keyuser_out.stderr).unwrap();
