@@ -24,6 +24,23 @@ impl List {
             ch
         }
     }
+
+    pub fn generate_inc(&self, i: &mut u64) -> char {
+        if !self.complement {
+            let ch = self.inner.chars().cycle().nth(*i as usize).unwrap();
+            let n = self.inner.chars().count() as u64;
+            *i = if *i < n { 0 } else { *i / n };
+            ch
+        } else {
+            let mut ch =
+                char::from_u32(*i as u32 + 32).expect("failed to generate incremental '.'");
+            while self.inner.contains(ch) {
+                ch = (ch as u8 + 1) as char;
+            }
+            *i = (*i).saturating_sub(1);
+            ch
+        }
+    }
 }
 
 /// { Repetitions }
@@ -67,8 +84,6 @@ impl Regex {
     }
 
     pub fn generate(&self) -> String {
-        let mut s = String::new();
-
         let repetitions = if self.plus {
             fastrand::usize(1..5)
         } else if self.star {
@@ -86,6 +101,7 @@ impl Regex {
             }
         };
 
+        let mut s = String::with_capacity(repetitions);
         for _ in 0..repetitions {
             match &self.symbol {
                 RegexSymbol::Any => s.push(fastrand::char(..)),
@@ -97,12 +113,56 @@ impl Regex {
 
         s
     }
+
+    pub fn generate_inc(&self, i: &mut u64) -> String {
+        let repetitions = if self.plus {
+            fastrand::usize(1..5)
+        } else if self.star {
+            fastrand::usize(0..5)
+        } else if self.question {
+            fastrand::usize(0..=1)
+        } else {
+            let Repetitions { start, comma, end } = self.repetitions;
+            if let Some(end) = end {
+                fastrand::usize(start as usize..=end as usize)
+            } else if comma {
+                fastrand::usize(start as usize..start as usize + 5)
+            } else {
+                start as usize
+            }
+        };
+
+        let mut s = String::with_capacity(repetitions);
+        for _ in 0..repetitions {
+            match &self.symbol {
+                RegexSymbol::Any => {s.insert(
+                    0,
+                    char::from_u32(*i as u32 + 32).expect("failed to generate incremental '.'"),
+                );
+                *i = i.saturating_sub(1);
+                },
+                RegexSymbol::Literal(literal) => s.insert(0, *literal),
+                RegexSymbol::Group(group) => s = generate_inc(group, i) + &s,
+                RegexSymbol::List(list) => s.insert(0, list.generate_inc(i)),
+            }
+        }
+
+        s
+    }
 }
 
 fn generate(regexes: &[Regex]) -> String {
-    let mut s = String::new();
+    let mut s = String::with_capacity(regexes.len());
     for regex in regexes {
         s.push_str(&regex.generate());
+    }
+    s
+}
+
+fn generate_inc(regexes: &[Regex], i: &mut u64) -> String {
+    let mut s = String::with_capacity(regexes.len());
+    for regex in regexes.iter().rev() {
+        s = regex.generate_inc(i) + &s;
     }
     s
 }
@@ -231,11 +291,15 @@ struct Command {
 
     /// number of elements to generate
     #[clap(short, long, default_value = "100")]
-    number: u32,
+    number: u64,
 
     /// seed used for random number generation
-    #[clap(short, long,  default_value = "223554")]
+    #[clap(short, long, default_value = "223554")]
     seed: u64,
+
+    /// whether to generate regexes in incremental fashion, in order
+    #[clap(short, long)]
+    incremental: bool,
 }
 
 fn main() {
@@ -254,7 +318,13 @@ fn main() {
     let stdout = stdout();
     let lock = stdout.lock();
     let mut writer = BufWriter::new(lock);
-    for _ in 0..cmd.number {
-        writeln!(writer, "{}", generate(&regex)).unwrap();
+    if cmd.incremental {
+        for mut i in 0..cmd.number {
+            writeln!(writer, "{}", generate_inc(&regex, &mut i)).unwrap();
+        }
+    } else {
+        for _ in 0..cmd.number {
+            writeln!(writer, "{}", generate(&regex)).unwrap();
+        }
     }
 }
