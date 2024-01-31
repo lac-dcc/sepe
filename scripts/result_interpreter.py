@@ -1,3 +1,8 @@
+#!/usr/bin/env python3
+
+# This script reads multiple .csv files produced by keyuser, extracts relevant
+# information and calculate metrics to compare the different hash functions
+
 import sys
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -16,7 +21,7 @@ def mannwhitneyu_from_dataframe(df, column_to_group, column_to_compare):
                 # Calculate the Mann-Whitney U test between the first two groups
                 stat, p = stats.mannwhitneyu(grouped.get_group(hashFunc1)[column_to_compare], grouped.get_group(hashFunc2)[column_to_compare])
                 # stat, p = stats.ttest_ind(grouped.get_group(hashFunc1)[column_to_compare], grouped.get_group(hashFunc2)[column_to_compare])
-                
+
                 # interpret
                 alpha = 0.05
                 if p > alpha:
@@ -57,7 +62,7 @@ def get_table(df, regex_name):
             all_data[hash_func_name] = [(temp['Execution Time (s)'].mean(), temp['Collision Count'].mean())]
         else:
             all_data[hash_func_name].append((temp['Execution Time (s)'].mean(), temp['Collision Count'].mean()))
-    
+
     # Geometric mean of all_data
     print("Results for Regex: ", regex_name)
     print("{:<20} {:<30} {:<20}".format("Func Name", "GeoTime", "GeoCollision"))
@@ -73,6 +78,9 @@ def get_table(df, regex_name):
         print("{:<20} {:<30} {:<20}".format(data, samples_time, samples_collision))
 
 def main():
+    if len(sys.argv) < 2:
+        print("usage: " + sys.argv[0] + " <one or more csv files produced by keyuser>")
+        exit(1)
     # Read CSV file names as arguments
     csv_files = sys.argv[1:]
 
@@ -82,7 +90,7 @@ def main():
     # Concatenate dataframes
     df = pd.concat(dataframes, ignore_index=True)
 
-    regex_name = sys.argv[1].replace("output/","").replace("0.csv","")
+    regex_name = sys.argv[1].replace("output/", "").replace("0.csv", "")
 
     # calculate geomean from a df column
     mannwhitneyu_from_dataframe(df, 'Hash Function', 'Execution Time (s)')
