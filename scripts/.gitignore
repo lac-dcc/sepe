@@ -2,3 +2,5 @@ array*.py
 *.png
 *.svg
 __pycache__/
+*histogram*
+*.csv

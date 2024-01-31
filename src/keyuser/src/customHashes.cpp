@@ -379,59 +379,160 @@ std::size_t PextIPV6::operator()(const std::string& key) const {
         return tmp3;
 }
 
+// static std::size_t __pext_hash(const char* ptr, size_t len, size_t seed) {
+
+//     static const size_t mul = (((size_t) 0xc6a4a793UL) << 32UL)
+//                     + (size_t) 0x5bd1e995UL;
+//     const char* const buf = static_cast<const char*>(ptr);
+
+//     // Remove the bytes not divisible by the sizeof(size_t).  This
+//     // allows the main loop to process the data as 64-bit integers.
+//     const size_t len_aligned = len & ~(size_t)0x7;
+//     const char* const end = buf + len_aligned;
+//     size_t hash = seed ^ (len * mul);
+
+//         constexpr std::size_t mask0 = 0x0f0f0f0f0f0f0f0f;
+//         constexpr std::size_t mask1 = 0x0f0f0f0f0f0f0f0f;
+//         constexpr std::size_t mask2 = 0x0f0f0f0f0f0f0f0f;
+//         constexpr std::size_t mask3 = 0x0f0f0f0f0f0f0f0f;
+//         constexpr std::size_t mask4 = 0x0f0f0f0f0f0f0f0f;
+//         constexpr std::size_t mask5 = 0x0f0f0f0f0f0f0f0f;
+//         constexpr std::size_t mask6 = 0x0f0f0f0f0f0f0f0f;
+//         constexpr std::size_t mask7 = 0x0f0f0f0f0f0f0f0f;
+//         constexpr std::size_t mask8 = 0x0f0f0f0f0f0f0f0f;
+//         constexpr std::size_t mask9 = 0x0f0f0f0f0f0f0f0f;
+//         constexpr std::size_t mask10 = 0x0f0f0f0f0f0f0f0f;
+//         constexpr std::size_t mask11 = 0x0f0f0f0f0f0f0f0f;
+//         constexpr std::size_t mask12 = 0x0f0f0f0f00000000;
+//         const std::size_t hashable0 = _pext_u64(load_u64_le(ptr+0), mask0);
+//         const std::size_t hashable1 = _pext_u64(load_u64_le(ptr+8), mask1);
+//         const std::size_t hashable2 = _pext_u64(load_u64_le(ptr+16), mask2);
+//         const std::size_t hashable3 = _pext_u64(load_u64_le(ptr+24), mask3);
+//         const std::size_t hashable4 = _pext_u64(load_u64_le(ptr+32), mask4);
+//         const std::size_t hashable5 = _pext_u64(load_u64_le(ptr+40), mask5);
+//         const std::size_t hashable6 = _pext_u64(load_u64_le(ptr+48), mask6);
+//         const std::size_t hashable7 = _pext_u64(load_u64_le(ptr+56), mask7);
+//         const std::size_t hashable8 = _pext_u64(load_u64_le(ptr+64), mask8);
+//         const std::size_t hashable9 = _pext_u64(load_u64_le(ptr+72), mask9);
+//         const std::size_t hashable10 = _pext_u64(load_u64_le(ptr+80), mask10);
+//         const std::size_t hashable11 = _pext_u64(load_u64_le(ptr+88), mask11);
+//         const std::size_t hashable12 = _pext_u64(load_u64_le(ptr+92), mask12);
+
+//         size_t data = shift_mix(hashable0 * mul) * mul;
+//         hash ^= data;
+//         hash *= mul;
+
+//         data = shift_mix(hashable1 * mul) * mul;
+//         hash ^= data;
+//         hash *= mul;
+
+//         data = shift_mix(hashable2 * mul) * mul;
+//         hash ^= data;
+//         hash *= mul;
+
+//         data = shift_mix(hashable3 * mul) * mul;
+//         hash ^= data;
+//         hash *= mul;
+
+//         data = shift_mix(hashable4 * mul) * mul;
+//         hash ^= data;
+//         hash *= mul;
+
+//         data = shift_mix(hashable5 * mul) * mul;
+//         hash ^= data;
+//         hash *= mul;
+
+//         data = shift_mix(hashable6 * mul) * mul;
+//         hash ^= data;
+//         hash *= mul;
+
+//         data = shift_mix(hashable7 * mul) * mul;
+//         hash ^= data;
+//         hash *= mul;
+
+//         data = shift_mix(hashable8 * mul) * mul;
+//         hash ^= data;
+//         hash *= mul;
+
+//         data = shift_mix(hashable9 * mul) * mul;
+//         hash ^= data;
+//         hash *= mul;
+
+//         data = shift_mix(hashable10 * mul) * mul;
+//         hash ^= data;
+//         hash *= mul;
+
+//         data = shift_mix(hashable11 * mul) * mul;
+//         hash ^= data;
+//         hash *= mul;
+
+//         data = shift_mix(hashable12 * mul) * mul;
+//         hash ^= data;
+//         hash *= mul;
+
+//         hash = shift_mix(hash) * mul;
+//         hash = shift_mix(hash);
+
+//         return hash;
+// }
+
+
 std::size_t PextINTS::operator()(const std::string& key) const {
-        constexpr std::size_t mask0 = 0x0f0f0f0f0f0f0f0f;
-        constexpr std::size_t mask1 = 0x0f0f0f0f0f0f0f0f;
-        constexpr std::size_t mask2 = 0x0f0f0f0f0f0f0f0f;
-        constexpr std::size_t mask3 = 0x0f0f0f0f0f0f0f0f;
-        constexpr std::size_t mask4 = 0x0f0f0f0f0f0f0f0f;
-        constexpr std::size_t mask5 = 0x0f0f0f0f0f0f0f0f;
-        constexpr std::size_t mask6 = 0x0f0f0f0f0f0f0f0f;
-        constexpr std::size_t mask7 = 0x0f0f0f0f0f0f0f0f;
-        constexpr std::size_t mask8 = 0x0f0f0f0f0f0f0f0f;
-        constexpr std::size_t mask9 = 0x0f0f0f0f0f0f0f0f;
-        constexpr std::size_t mask10 = 0x0f0f0f0f0f0f0f0f;
-        constexpr std::size_t mask11 = 0x0f0f0f0f0f0f0f0f;
-        constexpr std::size_t mask12 = 0x0f0f0f0f00000000;
-        const std::size_t hashable0 = _pext_u64(load_u64_le(key.c_str()+0), mask0);
-        const std::size_t hashable1 = _pext_u64(load_u64_le(key.c_str()+8), mask1);
-        const std::size_t hashable2 = _pext_u64(load_u64_le(key.c_str()+16), mask2);
-        const std::size_t hashable3 = _pext_u64(load_u64_le(key.c_str()+24), mask3);
-        const std::size_t hashable4 = _pext_u64(load_u64_le(key.c_str()+32), mask4);
-        const std::size_t hashable5 = _pext_u64(load_u64_le(key.c_str()+40), mask5);
-        const std::size_t hashable6 = _pext_u64(load_u64_le(key.c_str()+48), mask6);
-        const std::size_t hashable7 = _pext_u64(load_u64_le(key.c_str()+56), mask7);
-        const std::size_t hashable8 = _pext_u64(load_u64_le(key.c_str()+64), mask8);
-        const std::size_t hashable9 = _pext_u64(load_u64_le(key.c_str()+72), mask9);
-        const std::size_t hashable10 = _pext_u64(load_u64_le(key.c_str()+80), mask10);
-        const std::size_t hashable11 = _pext_u64(load_u64_le(key.c_str()+88), mask11);
-        const std::size_t hashable12 = _pext_u64(load_u64_le(key.c_str()+92), mask12);
-        size_t shift0 = hashable0;
-        size_t shift1 = hashable1 << 32;
-        size_t shift2 = hashable2;
-        size_t shift3 = hashable3 << 32;
-        size_t shift4 = hashable4;
-        size_t shift5 = hashable5 << 32;
-        size_t shift6 = hashable6;
-        size_t shift7 = hashable7 << 32;
-        size_t shift8 = hashable8;
-        size_t shift9 = hashable9 << 32;
-        size_t shift10 = hashable10;
-        size_t shift11 = hashable11 << 32;
-        size_t shift12 = hashable12;
-        size_t tmp0 = shift0 ^ shift1;
-        size_t tmp1 = shift2 ^ shift3;
-        size_t tmp2 = shift4 ^ shift5;
-        size_t tmp3 = shift6 ^ shift7;
-        size_t tmp4 = shift8 ^ shift9;
-        size_t tmp5 = shift10 ^ shift11;
-        size_t tmp6 = shift12 ^ tmp0;
-        size_t tmp7 = tmp1 ^ tmp2;
-        size_t tmp8 = tmp3 ^ tmp4;
-        size_t tmp9 = tmp5 ^ tmp6;
-        size_t tmp10 = tmp7 ^ tmp8;
-        size_t tmp11 = tmp9 ^ tmp10;
-        return tmp11;
+    // size_t __seed = static_cast<size_t>(0xc70f6907UL);
+    // return __pext_hash(key.c_str(), key.size(), __seed);
+
+    constexpr std::size_t mask0 = 0x0f0f0f0f0f0f0f0f;
+    constexpr std::size_t mask1 = 0x0f0f0f0f0f0f0f0f;
+    constexpr std::size_t mask2 = 0x0f0f0f0f0f0f0f0f;
+    constexpr std::size_t mask3 = 0x0f0f0f0f0f0f0f0f;
+    constexpr std::size_t mask4 = 0x0f0f0f0f0f0f0f0f;
+    constexpr std::size_t mask5 = 0x0f0f0f0f0f0f0f0f;
+    constexpr std::size_t mask6 = 0x0f0f0f0f0f0f0f0f;
+    constexpr std::size_t mask7 = 0x0f0f0f0f0f0f0f0f;
+    constexpr std::size_t mask8 = 0x0f0f0f0f0f0f0f0f;
+    constexpr std::size_t mask9 = 0x0f0f0f0f0f0f0f0f;
+    constexpr std::size_t mask10 = 0x0f0f0f0f0f0f0f0f;
+    constexpr std::size_t mask11 = 0x0f0f0f0f0f0f0f0f;
+    constexpr std::size_t mask12 = 0x0f0f0f0f00000000;
+    const std::size_t hashable0 = _pext_u64(load_u64_le(key.c_str()+0), mask0);
+    const std::size_t hashable1 = _pext_u64(load_u64_le(key.c_str()+8), mask1);
+    const std::size_t hashable2 = _pext_u64(load_u64_le(key.c_str()+16), mask2);
+    const std::size_t hashable3 = _pext_u64(load_u64_le(key.c_str()+24), mask3);
+    const std::size_t hashable4 = _pext_u64(load_u64_le(key.c_str()+32), mask4);
+    const std::size_t hashable5 = _pext_u64(load_u64_le(key.c_str()+40), mask5);
+    const std::size_t hashable6 = _pext_u64(load_u64_le(key.c_str()+48), mask6);
+    const std::size_t hashable7 = _pext_u64(load_u64_le(key.c_str()+56), mask7);
+    const std::size_t hashable8 = _pext_u64(load_u64_le(key.c_str()+64), mask8);
+    const std::size_t hashable9 = _pext_u64(load_u64_le(key.c_str()+72), mask9);
+    const std::size_t hashable10 = _pext_u64(load_u64_le(key.c_str()+80), mask10);
+    const std::size_t hashable11 = _pext_u64(load_u64_le(key.c_str()+88), mask11);
+    const std::size_t hashable12 = _pext_u64(load_u64_le(key.c_str()+92), mask12);
+    size_t shift0 = hashable0;
+    size_t shift1 = hashable1 << 32;
+    size_t shift2 = hashable2;
+    size_t shift3 = hashable3 << 32;
+    size_t shift4 = hashable4;
+    size_t shift5 = hashable5 << 32;
+    size_t shift6 = hashable6;
+    size_t shift7 = hashable7 << 32;
+    size_t shift8 = hashable8;
+    size_t shift9 = hashable9 << 32;
+    size_t shift10 = hashable10;
+    size_t shift11 = hashable11 << 32;
+    size_t shift12 = hashable12;
+    size_t tmp0 = shift0 ^ shift1;
+    size_t tmp1 = shift2 ^ shift3;
+    size_t tmp2 = shift4 ^ shift5;
+    size_t tmp3 = shift6 ^ shift7;
+    size_t tmp4 = shift8 ^ shift9;
+    size_t tmp5 = shift10 ^ shift11;
+    size_t tmp6 = shift12 ^ tmp0;
+    size_t tmp7 = tmp1 ^ tmp2;
+    size_t tmp8 = tmp3 ^ tmp4;
+    size_t tmp9 = tmp5 ^ tmp6;
+    size_t tmp10 = tmp7 ^ tmp8;
+    size_t tmp11 = tmp9 ^ tmp10;
+    return tmp11;
 }
 
 std::size_t OffXorUrlComplex::operator()(const std::string& key) const {
@@ -742,4 +843,226 @@ std::size_t NaiveSimdIPV6::operator()(const std::string& key) const {
     __m128i xor0 = _mm_xor_si128(var2, var1);
     __m128i xor1 = _mm_xor_si128(var0, xor0);
     return _mm_extract_epi64(xor1 , 0) ^ _mm_extract_epi64(xor1 , 1);
+}
+
+std::size_t GptCPF::operator()(const std::string& key) const {
+    const std::size_t prime = 31; // A prime number for hashing
+
+    // Unrolled loop for calculating the hash
+    std::size_t hashValue = 0;
+    hashValue += key[0] * 1000000000000ULL;
+    hashValue += key[1] * 100000000000ULL;
+    hashValue += key[2] * 10000000000ULL;
+    hashValue += key[4] * 1000000000ULL;
+    hashValue += key[5] * 100000000ULL;
+    hashValue += key[6] * 10000000ULL;
+    hashValue += key[8] * 1000000ULL;
+    hashValue += key[9] * 100000ULL;
+    hashValue += key[10] * 10000ULL;
+    hashValue += key[11] * 1000ULL;
+    hashValue += key[12] * 100ULL;
+    hashValue += key[13] * 10ULL;
+    hashValue += key[14] * 1ULL;
+
+    // Mixing with a prime number
+    hashValue = (hashValue * prime);
+
+    return hashValue;
+}
+
+std::size_t GptINTS::operator()(const std::string& key) const {
+    constexpr std::size_t keySize = 100;
+    constexpr std::size_t unrollFactor = 10; // Unroll the loop by a factor of 10 for optimization
+
+    std::size_t hashValue = 0;
+
+    // Unrolled loop for better performance
+    for (std::size_t i = 0; i < keySize; i += unrollFactor) {
+        hashValue ^= (static_cast<std::size_t>(key[i]) << 7) ^ (static_cast<std::size_t>(key[i + 1]) << 14)
+                   ^ (static_cast<std::size_t>(key[i + 2]) << 21) ^ (static_cast<std::size_t>(key[i + 3]) << 28)
+                   ^ (static_cast<std::size_t>(key[i + 4]) << 35) ^ (static_cast<std::size_t>(key[i + 5]) << 42)
+                   ^ (static_cast<std::size_t>(key[i + 6]) << 49) ^ (static_cast<std::size_t>(key[i + 7]) << 56)
+                   ^ (static_cast<std::size_t>(key[i + 8]) << 63) ^ (static_cast<std::size_t>(key[i + 9]) << 70);
+    }
+
+    // Handle the remaining characters in the key (if any)
+    for (std::size_t i = (keySize / unrollFactor) * unrollFactor; i < keySize; ++i) {
+        hashValue ^= static_cast<std::size_t>(key[i]) << ((i % unrollFactor) * 7);
+    }
+
+    return hashValue;
+}
+
+std::size_t GptIPV6::operator()(const std::string& key) const {
+    // Unrolled loop for optimized performance
+    std::size_t hashValue = 0;
+
+    // Process each segment (assuming 8 segments separated by ':')
+    hashValue ^= (std::size_t(key[0]) << 24) | (std::size_t(key[1]) << 16) | (std::size_t(key[2]) << 8) | std::size_t(key[3]);
+    hashValue ^= (std::size_t(key[5]) << 24) | (std::size_t(key[6]) << 16) | (std::size_t(key[7]) << 8) | std::size_t(key[8]);
+    hashValue ^= (std::size_t(key[10]) << 24) | (std::size_t(key[11]) << 16) | (std::size_t(key[12]) << 8) | std::size_t(key[13]);
+    hashValue ^= (std::size_t(key[15]) << 24) | (std::size_t(key[16]) << 16) | (std::size_t(key[17]) << 8) | std::size_t(key[18]);
+    hashValue ^= (std::size_t(key[20]) << 24) | (std::size_t(key[21]) << 16) | (std::size_t(key[22]) << 8) | std::size_t(key[23]);
+    hashValue ^= (std::size_t(key[25]) << 24) | (std::size_t(key[26]) << 16) | (std::size_t(key[27]) << 8) | std::size_t(key[28]);
+    hashValue ^= (std::size_t(key[30]) << 24) | (std::size_t(key[31]) << 16) | (std::size_t(key[32]) << 8) | std::size_t(key[33]);
+    hashValue ^= (std::size_t(key[35]) << 24) | (std::size_t(key[36]) << 16) | (std::size_t(key[37]) << 8) | std::size_t(key[38]);
+
+    return hashValue;
+}
+
+std::size_t GptIPV4::operator()(const std::string& key) const {
+    // Assuming key.size() is always 15
+    const char constantChar = '.'; // Constant character
+
+    // Unrolled for loop for better performance
+    std::size_t hashValue = 0;
+    hashValue += static_cast<std::size_t>(key[0]) * 31;
+    hashValue += static_cast<std::size_t>(key[1]) * 37;
+    hashValue += static_cast<std::size_t>(key[2]) * 41;
+    hashValue += static_cast<std::size_t>(key[3]) * 43;
+    hashValue += static_cast<std::size_t>(key[4]) * 47;
+    hashValue += static_cast<std::size_t>(key[5]) * 53;
+    hashValue += static_cast<std::size_t>(key[6]) * 59;
+    hashValue += static_cast<std::size_t>(key[7]) * 61;
+    hashValue += static_cast<std::size_t>(key[8]) * 67;
+    hashValue += static_cast<std::size_t>(key[9]) * 71;
+    hashValue += static_cast<std::size_t>(key[10]) * 73;
+    hashValue += static_cast<std::size_t>(key[11]) * 79;
+    hashValue += static_cast<std::size_t>(key[12]) * 83;
+    hashValue += static_cast<std::size_t>(key[13]) * 89;
+    hashValue += static_cast<std::size_t>(key[14]) * 97;
+
+    return hashValue;
+}
+
+std::size_t GptSSN::operator()(const std::string& key) const {
+    constexpr size_t keySize = 11;
+    size_t hashValue = 0;
+
+    // Unrolled for loop for better performance
+    for (size_t i = 0; i < keySize; i += 3) {
+        hashValue = 37 * hashValue + static_cast<size_t>(key[i] - '0');
+        hashValue = 37 * hashValue + static_cast<size_t>(key[i + 1] - '0');
+        hashValue = 37 * hashValue + static_cast<size_t>(key[i + 2] - '0');
+    }
+
+    return hashValue;
+}
+
+std::size_t GptMac::operator()(const std::string& key) const {
+    // Assuming the key is always in the format 'XX:XX:XX:XX:XX:XX'
+    // where the ':' character is at positions 2, 5, 8, 11, 14
+    // and ignoring those positions while hashing
+
+    const char constantChar = ':'; // The constant character
+
+    // Unrolled loop for hash calculation
+    std::size_t hashValue = 0;
+
+    hashValue ^= static_cast<std::size_t>(key[0]) + 0x9e3779b9 + (hashValue << 6) + (hashValue >> 2);
+    hashValue ^= static_cast<std::size_t>(key[1]) + 0x9e3779b9 + (hashValue << 6) + (hashValue >> 2);
+
+    hashValue ^= static_cast<std::size_t>(key[3]) + 0x9e3779b9 + (hashValue << 6) + (hashValue >> 2);
+    hashValue ^= static_cast<std::size_t>(key[4]) + 0x9e3779b9 + (hashValue << 6) + (hashValue >> 2);
+
+    hashValue ^= static_cast<std::size_t>(key[6]) + 0x9e3779b9 + (hashValue << 6) + (hashValue >> 2);
+    hashValue ^= static_cast<std::size_t>(key[7]) + 0x9e3779b9 + (hashValue << 6) + (hashValue >> 2);
+
+    hashValue ^= static_cast<std::size_t>(key[9]) + 0x9e3779b9 + (hashValue << 6) + (hashValue >> 2);
+    hashValue ^= static_cast<std::size_t>(key[10]) + 0x9e3779b9 + (hashValue << 6) + (hashValue >> 2);
+
+    hashValue ^= static_cast<std::size_t>(key[12]) + 0x9e3779b9 + (hashValue << 6) + (hashValue >> 2);
+    hashValue ^= static_cast<std::size_t>(key[13]) + 0x9e3779b9 + (hashValue << 6) + (hashValue >> 2);
+
+    hashValue ^= static_cast<std::size_t>(key[15]) + 0x9e3779b9 + (hashValue << 6) + (hashValue >> 2);
+    hashValue ^= static_cast<std::size_t>(key[16]) + 0x9e3779b9 + (hashValue << 6) + (hashValue >> 2);
+
+    // Combine with constant character
+    hashValue ^= static_cast<std::size_t>(constantChar) + 0x9e3779b9 + (hashValue << 6) + (hashValue >> 2);
+
+    return hashValue;
+}
+
+std::size_t GptUrl::operator()(const std::string& key) const {
+    constexpr std::size_t keySize = 70;
+    constexpr std::size_t unrollFactor = 5; // Adjust as needed
+
+    std::size_t hashValue = 0;
+
+    // Unrolled loop for better performance
+    for (std::size_t i = 0; i < keySize; i += unrollFactor) {
+        hashValue ^= (static_cast<std::size_t>(key[i]) << 0) | 
+                     (static_cast<std::size_t>(key[i + 1]) << 8) | 
+                     (static_cast<std::size_t>(key[i + 2]) << 16) | 
+                     (static_cast<std::size_t>(key[i + 3]) << 24) | 
+                     (static_cast<std::size_t>(key[i + 4]) << 32);
+    }
+
+    return hashValue;
+}
+
+std::size_t GptUrlComplex::operator()(const std::string& key) const {
+    // Constants
+    const char constantChar = '/';
+
+    // Unrolled loop for hash calculation
+    uint64_t hash = 0;
+
+    // Process [a-z]{10}
+    hash ^= (key[7] << 56) | (key[8] << 48) | (key[9] << 40) | (key[10] << 32) |
+            (key[11] << 24) | (key[12] << 16) | (key[13] << 8) | key[14];
+
+    // Process [0-9]{3}
+    hash ^= (key[27] << 56) | (key[28] << 48) | (key[29] << 40);
+
+    // Process [a-z0-9]{20}
+    hash ^= (key[46] << 56) | (key[47] << 48) | (key[48] << 40) | (key[49] << 32) |
+            (key[50] << 24) | (key[51] << 16) | (key[52] << 8) | key[53];
+
+    hash ^= (key[54] << 56) | (key[55] << 48) | (key[56] << 40) | (key[57] << 32) |
+            (key[58] << 24) | (key[59] << 16) | (key[60] << 8) | key[61];
+
+    hash ^= (key[62] << 56) | (key[63] << 48) | (key[64] << 40) | (key[65] << 32) |
+            (key[66] << 24) | (key[67] << 16) | (key[68] << 8) | key[69];
+
+    hash ^= (key[70] << 56) | (key[71] << 48) | (key[72] << 40) | (key[73] << 32) |
+            (key[74] << 24) | (key[75] << 16) | (key[76] << 8) | key[77];
+
+    hash ^= (key[78] << 56) | (key[79] << 48) | (key[80] << 40) | (key[81] << 32);
+
+    return hash;
+}
+
+//##########
+
+std::size_t GperfCPF::operator()(const std::string& key) const {
+    return 0;
+}
+
+std::size_t GperfINTS::operator()(const std::string& key) const {
+    return 0;
+}
+
+std::size_t GperfIPV6::operator()(const std::string& key) const {
+    return 0;
+}
+
+std::size_t GperfIPV4::operator()(const std::string& key) const {
+    return 0;
+}
+
+std::size_t GperfSSN::operator()(const std::string& key) const {
+    return 0;
+}
+
+std::size_t GperfMac::operator()(const std::string& key) const {
+    return 0;
+}
+
+std::size_t GperfUrl::operator()(const std::string& key) const {
+    return 0;
+}
+
+std::size_t GperfUrlComplex::operator()(const std::string& key) const {
+    return 0;
 }

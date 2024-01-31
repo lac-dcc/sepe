@@ -1,0 +1,46 @@
+User
+For a hash function, assume that keys are Brazilian CPF, always in the format 'nnn.nnn.nnn-nn', where all characters are digits. The '-' and '.' characters are constant, so you can ignore them in your hash function. The fixed key size is 14 characters.
+
+The code is C++, and the keys are std::strings. Do not use std::hash. Assume you do not need to assert key format.
+
+Produce an optimized hash function for this specific case with an unrolled for loop, and also consider that the constant character is always the same and in the same position.
+
+ChatGPT
+Certainly! To create an optimized hash function for the given case (Brazilian CPF keys with a fixed format), you can use a simple unrolled loop along with a mix of prime numbers for the hash. Here's an example implementation in C++:
+
+cpp
+Copy code
+#include <string>
+
+std::size_t customHash(const std::string& key) {
+    const std::size_t prime = 31; // A prime number for hashing
+
+    // Unrolled loop for calculating the hash
+    std::size_t hashValue = 0;
+    hashValue += key[0] * 1000000000000ULL;
+    hashValue += key[1] * 100000000000ULL;
+    hashValue += key[2] * 10000000000ULL;
+    hashValue += key[4] * 1000000000ULL;
+    hashValue += key[5] * 100000000ULL;
+    hashValue += key[6] * 10000000ULL;
+    hashValue += key[8] * 1000000ULL;
+    hashValue += key[9] * 100000ULL;
+    hashValue += key[10] * 10000ULL;
+    hashValue += key[11] * 1000ULL;
+    hashValue += key[12] * 100ULL;
+    hashValue += key[13] * 10ULL;
+    hashValue += key[14] * 1ULL;
+
+    // Mixing with a prime number
+    hashValue = (hashValue * prime);
+
+    return hashValue;
+}
+
+int main() {
+    std::string cpf = "123.456.789-09";
+    std::size_t hashValue = customHash(cpf);
+    // Use hashValue as needed...
+    return 0;
+}
+This hash function unrolls the loop, considering that the constant characters ('.' and '-') are ignored, and calculates the hash based on the position of each digit in the CPF. The use of prime numbers in the mixing step helps improve the distribution of the hash values. Adjust the prime number and the unrolled loop positions as needed for further optimization.

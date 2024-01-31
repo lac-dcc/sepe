@@ -126,7 +126,13 @@ struct UrlCompress{
     }; \
     struct Naive ## NAME { \
         std::size_t operator()(const std::string& key) const; \
-    }; 
+    }; \
+    struct Gpt ## NAME { \
+        std::size_t operator()(const std::string& key) const; \
+    }; \
+    struct Gperf ## NAME { \
+        std::size_t operator()(const std::string& key) const; \
+    };
 
 DECLARE_SYNTH_OFFXOR_AND_NAIVE_FUNCTIONS(UrlComplex)
 DECLARE_SYNTH_OFFXOR_AND_NAIVE_FUNCTIONS(Url)

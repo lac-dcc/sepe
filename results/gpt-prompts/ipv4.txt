@@ -1,0 +1,52 @@
+For a hash function, assume that keys are  IPV4, always in the format '123.456.789.123', where all characters are digits. The '.' character is a constant, so you can ignore it in your hash function. The fixed key size is 15 characters. 
+
+The code is C++, and the keys are std::strings. Do not use std::hash. Assume you do not need to assert key format.
+
+Produce an optimized hash function for this specific case with an unrolled for loop, and also consider that the constant character is always the same and in the same position.
+ChatGPT
+Certainly! Here's an optimized hash function for the given case in C++ using an unrolled for loop:
+
+cpp
+Copy code
+#include <string>
+
+// Custom hash function for IPV4 keys
+std::size_t customHash(const std::string& key) {
+    // Assuming key.size() is always 15
+    const char constantChar = '.'; // Constant character
+
+    // Unrolled for loop for better performance
+    std::size_t hashValue = 0;
+    hashValue += static_cast<std::size_t>(key[0]) * 31;
+    hashValue += static_cast<std::size_t>(key[1]) * 37;
+    hashValue += static_cast<std::size_t>(key[2]) * 41;
+    hashValue += static_cast<std::size_t>(key[3]) * 43;
+    hashValue += static_cast<std::size_t>(key[4]) * 47;
+    hashValue += static_cast<std::size_t>(key[5]) * 53;
+    hashValue += static_cast<std::size_t>(key[6]) * 59;
+    hashValue += static_cast<std::size_t>(key[7]) * 61;
+    hashValue += static_cast<std::size_t>(key[8]) * 67;
+    hashValue += static_cast<std::size_t>(key[9]) * 71;
+    hashValue += static_cast<std::size_t>(key[10]) * 73;
+    hashValue += static_cast<std::size_t>(key[11]) * 79;
+    hashValue += static_cast<std::size_t>(key[12]) * 83;
+    hashValue += static_cast<std::size_t>(key[13]) * 89;
+    hashValue += static_cast<std::size_t>(key[14]) * 97;
+
+    return hashValue;
+}
+
+int main() {
+    std::string ipv4Key = "123.456.789.123";
+    std::size_t hashValue = customHash(ipv4Key);
+
+    // Use hashValue as needed
+    return 0;
+}
+This hash function uses an unrolled for loop to calculate the hash value by considering each character in the key. Adjust the prime numbers in the multiplication to suit your specific needs and ensure a good distribution of hash values.
+
+
+
+
+
+
