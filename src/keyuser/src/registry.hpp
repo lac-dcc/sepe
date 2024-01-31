@@ -71,4 +71,7 @@
     REGISTER_BENCHMARKS(GperfIPV4); \
     REGISTER_BENCHMARKS(GperfIPV6); \
     REGISTER_BENCHMARKS(GperfINTS);
+<<<<<<< HEAD
 
+=======
+>>>>>>> deda608 (gperf hashes)

@@ -4,9 +4,16 @@ TARGET=keyuser
 SRC_DIR := src
 OBJ_DIR := obj
 
+GPERF_SRCS   := $(wildcard $(SRC_DIR)/gperf-hashes/*.c)
+GPERF_OBJS   := $(patsubst $(SRC_DIR)/gperf-hashes/%.c,$(OBJ_DIR)/%.o,$(GPERF_SRCS))
+DEBUG_OBJS   := $(patsubst $(SRC_DIR)/gperf-hashes/%.c,$(OBJ_DIR)/debug_%.o,$(GPERF_SRCS))
+
 SRCS         := $(wildcard $(SRC_DIR)/*.cpp)
 OBJS         := $(patsubst $(SRC_DIR)/%.cpp,$(OBJ_DIR)/%.o,$(SRCS))
+OBJS		 += $(GPERF_OBJS)	
 DEBUG_OBJS   := $(patsubst $(SRC_DIR)/%.cpp,$(OBJ_DIR)/debug_%.o,$(SRCS))
+DEBUG_OBJS   += $(DEBUG_OBJS)
+SRCS 	     += $(GPERF_SRCS)
 
 # ABSL
 ABSL_DIR := $(shell realpath ../../deps/abseil)
@@ -15,17 +22,23 @@ ABSL_INC := $(ABSL_DIR)/include
 ABSL_LIB_FILES :=-labsl_hash -labsl_city -labsl_low_level_hash
 
 # Compilation variables
-COMMON_FLAGS  := -std=c++20 -Wall -Wextra -pedantic -I$(ABSL_INC) -L$(ABSL_LIB)
+COMMON_FLAGS  := -std=c++20 -Wall -Wextra -pedantic -I$(ABSL_INC) -L$(ABSL_LIB) -Igperf_hashes/
 RELEASE_FLAGS := $(COMMON_FLAGS) -O2 -pipe -flto=auto -march=native
 DEBUG_FLAGS   := $(COMMON_FLAGS) -Og -g3 -fsanitize=address,undefined -mbmi2 -msse2 -msse3
 
-all: $(TARGET) 
+all: $(TARGET)
 
 $(OBJ_DIR)/debug_%.o: $(SRC_DIR)/%.cpp $(OBJ_DIR) Makefile
 	$(CXX) $(CXXFLAGS) $(DEBUG_FLAGS)  -c $< -o $@
 
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp $(OBJ_DIR) Makefile
 	$(CXX) $(CXXFLAGS) $(RELEASE_FLAGS) -c $< -o $@
+
+$(OBJ_DIR)/debug_%.o: $(SRC_DIR)/gperf-hashes/%.c $(OBJ_DIR) Makefile
+	$(CC) $(CFLAGS) $(DEBUG_FLAGS) -c $< -o $@
+
+$(OBJ_DIR)/%.o: $(SRC_DIR)/gperf-hashes/%.c $(OBJ_DIR) Makefile
+	$(CC) $(CFLAGS) $(RELEASE_FLAGS) -c $< -o $@
 
 $(OBJ_DIR):
 	@mkdir -p obj/

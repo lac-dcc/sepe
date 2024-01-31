@@ -7,6 +7,9 @@
 #include "city.hpp"
 #include "absl/hash/hash.h"
 #include "absl/hash/internal/hash.h"
+extern "C" {
+    #include "gperf-hashes/gperf-hashes.h"
+}
 
 std::size_t AbseilHash::operator()(const std::string& key) const{
     return absl::Hash<std::string>{}(key);
@@ -83,14 +86,14 @@ std::size_t STDHashBin::operator()(const std::string& key) const{
 }
 
 std::size_t FNVHash::operator()(const std::string& key) const {
-    std::size_t hash = 0x811c9dc5;  // FNV offset basis
-    std::size_t prime = 0x01000193; // FNV prime
-
-    for (char c : key) {
-        hash = hash ^ static_cast<std::size_t>(c);
-        hash *= prime;
+    const char* cptr = key.c_str();
+    size_t len = key.size();
+    size_t hash = 0;
+    for (; len; --len)
+    {
+        hash ^= static_cast<size_t>(*cptr++);
+        hash *= static_cast<size_t>(1099511628211ULL);
     }
-
     return hash;
 }
 
@@ -1033,36 +1036,34 @@ std::size_t GptUrlComplex::operator()(const std::string& key) const {
     return hash;
 }
 
-//##########
-
 std::size_t GperfCPF::operator()(const std::string& key) const {
-    return 0;
+    return GperfCPFHash(key.c_str(), key.size());
 }
 
 std::size_t GperfINTS::operator()(const std::string& key) const {
-    return 0;
+    return GperfINTSHash(key.c_str(), key.size());
 }
 
 std::size_t GperfIPV6::operator()(const std::string& key) const {
-    return 0;
+    return GperfIPV6Hash(key.c_str(), key.size());
 }
 
 std::size_t GperfIPV4::operator()(const std::string& key) const {
-    return 0;
+    return GperfIPV4Hash(key.c_str(), key.size());
 }
 
 std::size_t GperfSSN::operator()(const std::string& key) const {
-    return 0;
+    return GperfSSNHash(key.c_str(), key.size());
 }
 
 std::size_t GperfMac::operator()(const std::string& key) const {
-    return 0;
+    return GperfMACHash(key.c_str(), key.size());
 }
 
 std::size_t GperfUrl::operator()(const std::string& key) const {
-    return 0;
+    return GperfUrlHash(key.c_str(), key.size());
 }
 
 std::size_t GperfUrlComplex::operator()(const std::string& key) const {
-    return 0;
+    return GperfUrlComplexHash(key.c_str(), key.size());
 }
