@@ -1,4 +1,3 @@
-
 #define DECLARE_ONE_BENCH(name, hashname) (Benchmark*)new name<hashname>(#name,#hashname)
 
 // Define Macro to set the benchmarks and HashInfo
@@ -72,3 +71,4 @@
     REGISTER_BENCHMARKS(GperfIPV4); \
     REGISTER_BENCHMARKS(GperfIPV6); \
     REGISTER_BENCHMARKS(GperfINTS);
+
