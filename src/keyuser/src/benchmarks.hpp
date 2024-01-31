@@ -52,8 +52,6 @@ class Benchmark{
                     ++empty;
                 }
             }
-            printf("Empty buckets: %d\n", empty);
-            printf("Total buckets: %ld\n", container.bucket_count());
             return colcount;
         }
 

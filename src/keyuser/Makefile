@@ -22,7 +22,8 @@ ABSL_INC := $(ABSL_DIR)/include
 ABSL_LIB_FILES :=-labsl_hash -labsl_city -labsl_low_level_hash
 
 # Compilation variables
-COMMON_FLAGS  := -std=c++20 -Wall -Wextra -pedantic -I$(ABSL_INC) -L$(ABSL_LIB) -Igperf_hashes/
+CXXFLAGS += -std=c++20 
+COMMON_FLAGS  := -Wall -Wextra -pedantic -I$(ABSL_INC) -L$(ABSL_LIB) -Igperf_hashes/
 RELEASE_FLAGS := $(COMMON_FLAGS) -O2 -pipe -flto=auto -march=native
 DEBUG_FLAGS   := $(COMMON_FLAGS) -Og -g3 -fsanitize=address,undefined -mbmi2 -msse2 -msse3
 
