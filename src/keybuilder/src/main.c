@@ -79,7 +79,22 @@ int is_special(const char ch) {
 		|| ch == '.';
 }
 
-int main(void) {
+int main(int argc, const char* argv[]) {
+
+	if (argc > 1) {
+		printf("keybuilder\n");
+		printf("\nDescription: keybuilder generates a regex from a series of strings separated by newlines\n");
+		printf("\nExample usage: `./keybuilder < keys.txt`\n");
+		printf("\nOptions:\n");	
+		printf("\n    -h    Print this help\n");	
+		printf("\n");	
+		if (!(strcmp(argv[1], "-h") == 0 || strcmp(argv[1], "--help") == 0)) {
+			fprintf(stderr, "ERROR: unrecognized argument: %s\n", argv[1]);
+			return 1;
+		} else {
+			return 0;
+		}
+	}
 
 	char* line;
 	size_t n;
@@ -109,7 +124,7 @@ int main(void) {
 			fprintf(stderr, "ERROR: all lines must have the exact same size!\n");
 			free(line);
 			free(ranges);
-			return 1;
+			return 2;
 		}
 
 		for (ssize_t i = 0; i < line_size - 1; ++i) {
