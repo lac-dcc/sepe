@@ -63,7 +63,7 @@ struct Command {
     #[clap(long)]
     histogram: bool,
 
-    /// Whether to generate the keys incrementaly, rather than randomly (VERY SLOW)
+    /// Whether to generate the keys incrementally, rather than randomly (VERY SLOW)
     #[clap(long)]
     incremental_generation: bool,
 

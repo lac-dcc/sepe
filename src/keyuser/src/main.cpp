@@ -21,7 +21,7 @@ std::string correctBenchUsage(){
            "       -i or --insert: integer that represents the percentage of insertion operations\n"
            "       -s or --search: integer that represents the percentage of search operations\n"
            "       -e or --elimination: integer that represents the percentage of elimination operations\n"
-           "               The sum of -i, -s, and -e shoud be 100.\n"
+           "               The sum of -i, -s, and -e should be 100.\n"
            "       -n or --num-operations: integer that represents the number of 'times to perform a hash operation on the benchmark\n"
            "       -r or --repetitions: number of times to repeat the benchmark\n"
            "       -seed: integer that represents the seed for the random number generator\n "

@@ -270,7 +270,7 @@ fn parse_regex(mut chars: std::str::Chars) -> Vec<Regex> {
             }
             '[' => tree.push(parse_list(&mut chars)),
             '{' => tree.last_mut().unwrap().repetitions = parse_repetitions(&mut chars),
-            ')' => panic!("badly formated regex!"),
+            ')' => panic!("badly formatted regex!"),
             '(' => tree.push(parse_group(&mut chars)),
             '+' => tree.last_mut().unwrap().plus = true,
             '*' => tree.last_mut().unwrap().star = true,

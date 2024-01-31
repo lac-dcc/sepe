@@ -53,7 +53,7 @@ def goodness_fit_test(key, value):
     if p > 0.05:
         print(f" {key:<20} p-value:    {p:.2f} --> SYMMETRIC")
     else:
-        print(f" {key:<20} p-value:    {p:.2f} --> ASSYMETRIC")
+        print(f" {key:<20} p-value:    {p:.2f} --> ASYMMETRIC")
 
 def main():
     _, ax = plt.subplots(figsize=(10, 5))

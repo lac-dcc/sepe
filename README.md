@@ -4,11 +4,11 @@
 
 ## Introduction
 
-The goal of this project is to devise, implement, and evaluate techniques for generating optimized hash functions tailored for string keys whose format can be approximated by a regular expression inferred through profiling. These functions will be used to improve the performance of C++'s STL data structures, such as `std::unordered_map`, `std::unordered_set`, `std::unordered_multimap` and `std::unordered_multiset`, in addition to any other `std::hash` specialization for user-defined C++ types.
+This project's goal is to devise, implement, and evaluate techniques for generating optimized hash functions tailored for string keys whose format can be approximated by a regular expression inferred through profiling. These functions will be used to improve the performance of C++'s STL data structures, such as `std::unordered_map`, `std::unordered_set`, `std::unordered_multimap` and `std::unordered_multiset`, in addition to any other `std::hash` specialization for user-defined C++ types.
 
 ### Dependencies
 
-These are the most important dependencies for building and running Sepe:
+These are the most important dependencies for building and running all Sepe programs:
 
 | Dependency | Version   | Installation Link                            |
 |------------|-----------|----------------------------------------------|
@@ -16,18 +16,29 @@ These are the most important dependencies for building and running Sepe:
 | CMake      | >= 3.20   | [cmake.org](https://cmake.org/install/)      |
 | Rust       | >= 1.7    | [rust.org](https://www.rust-lang.org/tools/install)|
 
-## Quick-Start: Building and Running
+Rust is only necessary if you want to run the experiments. If you are only interested in the hash functions generation, only `clang` is necessary.
+
+## Quick-Start: Building and Running Experiments
 
 Building and running with default parameters:
 
-```
+```sh
+./scripts/install_abseil.sh # necessary for keyuser
 make
-./bin/bench-runner [REGEX]
+./bin/bench-runner [REGEXES]
 ```
 
 Valid regexes are listed in the `Regexes.toml` file.
 
-## Building 
+### Building only the hash function generator
+
+To only build the hash  function generator, use:
+
+```sh
+make bin/keybuilder bin/keysynth
+```
+
+## Building
 
 `make` will build all binaries and move them to a `bin` file in the top level
 directory.
@@ -36,65 +47,71 @@ directory.
 
 Requires Rust.
 
+```sh
+make bin/keygen
 ```
-cd src/keygen
-cargo build --release
-```
-
-*Binary output located at : src/keygen/target/release/keygen*
 
 ### Building bench-runner
 
 Requires Rust.
 
+```sh
+make bin/bench-runner
 ```
-cd src/bench-runner
-cargo build --release
-```
-
-*Binary output located at : src/bench-runner/target/release/bench-runner*
 
 ### Building keyuser
 
 Requires C++.
 
-```
-cd src/keyuser
-make
+```sh
+./scripts/install_abseil.sh # we use parts of the abseil library in the benchmarks
+make bin/keyuser
 ```
 
-*Binary output located at : src/keyuser/keyuser*
+### Building keybuilder
+
+Requires C
+
+```sh
+make bin/keybuilder
+```
+
+### Building keysynth
+
+Requires C
+
+```sh
+make bin/keysynth
+```
 
 ## Running
 
-### Running keygen
+### keygen
 
-`keygen` generates (standard output) n random keys from Regex. *Not all valid regexes are accepeted.*
+`keygen` generates (standard output) n random keys from Regex. *Not all valid regexes are accepted.* Specifically, we did not implement the `OR` (`|`) operator.
 
-```
-./bin/keygen <REGEX> [number_of_elements] [seed]
+```sh
+./bin/keygen REGEX [number_of_elements] [seed]
 ```
 
 Example: *Generating 2 random IPV4 keys with seed 223554*
 
-```
+```sh
 ./bin/keygen "(([0-9]{3})\.){3}[0-9]{3}" -n 2 -s 223554
 313.797.178.390
 445.982.868.308
 ```
 
 For more options, do:
-```
+```sh
 ./bin/keygen --help
 ```
 
-`keygen` is independent from `keyuser`.
-
-### Running keyuser
+### keyuser
 
 `keyuser` benchmarks custom hash functions with keys received from standard input.
 
-```
+```sh
 <standard_output_keys> | ./bin/keyuser [hashes] <num_operations> <insert> <search> <elimination> [seed] [verbose]
 ```
 
@@ -102,7 +119,7 @@ For more options, do:
 
 Example: *Benchmarking 2 IPV4 Keys with 10 total operations using STDHashBin IPV4HashGeneric hash functions. 50% insertions, 30% search, and 20% elimination operations.*
 
-```
+```sh
 ./bin/keygen "(([0-9]{3})\.){3}[0-9]{3}" -n 2 -s 223554 | ./bin/keyuser --hashes STDHashBin IPV4HashGeneric -n 10 -i 50 -s 30 -e 20
  Interweaved execution mode (50% batched inserts):
                 ------> IPV4HashGeneric           Average time: 0.000004 (s)    Geomean time: 0.000004 (s)    Total Collision Count (Buckets) 4
@@ -113,25 +130,51 @@ Example: *Benchmarking 2 IPV4 Keys with 10 total operations using STDHashBin IPV
 ```
 
 For more options, do:
-```
+```sh
 ./bin/keyuser --help
 ```
 
-### Running bench-runner
+### keybuilder
 
-`bench-runner` is a helper program that connects `keygen` and `keyuser` together.
+`keybuilder` creates a regex from a series of *fixed-sized* strings passed through standard input, separated by a newline.
 
+```sh
+./bin/keybuilder < txt-file-with-strings
 ```
-./bin/bench-runner <Regex entry in Regexes.toml>
+
+### keysynth
+
+`keysynth` synthesizes the hash functions based on the regex generated by the keybuilder. It is picky about the regex's format, so it is not recommended to hand-write it. Use `keybuilder` instead.
+
+```sh
+./bin/keysynth "$(./bin/keybuilder < txt-file-with-strings)"
+```
+
+### bench-runner
+
+`bench-runner` is a helper program that connects the other programs together as needed.
+
+```sh
+./bin/bench-runner Regex-entry-in-Regexes.toml
 ```
 
 Example: *Running the IPV4 Benchmark*
 
-```
+```sh
 ./bin/bench-runner IPV4
 ```
 
 For more options, do:
-```
+```sh
 ./bin/bench-runner --help
 ```
+
+## Helper Scripts
+
+The `scripts` folder contains some helper scripts that may be useful for some people:
+
+  * `align_csv.sh` - pretty prints `keyuser`'s generated `.csv` files for easier analysis
+  * `benchmark.sh` - helper to run many benchmarks at once
+  * `install_abseil.sh` - installs the abseil library locally. Necessary for `keyuser`
+  * `make_hash_from_regex.sh` - creates a hash function from a user defined regex
+  * `result_interpreter.py` - interprets the results generated from `keyuser`'s benchmarks
