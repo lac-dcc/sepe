@@ -1,10 +1,24 @@
-#include "customHashes.hpp"
+/**
+ * @file customHashes.cpp
+ * @brief Implementation of custom hash functions.
+ * 
+ * This file includes the implementation of several custom hash functions as well as helper functions for loading and shifting data.
+ * 
+ * Some general function types and their brief implementation strategies are:
+ *  - Pext: XORS only relevant bytes after compressing them the PEXT instruction.
+ *  - Naive: XORS all bytes. 
+ *  - OffXor: XORS all relevant bytes.
+ *  - Gpt: Uses the GPT generated hash functions.
+ *  - Gperf: Uses the GPERF generated hash functions.
+ */
+
 #include <cstring>
 #include <smmintrin.h>
 #include <pmmintrin.h>
 #include <immintrin.h>
 
-#include "city.hpp"
+#include "customHashes.hpp"
+#include "google-hashes/city.hpp"
 #include "absl/hash/hash.h"
 #include "absl/hash/internal/hash.h"
 extern "C" {

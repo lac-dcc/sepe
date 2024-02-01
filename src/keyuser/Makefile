@@ -4,16 +4,15 @@ TARGET=keyuser
 SRC_DIR := src
 OBJ_DIR := obj
 
-GPERF_SRCS   := $(wildcard $(SRC_DIR)/gperf-hashes/*.c)
-GPERF_OBJS   := $(patsubst $(SRC_DIR)/gperf-hashes/%.c,$(OBJ_DIR)/%.o,$(GPERF_SRCS))
-DEBUG_OBJS   := $(patsubst $(SRC_DIR)/gperf-hashes/%.c,$(OBJ_DIR)/debug_%.o,$(GPERF_SRCS))
+# Find all .cpp and .c files in the project
+SRCS := $(shell find . \( -name "*.cpp" -o -name "*.c" \) -printf "%P\n")
+OBJS := $(shell find . \( -name "*.cpp" -o -name "*.c" \) -exec basename {} \;)
+OBJS := $(patsubst %.cpp,$(OBJ_DIR)/%.o,$(patsubst %.c,$(OBJ_DIR)/%.o,$(OBJS)))
+DEBUG_OBJS := $(patsubst %.cpp,$(OBJ_DIR)/debug_%.o,$(patsubst %.c,$(OBJ_DIR)/debug_%.o,$(SRCS)))
 
-SRCS         := $(wildcard $(SRC_DIR)/*.cpp)
-OBJS         := $(patsubst $(SRC_DIR)/%.cpp,$(OBJ_DIR)/%.o,$(SRCS))
-OBJS		 += $(GPERF_OBJS)	
-DEBUG_OBJS   := $(patsubst $(SRC_DIR)/%.cpp,$(OBJ_DIR)/debug_%.o,$(SRCS))
-DEBUG_OBJS   += $(DEBUG_OBJS)
-SRCS 	     += $(GPERF_SRCS)
+# Make, please look into subdirectories :)
+vpath %.cpp $(shell find $(SRC_DIR) -type d)
+vpath %.c $(shell find $(SRC_DIR) -type d)
 
 # ABSL
 ABSL_DIR := $(shell realpath ../../deps/abseil)
@@ -29,16 +28,16 @@ DEBUG_FLAGS   := $(COMMON_FLAGS) -Og -g3 -fsanitize=address,undefined -mbmi2 -ms
 
 all: $(TARGET)
 
-$(OBJ_DIR)/debug_%.o: $(SRC_DIR)/%.cpp $(OBJ_DIR) Makefile
+# CXX objects
+$(OBJ_DIR)/debug_%.o: %.cpp $(OBJ_DIR) Makefile
 	$(CXX) $(CXXFLAGS) $(DEBUG_FLAGS)  -c $< -o $@
-
-$(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp $(OBJ_DIR) Makefile
+$(OBJ_DIR)/%.o: %.cpp $(OBJ_DIR) Makefile
 	$(CXX) $(CXXFLAGS) $(RELEASE_FLAGS) -c $< -o $@
 
-$(OBJ_DIR)/debug_%.o: $(SRC_DIR)/gperf-hashes/%.c $(OBJ_DIR) Makefile
+# CC objects
+$(OBJ_DIR)/debug_%.o: %.c $(OBJ_DIR) Makefile
 	$(CC) $(CFLAGS) $(DEBUG_FLAGS) -c $< -o $@
-
-$(OBJ_DIR)/%.o: $(SRC_DIR)/gperf-hashes/%.c $(OBJ_DIR) Makefile
+$(OBJ_DIR)/%.o: %.c $(OBJ_DIR) Makefile
 	$(CC) $(CFLAGS) $(RELEASE_FLAGS) -c $< -o $@
 
 $(OBJ_DIR):

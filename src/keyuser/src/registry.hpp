@@ -1,11 +1,32 @@
+/**
+ * @file registry.hpp
+ * @brief This file contains macros for registering benchmarks.
+ * @brief New Custom Hash functions must be manually added to the REGISTER_ALL_BENCHMARKS macro.
+ */
+
+/**
+ * @def DECLARE_ONE_BENCH(name, hashname)
+ * @brief This macro creates a new benchmark object.
+ * @param name The name of the benchmark.
+ * @param hashname The name of the hash function used in the benchmark.
+ * @return A pointer to the new benchmark object.
+ */
 #define DECLARE_ONE_BENCH(name, hashname) (Benchmark*)new name<hashname>(#name,#hashname)
 
-// Define Macro to set the benchmarks and HashInfo
+/**
+ * @def REGISTER_BENCHMARKS(hashname)
+ * @brief This macro registers benchmarks for a specific hash function.
+ * @param hashname The name of the hash function.
+ */
 #define REGISTER_BENCHMARKS(hashname)   benchmarks.push_back(DECLARE_ONE_BENCH(UnorderedMapBench, hashname)); \
                                         benchmarks.push_back(DECLARE_ONE_BENCH(UnorderedMultiMapBench, hashname)); \
                                         benchmarks.push_back(DECLARE_ONE_BENCH(UnorderedSetBench, hashname)); \
                                         benchmarks.push_back(DECLARE_ONE_BENCH(UnorderedMultisetBench, hashname));
 
+/**
+ * @def REGISTER_ALL_BENCHMARKS
+ * @brief This macro registers all benchmarks for all hash functions.
+ */
 #define REGISTER_ALL_BENCHMARKS \
     REGISTER_BENCHMARKS(AbseilHash); \
     REGISTER_BENCHMARKS(STDHashBin); \

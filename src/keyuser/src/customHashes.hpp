@@ -12,121 +12,249 @@
 #include <vector>
 #include <numeric>
 
+/**
+ * @brief Struct for CityHash.
+ */
 struct CityHash{
-    std::size_t operator()(const std::string& key) const;
-};
-
-struct AbseilHash{
-    std::size_t operator()(const std::string& key) const;
-};
-
-struct STDHashSrc{
+    /**
+     * @brief Function call operator that calculates the hash of a key.
+     * 
+     * @param key The fixed lenght std::string key to hash.
+     * @return The hash of the key.
+     */
     std::size_t operator()(const std::string& key) const;
 };
 
 /**
- * @struct STDHashBin
- * @brief This struct provides a hash function using the standard library's hash function.
+ * @brief Struct for AbseilHash.
+ */
+struct AbseilHash{
+    /**
+     * @brief Function call operator that calculates the hash of a key.
+     * 
+     * @param key The fixed lenght std::string key to hash.
+     * @return The hash of the key.
+     */
+    std::size_t operator()(const std::string& key) const;
+};
+
+/**
+ * @brief Struct for STDHashSrc.
+ */
+struct STDHashSrc{
+    /**
+     * @brief Function call operator that calculates the hash of a key.
+     * 
+     * @param key The fixed lenght std::string key to hash.
+     * @return The hash of the key.
+     */
+    std::size_t operator()(const std::string& key) const;
+};
+
+/**
+ * @brief Struct for STDHashBin.
  */
 struct STDHashBin{
+    /**
+     * @brief Function call operator that calculates the hash of a key.
+     * 
+     * @param key The fixed lenght std::string key to hash.
+     * @return The hash of the key.
+     */
     std::size_t operator()(const std::string& key) const;
 };
 
 /**
- * @struct FNVHash
- * @brief This struct provides a hash function using the Fowler–Noll–Vo hash function.
+ * @brief Struct for FNVHash.
  */
 struct FNVHash {
+    /**
+     * @brief Function call operator that calculates the hash of a key.
+     * 
+     * @param key The fixed lenght std::string key to hash.
+     * @return The hash of the key.
+     */
     std::size_t operator()(const std::string& key) const;
 };
 
 /**
- * @struct IPV4HashUnrolled
- * @brief This struct provides an unrolled hash function for IPV4 addresses.
+ * @brief Struct for IPV4HashUnrolled.
  */
 struct IPV4HashUnrolled{
+    /**
+     * @brief Function call operator that calculates the hash of a key.
+     * 
+     * @param key The fixed lenght std::string key to hash.
+     * @return The hash of the key.
+     */
     std::size_t operator()(const std::string& key) const;
 };
 
 /**
- * @struct IPV4HashMove
- * @brief This struct provides a hash function for IPV4 addresses that uses move semantics.
+ * @brief Struct for IPV4HashMove.
  */
 struct IPV4HashMove{
+    /**
+     * @brief Function call operator that calculates the hash of a key.
+     * 
+     * @param key The fixed lenght std::string key to hash.
+     * @return The hash of the key.
+     */
     std::size_t operator()(const std::string& key) const;
 };
 
-
 /**
- * @struct IPV4HashBitOps
- * @brief This struct provides a hash function for IPV4 addresses that uses data compression..
+ * @brief Struct for IPV4HashBitOps.
  */
 struct IPV4HashBitOps{
+    /**
+     * @brief Function call operator that calculates the hash of a key.
+     * 
+     * @param key The fixed lenght std::string key to hash.
+     * @return The hash of the key.
+     */
     std::size_t operator()(const std::string& key) const;
 };
 
 /**
- * @struct CPFHashVectorizedMul
- * @brief This struct provides a hash function for CPF numbers that uses vectorized multiplication.
+ * @brief Struct for CPFHashVectorizedMul.
  */
 struct CPFHashVectorizedMul{
+    /**
+     * @brief Function call operator that calculates the hash of a key.
+     * 
+     * @param key The fixed lenght std::string key to hash.
+     * @return The hash of the key.
+     */
     std::size_t operator()(const std::string& key) const;
 };
 
 /**
- * @struct CPFHashBitOps
- * @brief This struct provides a hash function for CPF numbers that uses data compression..
+ * @brief Struct for CPFHashBitOps.
  */
 struct CPFHashBitOps{
+    /**
+     * @brief Function call operator that calculates the hash of a key.
+     * 
+     * @param key The fixed lenght std::string key to hash.
+     * @return The hash of the key.
+     */
     std::size_t operator()(const std::string& key) const;
 };
 
 /**
- * @struct SSNHashBitOps
- * @brief This struct provides a hash function for Social Security numbers that uses data compression..
+ * @brief Struct for SSNHashBitOps.
  */
 struct SSNHashBitOps{
+    /**
+     * @brief Function call operator that calculates the hash of a key.
+     * 
+     * @param key The fixed lenght std::string key to hash.
+     * @return The hash of the key.
+     */
     std::size_t operator()(const std::string& key) const;
 };
 
 /**
- * @struct CarPlateHashBitOps
- * @brief This struct provides a hash function for car plate numbers that uses data compression..
+ * @brief Struct for CarPlateHashBitOps.
  */
 struct CarPlateHashBitOps{
+    /**
+     * @brief Function call operator that calculates the hash of a key.
+     * 
+     * @param key The fixed lenght std::string key to hash.
+     * @return The hash of the key.
+     */
     std::size_t operator()(const std::string& key) const;
 };
 
 /**
- * @struct MacAddressHashBitOps
- * @brief This struct provides a hash function for MAC addresses that uses data compression..
+ * @brief Struct for MacAddressHashBitOps.
  */
 struct MacAddressHashBitOps{
+    /**
+     * @brief Function call operator that calculates the hash of a key.
+     * 
+     * @param key The fixed lenght std::string key to hash.
+     * @return The hash of the key.
+     */
     std::size_t operator()(const std::string& key) const;
 };
 
+/**
+ * @brief Struct for IntBitHash.
+ */
 struct IntBitHash{
+    /**
+     * @brief Function call operator that calculates the hash of a key.
+     * 
+     * @param key The fixed lenght std::string key to hash.
+     * @return The hash of the key.
+     */
     std::size_t operator()(const std::string& key) const;
 };
 
+/**
+ * @brief Struct for IntSimdHash.
+ */
 struct IntSimdHash{
+    /**
+     * @brief Function call operator that calculates the hash of a key.
+     * 
+     * @param key The fixed lenght std::string key to hash.
+     * @return The hash of the key.
+     */
     std::size_t operator()(const std::string& key) const;
 };
 
+/**
+ * @brief Struct for UrlCompress.
+ */
 struct UrlCompress{
+    /**
+     * @brief Function call operator that calculates the hash of a key.
+     * 
+     * @param key The fixed lenght std::string key to hash.
+     * @return The hash of the key.
+     */
     std::size_t operator()(const std::string& key) const;
 };
 
+/**
+ * @brief Struct for PextMurmurINTS.
+ */
 struct PextMurmurINTS{
+    /**
+     * @brief Function call operator that calculates the hash of a key.
+     * 
+     * @param key The fixed lenght std::string key to hash.
+     * @return The hash of the key.
+     */
     std::size_t operator()(const std::string& key) const;
 };
 
+/**
+ * @brief Struct for PextMurmurUrlComplex.
+ */
 struct PextMurmurUrlComplex{
+    /**
+     * @brief Function call operator that calculates the hash of a key.
+     * 
+     * @param key The fixed lenght std::string key to hash.
+     * @return The hash of the key.
+     */
     std::size_t operator()(const std::string& key) const;
 };
 
-
-#define DECLARE_SYNTH_OFFXOR_AND_NAIVE_FUNCTIONS(NAME) \
+/**
+ * @brief Macro that declares several structs with the same pattern.
+ * 
+ * Each struct has a function call operator that calculates the hash of a key.
+ * The structs are named by concatenating different prefixes with the NAME argument.
+ * 
+ * @param NAME The name to append to the struct names.
+ */
+#define DECLARE_SYNTH_OFFXOR_NAIVE_CHATGPT_AND_GPERF_FUNCTIONS(NAME) \
     struct Pext ## NAME { \
         std::size_t operator()(const std::string& key) const; \
     }; \
@@ -143,44 +271,117 @@ struct PextMurmurUrlComplex{
         std::size_t operator()(const std::string& key) const; \
     };
 
-DECLARE_SYNTH_OFFXOR_AND_NAIVE_FUNCTIONS(UrlComplex)
-DECLARE_SYNTH_OFFXOR_AND_NAIVE_FUNCTIONS(Url)
-DECLARE_SYNTH_OFFXOR_AND_NAIVE_FUNCTIONS(Mac)
-DECLARE_SYNTH_OFFXOR_AND_NAIVE_FUNCTIONS(CPF)
-DECLARE_SYNTH_OFFXOR_AND_NAIVE_FUNCTIONS(SSN)
-DECLARE_SYNTH_OFFXOR_AND_NAIVE_FUNCTIONS(IPV4)
-DECLARE_SYNTH_OFFXOR_AND_NAIVE_FUNCTIONS(IPV6)
-DECLARE_SYNTH_OFFXOR_AND_NAIVE_FUNCTIONS(INTS)
+// Use the macro to declare several structs.
+DECLARE_SYNTH_OFFXOR_NAIVE_CHATGPT_AND_GPERF_FUNCTIONS(UrlComplex)
+DECLARE_SYNTH_OFFXOR_NAIVE_CHATGPT_AND_GPERF_FUNCTIONS(Url)
+DECLARE_SYNTH_OFFXOR_NAIVE_CHATGPT_AND_GPERF_FUNCTIONS(Mac)
+DECLARE_SYNTH_OFFXOR_NAIVE_CHATGPT_AND_GPERF_FUNCTIONS(CPF)
+DECLARE_SYNTH_OFFXOR_NAIVE_CHATGPT_AND_GPERF_FUNCTIONS(SSN)
+DECLARE_SYNTH_OFFXOR_NAIVE_CHATGPT_AND_GPERF_FUNCTIONS(IPV4)
+DECLARE_SYNTH_OFFXOR_NAIVE_CHATGPT_AND_GPERF_FUNCTIONS(IPV6)
+DECLARE_SYNTH_OFFXOR_NAIVE_CHATGPT_AND_GPERF_FUNCTIONS(INTS)
 
+/**
+ * @brief Struct for OffXorSimdUrlComplex.
+ */
 struct OffXorSimdUrlComplex{
+    /**
+     * @brief Function call operator that calculates the hash of a key.
+     * 
+     * @param key The fixed lenght std::string key to hash.
+     * @return The hash of the key.
+     */
     std::size_t operator()(const std::string& key) const;
 };
 
+/**
+ * @brief Struct for OffXorSimdUrl.
+ */
 struct OffXorSimdUrl {
+    /**
+     * @brief Function call operator that calculates the hash of a key.
+     * 
+     * @param key The fixed lenght std::string key to hash.
+     * @return The hash of the key.
+     */
     std::size_t operator()(const std::string& key) const;
 };
 
+/**
+ * @brief Struct for OffXorSimdIPV6.
+ */
 struct OffXorSimdIPV6 {
+    /**
+     * @brief Function call operator that calculates the hash of a key.
+     * 
+     * @param key The fixed lenght std::string key to hash.
+     * @return The hash of the key.
+     */
     std::size_t operator()(const std::string& key) const;
 }; 
 
+/**
+ * @brief Struct for OffXorSimdINTS.
+ */
 struct OffXorSimdINTS {
+    /**
+     * @brief Function call operator that calculates the hash of a key.
+     * 
+     * @param key The fixed lenght std::string key to hash.
+     * @return The hash of the key.
+     */
     std::size_t operator()(const std::string& key) const;
 }; 
 
+/**
+ * @brief Struct for NaiveSimdUrlComplex.
+ */
 struct NaiveSimdUrlComplex{
+    /**
+     * @brief Function call operator that calculates the hash of a key.
+     * 
+     * @param key The fixed lenght std::string key to hash.
+     * @return The hash of the key.
+     */
     std::size_t operator()(const std::string& key) const;
 };
 
+/**
+ * @brief Struct for NaiveSimdUrl.
+ */
 struct NaiveSimdUrl {
+    /**
+     * @brief Function call operator that calculates the hash of a key.
+     * 
+     * @param key The fixed lenght std::string key to hash.
+     * @return The hash of the key.
+     */
     std::size_t operator()(const std::string& key) const;
 };
 
+/**
+ * @brief Struct for NaiveSimdIPV6.
+ */
 struct NaiveSimdIPV6 {
+    /**
+     * @brief Function call operator that calculates the hash of a key.
+     * 
+     * @param key The fixed lenght std::string key to hash.
+     * @return The hash of the key.
+     */
     std::size_t operator()(const std::string& key) const;
 }; 
 
+/**
+ * @brief Struct for NaiveSimdINTS.
+ */
 struct NaiveSimdINTS {
+    /**
+     * @brief Function call operator that calculates the hash of a key.
+     * 
+     * @param key The fixed lenght std::string key to hash.
+     * @return The hash of the key.
+     */
     std::size_t operator()(const std::string& key) const;
 }; 
 

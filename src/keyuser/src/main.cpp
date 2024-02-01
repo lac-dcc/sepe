@@ -1,3 +1,11 @@
+/**
+ * @file main.cpp
+ * @brief Main file for the benchmarking program.
+ * 
+ * This file includes the main function and other helper functions for the benchmarking program.
+ * It parses command line arguments and runs the benchmarks accordingly.
+ */
+
 #include <iostream>
 #include <cstring>
 #include <vector>

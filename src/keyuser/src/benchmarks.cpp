@@ -1,3 +1,11 @@
+/**
+ * @file benchmarks.cpp
+ * @brief Implementation of benchmarking functions.
+ * 
+ * This file includes the implementation of functions for executing benchmarks.
+ * The benchmarks are performed on a set of keys and according to a set of parameters.
+ */
+
 #include "benchmarks.hpp"
 
 #include <chrono>
