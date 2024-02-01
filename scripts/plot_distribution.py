@@ -28,9 +28,13 @@ from scipy import stats
 import numpy as np
 
 def goodness_fit_test(key, value):
+
+    n = len(value)
+    print("Chi Worst case: ", ((n-1)**2) + (n-1) )
+
     key = key.replace("array_", "")
     # Calculate the observed frequencies of each value
-    observed_freq, _bin_edges = np.histogram(value, bins=len(np.unique(value)))
+    observed_freq, _ = np.histogram(value, bins=len(np.unique(value)))
 
     # Calculate the expected frequencies for a uniform distribution
     expected_freq = np.full_like(observed_freq, len(value) / len(np.unique(value)))
@@ -51,9 +55,9 @@ def goodness_fit_test(key, value):
         print(f" {key:<20} skewness:   {skewness:.2f} --> Approximately symmetric. ")
 
     if p > 0.05:
-        print(f" {key:<20} p-value:    {p:.2f} --> SYMMETRIC")
+        print(f" {key:<20} p-value:    {p:.2f}   Chi-Test {chi2:.2f} --> SYMMETRIC")
     else:
-        print(f" {key:<20} p-value:    {p:.2f} --> ASYMMETRIC")
+        print(f" {key:<20} p-value:    {p:.2f}   Chi-Test {chi2:.2f} --> ASYMMETRIC")
 
 def main():
     _, ax = plt.subplots(figsize=(10, 5))

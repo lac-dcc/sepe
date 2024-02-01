@@ -77,7 +77,7 @@ static size_t _Hash_bytes(const void* ptr, size_t len, size_t seed)
 }
 
 std::size_t STDHashSrc::operator()(const std::string& key) const{
-    size_t __seed = static_cast<size_t>(0xc70f6907UL);
+    constexpr size_t __seed = static_cast<size_t>(0xc70f6907UL);
     return _Hash_bytes(key.c_str(), key.size(), __seed);
 }
 
@@ -266,7 +266,69 @@ std::size_t IntBitHash::operator()(const std::string& key) const {
     return bits1 ^ bits2 ^ bits3 ^ bits4 ^ bits5 ^ bits6 ^ bits7;
 }
 
-// Synthesized functions
+static std::size_t __pext_hash_url_complex(const char* ptr, size_t len, size_t seed) {
+
+    static const size_t mul = (((size_t) 0xc6a4a793UL) << 32UL)
+                    + (size_t) 0x5bd1e995UL;
+    const char* const buf = static_cast<const char*>(ptr);
+
+    // Remove the bytes not divisible by the sizeof(size_t).  This
+    // allows the main loop to process the data as 64-bit integers.
+    const size_t len_aligned = len & ~(size_t)0x7;
+    const char* const end = buf + len_aligned;
+    size_t hash = seed ^ (len * mul);
+
+        constexpr std::size_t mask0 = 0x1f1f1f1f1f1f1f1f;
+        constexpr std::size_t mask1 = 0x0000000000001f1f;
+        constexpr std::size_t mask2 = 0x00000000000f0f0f;
+        constexpr std::size_t mask3 = 0x0000007f7f7f7f7f;
+        constexpr std::size_t mask4 = 0x7f7f7f7f7f7f7f7f;
+        constexpr std::size_t mask5 = 0x007f7f7f7f7f7f7f;
+
+        const std::size_t hashable0 = _pext_u64(load_u64_le(ptr+23), mask0);
+        const std::size_t hashable1 = _pext_u64(load_u64_le(ptr+31), mask1);
+        const std::size_t hashable2 = _pext_u64(load_u64_le(ptr+41), mask2);
+        const std::size_t hashable3 = _pext_u64(load_u64_le(ptr+58), mask3);
+        const std::size_t hashable4 = _pext_u64(load_u64_le(ptr+66), mask4);
+        const std::size_t hashable5 = _pext_u64(load_u64_le(ptr+74), mask5);
+
+        size_t data = shift_mix(hashable0 * mul) * mul;
+        hash ^= data;
+        hash *= mul;
+
+        data = shift_mix(hashable1 * mul) * mul;
+        hash ^= data;
+        hash *= mul;
+
+        data = shift_mix(hashable2 * mul) * mul;
+        hash ^= data;
+        hash *= mul;
+
+        data = shift_mix(hashable3 * mul) * mul;
+        hash ^= data;
+        hash *= mul;
+
+        data = shift_mix(hashable4 * mul) * mul;
+        hash ^= data;
+        hash *= mul;
+
+        data = shift_mix(hashable5 * mul) * mul;
+        hash ^= data;
+        hash *= mul;
+
+        hash = shift_mix(hash) * mul;
+        hash = shift_mix(hash);
+
+    hash = shift_mix(hash) * mul;
+    hash = shift_mix(hash);
+
+    return hash;
+}
+
+std::size_t PextMurmurUrlComplex::operator()(const std::string& key) const {
+    constexpr size_t __seed = static_cast<size_t>(0xc70f6907UL);
+    return __pext_hash_url_complex(key.c_str(), key.size(), __seed);
+}
 
 std::size_t PextUrlComplex::operator()(const std::string& key) const {
         constexpr std::size_t mask0 = 0x1f1f1f1f1f1f1f1f;
@@ -382,107 +444,109 @@ std::size_t PextIPV6::operator()(const std::string& key) const {
         return tmp3;
 }
 
-// static std::size_t __pext_hash(const char* ptr, size_t len, size_t seed) {
+static std::size_t __pext_hash_ints(const char* ptr, size_t len, size_t seed) {
 
-//     static const size_t mul = (((size_t) 0xc6a4a793UL) << 32UL)
-//                     + (size_t) 0x5bd1e995UL;
-//     const char* const buf = static_cast<const char*>(ptr);
+    static const size_t mul = (((size_t) 0xc6a4a793UL) << 32UL)
+                    + (size_t) 0x5bd1e995UL;
+    const char* const buf = static_cast<const char*>(ptr);
 
-//     // Remove the bytes not divisible by the sizeof(size_t).  This
-//     // allows the main loop to process the data as 64-bit integers.
-//     const size_t len_aligned = len & ~(size_t)0x7;
-//     const char* const end = buf + len_aligned;
-//     size_t hash = seed ^ (len * mul);
+    // Remove the bytes not divisible by the sizeof(size_t).  This
+    // allows the main loop to process the data as 64-bit integers.
+    const size_t len_aligned = len & ~(size_t)0x7;
+    const char* const end = buf + len_aligned;
+    size_t hash = seed ^ (len * mul);
 
-//         constexpr std::size_t mask0 = 0x0f0f0f0f0f0f0f0f;
-//         constexpr std::size_t mask1 = 0x0f0f0f0f0f0f0f0f;
-//         constexpr std::size_t mask2 = 0x0f0f0f0f0f0f0f0f;
-//         constexpr std::size_t mask3 = 0x0f0f0f0f0f0f0f0f;
-//         constexpr std::size_t mask4 = 0x0f0f0f0f0f0f0f0f;
-//         constexpr std::size_t mask5 = 0x0f0f0f0f0f0f0f0f;
-//         constexpr std::size_t mask6 = 0x0f0f0f0f0f0f0f0f;
-//         constexpr std::size_t mask7 = 0x0f0f0f0f0f0f0f0f;
-//         constexpr std::size_t mask8 = 0x0f0f0f0f0f0f0f0f;
-//         constexpr std::size_t mask9 = 0x0f0f0f0f0f0f0f0f;
-//         constexpr std::size_t mask10 = 0x0f0f0f0f0f0f0f0f;
-//         constexpr std::size_t mask11 = 0x0f0f0f0f0f0f0f0f;
-//         constexpr std::size_t mask12 = 0x0f0f0f0f00000000;
-//         const std::size_t hashable0 = _pext_u64(load_u64_le(ptr+0), mask0);
-//         const std::size_t hashable1 = _pext_u64(load_u64_le(ptr+8), mask1);
-//         const std::size_t hashable2 = _pext_u64(load_u64_le(ptr+16), mask2);
-//         const std::size_t hashable3 = _pext_u64(load_u64_le(ptr+24), mask3);
-//         const std::size_t hashable4 = _pext_u64(load_u64_le(ptr+32), mask4);
-//         const std::size_t hashable5 = _pext_u64(load_u64_le(ptr+40), mask5);
-//         const std::size_t hashable6 = _pext_u64(load_u64_le(ptr+48), mask6);
-//         const std::size_t hashable7 = _pext_u64(load_u64_le(ptr+56), mask7);
-//         const std::size_t hashable8 = _pext_u64(load_u64_le(ptr+64), mask8);
-//         const std::size_t hashable9 = _pext_u64(load_u64_le(ptr+72), mask9);
-//         const std::size_t hashable10 = _pext_u64(load_u64_le(ptr+80), mask10);
-//         const std::size_t hashable11 = _pext_u64(load_u64_le(ptr+88), mask11);
-//         const std::size_t hashable12 = _pext_u64(load_u64_le(ptr+92), mask12);
+        constexpr std::size_t mask0 = 0x0f0f0f0f0f0f0f0f;
+        constexpr std::size_t mask1 = 0x0f0f0f0f0f0f0f0f;
+        constexpr std::size_t mask2 = 0x0f0f0f0f0f0f0f0f;
+        constexpr std::size_t mask3 = 0x0f0f0f0f0f0f0f0f;
+        constexpr std::size_t mask4 = 0x0f0f0f0f0f0f0f0f;
+        constexpr std::size_t mask5 = 0x0f0f0f0f0f0f0f0f;
+        constexpr std::size_t mask6 = 0x0f0f0f0f0f0f0f0f;
+        constexpr std::size_t mask7 = 0x0f0f0f0f0f0f0f0f;
+        constexpr std::size_t mask8 = 0x0f0f0f0f0f0f0f0f;
+        constexpr std::size_t mask9 = 0x0f0f0f0f0f0f0f0f;
+        constexpr std::size_t mask10 = 0x0f0f0f0f0f0f0f0f;
+        constexpr std::size_t mask11 = 0x0f0f0f0f0f0f0f0f;
+        constexpr std::size_t mask12 = 0x0f0f0f0f00000000;
+        const std::size_t hashable0 = _pext_u64(load_u64_le(ptr+0), mask0);
+        const std::size_t hashable1 = _pext_u64(load_u64_le(ptr+8), mask1);
+        const std::size_t hashable2 = _pext_u64(load_u64_le(ptr+16), mask2);
+        const std::size_t hashable3 = _pext_u64(load_u64_le(ptr+24), mask3);
+        const std::size_t hashable4 = _pext_u64(load_u64_le(ptr+32), mask4);
+        const std::size_t hashable5 = _pext_u64(load_u64_le(ptr+40), mask5);
+        const std::size_t hashable6 = _pext_u64(load_u64_le(ptr+48), mask6);
+        const std::size_t hashable7 = _pext_u64(load_u64_le(ptr+56), mask7);
+        const std::size_t hashable8 = _pext_u64(load_u64_le(ptr+64), mask8);
+        const std::size_t hashable9 = _pext_u64(load_u64_le(ptr+72), mask9);
+        const std::size_t hashable10 = _pext_u64(load_u64_le(ptr+80), mask10);
+        const std::size_t hashable11 = _pext_u64(load_u64_le(ptr+88), mask11);
+        const std::size_t hashable12 = _pext_u64(load_u64_le(ptr+92), mask12);
 
-//         size_t data = shift_mix(hashable0 * mul) * mul;
-//         hash ^= data;
-//         hash *= mul;
+        size_t data = shift_mix(hashable0 * mul) * mul;
+        hash ^= data;
+        hash *= mul;
 
-//         data = shift_mix(hashable1 * mul) * mul;
-//         hash ^= data;
-//         hash *= mul;
+        data = shift_mix(hashable1 * mul) * mul;
+        hash ^= data;
+        hash *= mul;
 
-//         data = shift_mix(hashable2 * mul) * mul;
-//         hash ^= data;
-//         hash *= mul;
+        data = shift_mix(hashable2 * mul) * mul;
+        hash ^= data;
+        hash *= mul;
 
-//         data = shift_mix(hashable3 * mul) * mul;
-//         hash ^= data;
-//         hash *= mul;
+        data = shift_mix(hashable3 * mul) * mul;
+        hash ^= data;
+        hash *= mul;
 
-//         data = shift_mix(hashable4 * mul) * mul;
-//         hash ^= data;
-//         hash *= mul;
+        data = shift_mix(hashable4 * mul) * mul;
+        hash ^= data;
+        hash *= mul;
 
-//         data = shift_mix(hashable5 * mul) * mul;
-//         hash ^= data;
-//         hash *= mul;
+        data = shift_mix(hashable5 * mul) * mul;
+        hash ^= data;
+        hash *= mul;
 
-//         data = shift_mix(hashable6 * mul) * mul;
-//         hash ^= data;
-//         hash *= mul;
+        data = shift_mix(hashable6 * mul) * mul;
+        hash ^= data;
+        hash *= mul;
 
-//         data = shift_mix(hashable7 * mul) * mul;
-//         hash ^= data;
-//         hash *= mul;
+        data = shift_mix(hashable7 * mul) * mul;
+        hash ^= data;
+        hash *= mul;
 
-//         data = shift_mix(hashable8 * mul) * mul;
-//         hash ^= data;
-//         hash *= mul;
+        data = shift_mix(hashable8 * mul) * mul;
+        hash ^= data;
+        hash *= mul;
 
-//         data = shift_mix(hashable9 * mul) * mul;
-//         hash ^= data;
-//         hash *= mul;
+        data = shift_mix(hashable9 * mul) * mul;
+        hash ^= data;
+        hash *= mul;
 
-//         data = shift_mix(hashable10 * mul) * mul;
-//         hash ^= data;
-//         hash *= mul;
+        data = shift_mix(hashable10 * mul) * mul;
+        hash ^= data;
+        hash *= mul;
 
-//         data = shift_mix(hashable11 * mul) * mul;
-//         hash ^= data;
-//         hash *= mul;
+        data = shift_mix(hashable11 * mul) * mul;
+        hash ^= data;
+        hash *= mul;
 
-//         data = shift_mix(hashable12 * mul) * mul;
-//         hash ^= data;
-//         hash *= mul;
+        data = shift_mix(hashable12 * mul) * mul;
+        hash ^= data;
+        hash *= mul;
 
-//         hash = shift_mix(hash) * mul;
-//         hash = shift_mix(hash);
+        hash = shift_mix(hash) * mul;
+        hash = shift_mix(hash);
 
-//         return hash;
-// }
+        return hash;
+}
 
+std::size_t PextMurmurINTS::operator()(const std::string& key) const {
+    constexpr size_t __seed = static_cast<size_t>(0xc70f6907UL);
+    return __pext_hash_ints(key.c_str(), key.size(), __seed);
+}
 
 std::size_t PextINTS::operator()(const std::string& key) const {
-    // size_t __seed = static_cast<size_t>(0xc70f6907UL);
-    // return __pext_hash(key.c_str(), key.size(), __seed);
 
     constexpr std::size_t mask0 = 0x0f0f0f0f0f0f0f0f;
     constexpr std::size_t mask1 = 0x0f0f0f0f0f0f0f0f;

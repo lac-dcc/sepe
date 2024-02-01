@@ -117,6 +117,15 @@ struct UrlCompress{
     std::size_t operator()(const std::string& key) const;
 };
 
+struct PextMurmurINTS{
+    std::size_t operator()(const std::string& key) const;
+};
+
+struct PextMurmurUrlComplex{
+    std::size_t operator()(const std::string& key) const;
+};
+
+
 #define DECLARE_SYNTH_OFFXOR_AND_NAIVE_FUNCTIONS(NAME) \
     struct Pext ## NAME { \
         std::size_t operator()(const std::string& key) const; \

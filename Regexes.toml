@@ -2,7 +2,7 @@
 
 [URL_COMPLEX]
 regex = "http:/google\\.github\\.io/[a-z]{10}/version[0-9]{3}/doxygen/html/[a-z0-9]{20}\\.html"
-hashes = ["STDHashSrc", "AbseilHash", "CityHash", "FNVHash", "UrlCompress", "PextUrlComplex", "OffXorUrlComplex", "OffXorSimdUrlComplex", "NaiveSimdUrlComplex", "GptUrlComplex", "GperfUrlComplex", "NaiveUrlComplex"]
+hashes = ["STDHashSrc", "AbseilHash", "CityHash", "FNVHash", "UrlCompress", "PextUrlComplex", "OffXorUrlComplex", "OffXorSimdUrlComplex", "NaiveSimdUrlComplex", "GptUrlComplex", "GperfUrlComplex", "NaiveUrlComplex", "PextMurmurUrlComplex"]
 
 [URL_FIXED_PATTERN]
 regex = "http:/google\\.github\\.io/farmhash/doxygen/html/[a-z0-9]{20}\\.html"
@@ -30,4 +30,4 @@ hashes = ["STDHashSrc", "AbseilHash", "CityHash", "FNVHash", "PextIPV6", "OffXor
 
 [INTS]
 regex = "[0-9]{100}"
-hashes = ["STDHashSrc", "AbseilHash", "CityHash", "FNVHash", "IntBitHash", "IntSimdHash", "PextINTS", "OffXorINTS", "OffXorSimdINTS", "NaiveINTS", "GptINTS", "GperfINTS", "NaiveSimdINTS"]
+hashes = ["STDHashSrc", "AbseilHash", "CityHash", "FNVHash", "IntBitHash", "IntSimdHash", "PextINTS", "OffXorINTS", "OffXorSimdINTS", "NaiveINTS", "GptINTS", "GperfINTS", "NaiveSimdINTS", "PextMurmurINTS"]
