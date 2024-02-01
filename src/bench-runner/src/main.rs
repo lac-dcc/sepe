@@ -52,7 +52,7 @@ struct Command {
     verbose: bool,
 
     /// Suffix of output csv files
-    #[clap(long, default_value = "_results.csv")]
+    #[clap(long, default_value = "_performance.csv")]
     outfile: String,
 
     /// Generate the synthesized function for the given regex, do not run experiments
@@ -226,8 +226,8 @@ fn main() {
         if !keyuser_out.status.success() {
             eprintln!("        !!!FAILED: {}!!!", keyuser_out.status);
         } else {
-            let filename = if cmd.histogram && &cmd.outfile == "_results.csv" {
-                cmd_regex + "_histogram.py"
+            let filename = if cmd.histogram && &cmd.outfile == "_performance.csv" {
+                cmd_regex + "_distribution.py"
             } else {
                 cmd_regex + &cmd.outfile
             };
