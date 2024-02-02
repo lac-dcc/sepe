@@ -2,6 +2,7 @@
 name = "keygen"
 version = "0.1.0"
 edition = "2021"
+authors = ["Leonardo G. Faé", "Renato B. Hoffmann"]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 

@@ -2,14 +2,17 @@ use std::io::{stdout, BufWriter, Write};
 
 use clap::Parser;
 
-/// [ list ]
+/// Represents a List (e.g. `[0-9]`) of possible values
 #[derive(Debug)]
 struct List {
     inner: String,
+    /// A complement is a list with a caret: [^0-9]. It means we should generate all values BUT
+    /// those in the list
     complement: bool,
 }
 
 impl List {
+    /// Returns a random character from the list
     pub fn generate(&self) -> char {
         if !self.complement {
             self.inner
@@ -25,6 +28,7 @@ impl List {
         }
     }
 
+    /// Returns the specified character from the list, decrementing the `i` accordingly
     pub fn generate_inc(&self, i: &mut u64) -> char {
         if !self.complement {
             let ch = self.inner.chars().cycle().nth(*i as usize).unwrap();
@@ -43,7 +47,7 @@ impl List {
     }
 }
 
-/// { Repetitions }
+/// Represents a Repetition (e.g. `{3}`) of values
 #[derive(Debug)]
 struct Repetitions {
     start: u32,
@@ -51,24 +55,34 @@ struct Repetitions {
     end: Option<u32>,
 }
 
+/// Possible Regex symbols
 #[derive(Debug)]
 enum RegexSymbol {
+    /// the `.` special character
     Any,
+    /// stands for the exact character it contains
     Literal(char),
+    /// a parenthesized group, e.g. `(inner_regex)`
     Group(Vec<Regex>),
+    /// list, e.g. `[0-9]`
     List(List),
 }
 
+/// A Regex is a symbol and its possible modifiers
 #[derive(Debug)]
 struct Regex {
     symbol: RegexSymbol,
+    /// "one or more"
     plus: bool,
+    /// "zero or more"
     star: bool,
+    /// "optional"
     question: bool,
     repetitions: Repetitions,
 }
 
 impl Regex {
+    /// Initializes a new Regex from a symbol, setting all modifiers to false
     pub fn new(symbol: RegexSymbol) -> Self {
         Self {
             symbol,
@@ -83,6 +97,7 @@ impl Regex {
         }
     }
 
+    /// Returns random characters according to the regular expression rules
     pub fn generate(&self) -> String {
         let repetitions = if self.plus {
             fastrand::usize(1..5)
@@ -114,6 +129,7 @@ impl Regex {
         s
     }
 
+    /// Returns incremental characters according to the regular expression rules
     pub fn generate_inc(&self, i: &mut u64) -> String {
         let repetitions = if self.plus {
             fastrand::usize(1..5)
@@ -135,12 +151,13 @@ impl Regex {
         let mut s = String::with_capacity(repetitions);
         for _ in 0..repetitions {
             match &self.symbol {
-                RegexSymbol::Any => {s.insert(
-                    0,
-                    char::from_u32(*i as u32 + 32).expect("failed to generate incremental '.'"),
-                );
-                *i = i.saturating_sub(1);
-                },
+                RegexSymbol::Any => {
+                    s.insert(
+                        0,
+                        char::from_u32(*i as u32 + 32).expect("failed to generate incremental '.'"),
+                    );
+                    *i = i.saturating_sub(1);
+                }
                 RegexSymbol::Literal(literal) => s.insert(0, *literal),
                 RegexSymbol::Group(group) => s = generate_inc(group, i) + &s,
                 RegexSymbol::List(list) => s.insert(0, list.generate_inc(i)),
@@ -151,6 +168,7 @@ impl Regex {
     }
 }
 
+/// generate a random regex
 fn generate(regexes: &[Regex]) -> String {
     let mut s = String::with_capacity(regexes.len());
     for regex in regexes {
@@ -159,6 +177,7 @@ fn generate(regexes: &[Regex]) -> String {
     s
 }
 
+/// generate a specific regex, according to `i`
 fn generate_inc(regexes: &[Regex], i: &mut u64) -> String {
     let mut s = String::with_capacity(regexes.len());
     for regex in regexes.iter().rev() {
@@ -167,6 +186,7 @@ fn generate_inc(regexes: &[Regex], i: &mut u64) -> String {
     s
 }
 
+/// parse a list ([0-9])
 fn parse_list(chars: &mut std::str::Chars) -> Regex {
     let mut inner = String::new();
 
@@ -206,6 +226,7 @@ fn parse_list(chars: &mut std::str::Chars) -> Regex {
     Regex::new(RegexSymbol::List(List { inner, complement }))
 }
 
+/// parse a list ([0-9])
 fn parse_repetitions(chars: &mut std::str::Chars) -> Repetitions {
     let mut s = String::new();
     for ch in chars.by_ref() {
@@ -231,6 +252,7 @@ fn parse_repetitions(chars: &mut std::str::Chars) -> Repetitions {
     Repetitions { start, comma, end }
 }
 
+/// parse a group ((inner_regex))
 fn parse_group(chars: &mut std::str::Chars) -> Regex {
     use RegexSymbol::*;
 
@@ -257,6 +279,7 @@ fn parse_group(chars: &mut std::str::Chars) -> Regex {
     Regex::new(Group(group))
 }
 
+/// parse the regex
 fn parse_regex(mut chars: std::str::Chars) -> Vec<Regex> {
     use RegexSymbol::*;
 
@@ -285,19 +308,27 @@ fn parse_regex(mut chars: std::str::Chars) -> Vec<Regex> {
 
 #[derive(Parser)]
 #[command(version, name = "keygen")]
+/// `keygen` generates random strings based on a regex
+///
+/// Note the OR operator (|) is not implemented
 struct Command {
-    /// regex used to generate examples for
+    /// Regex used to generate the strings
+    ///
+    /// Attention! The OR operator (|) is not implemented!
     regex: String,
 
-    /// number of elements to generate
+    /// Number of elements to generate
     #[clap(short, long, default_value = "100")]
     number: u64,
 
-    /// seed used for random number generation
+    /// Seed used for random number generation
     #[clap(short, long, default_value = "223554")]
     seed: u64,
 
-    /// whether to generate regexes in incremental fashion, in order
+    /// Whether to generate regexes in incremental fashion, in order
+    ///
+    /// For example, normally, a regex like [0-9]{3} would generate random 3 digit numbers. By
+    /// passing this flag, the gerator will produce '001', '002', '003', and so on, in order.
     #[clap(short, long)]
     incremental: bool,
 }
@@ -305,7 +336,6 @@ struct Command {
 fn main() {
     let cmd = Command::parse();
 
-    // Set the seed for the random number generator
     fastrand::seed(cmd.seed);
 
     let regex = parse_regex(cmd.regex.chars());
