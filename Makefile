@@ -1,4 +1,8 @@
-all: bin bin/keygen bin/keyuser bin/sepe-runner bin/keybuilder bin/keysynth
+all: bin bin/keygen bin/keybuilder bin/keysynth
+
+benchmark: bin/keyuser bin/sepe-runner
+
+keyuser: bin/keyuser
 
 bin:
 	@mkdir -p bin/

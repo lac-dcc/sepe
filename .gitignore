@@ -7,4 +7,5 @@ deps/
 __pycache__/
 *.png
 *.svg
-*_histogram.py
+*_distribution.py
+

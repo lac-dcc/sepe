@@ -15,76 +15,107 @@ These are the most important dependencies for building and running all Sepe prog
 | clang      | >= 14.0.0 | [llvm.org](https://llvm.org/docs/CMake.html) |
 | CMake      | >= 3.20   | [cmake.org](https://cmake.org/install/)      |
 | Rust       | >= 1.7    | [rust.org](https://www.rust-lang.org/tools/install)|
+| Python     | >= 3.10   | [python.org](https://wiki.python.org/moin/BeginnersGuide/Download)|
 
 Rust is only necessary if you want to run the experiments. If you are only interested in the hash functions generation, only `clang` is necessary.
 
-## Quick-Start: Building and Running Experiments
+## Quick-Start: Synthesizing functions
+
+To build the hash function from the regular expression of your keys, use:
+
+```sh
+make
+./scripts/make_hash_from_regex.sh [REGEX]
+```
+
+Example: *Generating a custom hash function for IPV4 keys*
+```sh
+./scripts/make_hash_from_regex.sh "(([0-9]{3})\\.){3}[0-9]{3}" #or single quotes in zshell
+```
+
+### Integrating the Synthesized function into your project
+
+Suppose your code has a C++ STL std::unordered_map with IPV4 std::string as keys and int as values.
+
+```cpp
+std::unordered_map<std::string, int> map;
+map["255.255.255.255"] = 42
+// more code that uses map object
+```
+
+After running, `./scripts/make_hash_from_regex.sh "(([0-9]{3})\\.){3}[0-9]{3}"`, you should get the following output with two function options:
+
+```cpp
+// Helper function, include in your codebase:
+inline static uint64_t load_u64_le(const char* b) {
+        uint64_t Ret;
+        // This is a way for the compiler to optimize this func to a single movq instruction
+        memcpy(&Ret, b, sizeof(uint64_t));
+        return Ret;
+}
+// Pext Hash Function:
+struct synthesizedPextHash {
+    // Omitted for brevity in this code snippet
+};
+// OffXor Hash Function:
+struct synthesizedOffXorHash {
+        std::size_t operator()(const std::string& key) const {
+                const std::size_t hashable0 = load_u64_le(key.c_str()+0);
+                const std::size_t hashable1 = load_u64_le(key.c_str()+7);
+                size_t tmp0 = hashable0 ^ hashable1;
+                return tmp0;
+        }
+};
+```
+
+Simply copy and paste the desired hash function, in this example `synthesizedOffXorHash` into your codebase and then add its name as the third argument of in the std::unordered_map template like so:
+
+```cpp
+// Helper function, include in your codebase:
+inline static uint64_t load_u64_le(const char* b) {
+        uint64_t Ret;
+        // This is a way for the compiler to optimize this func to a single movq instruction
+        memcpy(&Ret, b, sizeof(uint64_t));
+        return Ret;
+}
+
+struct synthesizedOffXorHash {
+        std::size_t operator()(const std::string& key) const {
+                const std::size_t hashable0 = load_u64_le(key.c_str()+0);
+                const std::size_t hashable1 = load_u64_le(key.c_str()+7);
+                size_t tmp0 = hashable0 ^ hashable1;
+                return tmp0;
+        }
+};
+
+void yourCode(void){
+        std::unordered_map<std::string, int, synthesizedOffXorHash> map;
+        map["255.255.255.255"] = 42
+        // more code that uses map object
+}
+
+```
+
+## Quick-Start: Benchmarking
 
 Building and running with default parameters:
 
 ```sh
 ./scripts/install_abseil.sh # necessary for keyuser
-make
-./bin/bench-runner [REGEXES]
+make && make benchmark
+./bin/sepe-runner [REGEXES]
 ```
-
 Valid regexes are listed in the `Regexes.toml` file.
 
-### Building only the hash function generator
-
-To only build the hash  function generator, use:
-
-```sh
-make bin/keybuilder bin/keysynth
+Example: *Benchmarking all IPV4 hash functions with default parameters*
+```
+./bin/sepe-runner IPV4
+./scripts/keyuser_interpreter.py -p IPV4_performance.csv
 ```
 
-## Building
+For more options, see [sepe-runner](#sepe-runner) section: 
 
-`make` will build all binaries and move them to a `bin` file in the top level
-directory.
-
-### Building keygen
-
-Requires Rust.
-
-```sh
-make bin/keygen
-```
-
-### Building bench-runner
-
-Requires Rust.
-
-```sh
-make bin/bench-runner
-```
-
-### Building keyuser
-
-Requires C++.
-
-```sh
-./scripts/install_abseil.sh # we use parts of the abseil library in the benchmarks
-make bin/keyuser
-```
-
-### Building keybuilder
-
-Requires C
-
-```sh
-make bin/keybuilder
-```
-
-### Building keysynth
-
-Requires C
-
-```sh
-make bin/keysynth
-```
-
-## Running
+## Sepe Components
 
 ### keygen
 
@@ -109,6 +140,8 @@ For more options, do:
 
 ### keyuser
 
+*We recommend using keyuser via [sepe-runner](#sepe-runner)*
+
 `keyuser` benchmarks custom hash functions with keys received from standard input.
 
 ```sh
@@ -121,12 +154,15 @@ Example: *Benchmarking 2 IPV4 Keys with 10 total operations using STDHashBin IPV
 
 ```sh
 ./bin/keygen "(([0-9]{3})\.){3}[0-9]{3}" -n 2 -s 223554 | ./bin/keyuser --hashes STDHashBin IPV4HashGeneric -n 10 -i 50 -s 30 -e 20
- Interweaved execution mode (50% batched inserts):
-                ------> IPV4HashGeneric           Average time: 0.000004 (s)    Geomean time: 0.000004 (s)    Total Collision Count (Buckets) 4
-                ------> STDHashBin                   Average time: 0.000005 (s)    Geomean time: 0.000004 (s)    Total Collision Count (Buckets) 4
-        Batch execution mode:
-                ------> IPV4HashGeneric           Average time: 0.000004 (s)    Geomean time: 0.000004 (s)    Total Collision Count (Buckets) 4
-                ------> STDHashBin                   Average time: 0.000004 (s)    Geomean time: 0.000004 (s)    Total Collision Count (Buckets) 4
+Execution Mode,Num Operations,Num Keys,Insertions (%),Searches (%),Eliminatons(%),Hash Container,Hash Function,Execution Time (s),Collision Count
+Interweaved,10,2,50,30,20,UnorderedMapBench,STDHashBin,0.000056,0
+Interweaved,10,2,50,30,20,UnorderedMultiMapBench,STDHashBin,0.000004,2
+Interweaved,10,2,50,30,20,UnorderedSetBench,STDHashBin,0.000018,0
+Interweaved,10,2,50,30,20,UnorderedMultisetBench,STDHashBin,0.000003,2
+Batched,10,2,50,30,20,UnorderedMapBench,STDHashBin,0.000002,0
+Batched,10,2,50,30,20,UnorderedMultiMapBench,STDHashBin,0.000003,0
+Batched,10,2,50,30,20,UnorderedSetBench,STDHashBin,0.000002,0
+Batched,10,2,50,30,20,UnorderedMultisetBench,STDHashBin,0.000002,0
 ```
 
 For more options, do:
@@ -144,29 +180,38 @@ For more options, do:
 
 ### keysynth
 
-`keysynth` synthesizes the hash functions based on the regex generated by the keybuilder. It is picky about the regex's format, so it is not recommended to hand-write it. Use `keybuilder` instead.
+`keysynth` synthesizes the hash functions based on the regex generated by the `keybuilder`. It is picky about the regex's format, so it is not recommended to hand-write it. Use `keybuilder` instead.
 
 ```sh
 ./bin/keysynth "$(./bin/keybuilder < txt-file-with-strings)"
 ```
 
-### bench-runner
+### sepe-runner
 
-`bench-runner` is a helper program that connects the other programs together as needed.
+`sepe-runner` is a helper program that connects the other programs together as needed.
+
+`Regexes.toml` is a configuration file containing all accepted `sepe-runner` regular expressions and their associated Hash Functions. *Changing this file also requires changing `keyuser`.*
 
 ```sh
-./bin/bench-runner Regex-entry-in-Regexes.toml
+./bin/sepe-runner Regex-entry-in-Regexes.toml
 ```
+Some relevant parameters are:
+- `-k, --keys`: Number of keys to generate
+- `-o, --operations`: Number of operations to run
+- `-i, --insert`: Percentage of insertion operations
+- `-s, --search`: Percentage of search operations
+- `-e, --elimination`: Percentage of elimination operations
+- `--histogram`: Generate the distribution histogram for the given regex, do not run experiments
 
-Example: *Running the IPV4 Benchmark*
+Example: *Running the IPV4 benchmark*
 
 ```sh
-./bin/bench-runner IPV4
+./bin/sepe-runner IPV4
 ```
 
 For more options, do:
 ```sh
-./bin/bench-runner --help
+./bin/sepe-runner --help
 ```
 
 ## Helper Scripts
@@ -177,4 +222,30 @@ The `scripts` folder contains some helper scripts that may be useful for some pe
   * `benchmark.sh` - helper to run many benchmarks at once
   * `install_abseil.sh` - installs the abseil library locally. Necessary for `keyuser`
   * `make_hash_from_regex.sh` - creates a hash function from a user defined regex
-  * `result_interpreter.py` - interprets the results generated from `keyuser`'s benchmarks
+  * `keyuser_interpreter.py` - interprets the results generated from `keyuser`'s benchmarks
+
+### Using `keyuser_interpreter.py`
+
+  This script is used to help interpret the output of `keyuser`. It can plot graphs, generate tables, and perform statistical analysis.
+
+  The most relevant configurations are:
+
+```
+-d DISTRIBUTION, --distribution DISTRIBUTION
+                      Name of the distribution file to interpret. Exclusive with -p option.
+-p [PERFORMANCE ...], --performance [PERFORMANCE ...]
+                      Name of the csv performance files to interpret. Exclusive with -d option.
+-pg, --plot-graph     Option to plot the results in graphs.
+-hf [HASH_FUNCTIONS ...], --hash-functions [HASH_FUNCTIONS ...]
+                      Name of the hash functions to analyze.
+```
+
+Example for interpreting performance of IPV4 keys:
+```sh
+./bin/sepe-runner IPV4 && ./scripts/keyuser_interpreter.py -p IPV4_performance.csv
+```
+
+Example for interpreting performance of IPV4 keys:
+```sh
+./bin/sepe-runner --histogram IPV4 && ./scripts/keyuser_interpreter.py -d IPV4_distribution.py
+```

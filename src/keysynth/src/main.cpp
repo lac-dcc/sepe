@@ -3,13 +3,12 @@
 #include <queue>
 #include <utility>
 
-// Constant to hold a helper function used within the synthethised functions
-static const std::string load_u64_le = R"(inline static uint64_t load_u64_le(const char* b) {
-    uint64_t Ret;
-    // This is a way for the compiler to optimize this func to a single movq instruction
-    memcpy(&Ret, b, sizeof(uint64_t)); 
-    return Ret;
-})";
+// Constant to hold a helper function used within the synthetized functions
+static const std::string load_u64_le = "inline static uint64_t load_u64_le(const char* b) {\n\
+\tuint64_t Ret;\n\
+\t// This is a way for the compiler to optimize this func to a single movq instruction\n\
+\tmemcpy(&Ret, b, sizeof(uint64_t));\n\
+\treturn Ret;\n}";
 
 /**
  * @brief Converts an integer to a 2 digits hexadecimal string.
@@ -152,7 +151,7 @@ static std::string recursivelyCalculateMask(const std::vector<Range>& ranges, si
 
 // Returns a hashable variable for the pext hash function
 static std::string hashablePext(int hashableID, size_t offset){
-    return "\tconst std::size_t hashable" + 
+    return "\t\tconst std::size_t hashable" + 
                 std::to_string(hashableID) + 
                 " = _pext_u64(load_u64_le(key.c_str()+" + 
                 std::to_string(offset) + 
@@ -163,7 +162,7 @@ static std::string hashablePext(int hashableID, size_t offset){
 
 // Returns a hashable variable for the naive hash function
 static std::string hashableNaive(int hashableID, size_t offset){
-    return "\tconst std::size_t hashable" + 
+    return "\t\tconst std::size_t hashable" + 
                 std::to_string(hashableID) + 
                 " = load_u64_le(key.c_str()+" + 
                 std::to_string(offset) + 
@@ -172,7 +171,7 @@ static std::string hashableNaive(int hashableID, size_t offset){
 
 // Returns a hashable variable for the vectorized/SIMD naive hash function
 static std::string hashableNaiveSIMD(int hashableID, size_t offset){
-    return "\tconst __m128i hashable" + 
+    return "\t\tconst __m128i hashable" + 
                 std::to_string(hashableID) + 
                 " = _mm_lddqu_si128((const __m128i *)(key.c_str()+" + 
                 std::to_string(offset) + 
@@ -251,9 +250,11 @@ calculateRanges(std::string& regex){
 
     if(ranges.size() == 0){
 		std::cout << "// No regex ranges in the key. Using default Function. \n\
-			std::size_t synthesizedHashFunc::operator()(const std::string& key) const {\n\
-    			\treturn std::hash<std::string>{}(key);\n\
-			}";
+            struct synthesizedHashFunc{\n\
+                std::size_t operator()(const std::string& key) const {\n\
+                    \treturn std::hash<std::string>{}(key);\n\
+                }\n\
+            }\n";
             exit(0);
     }
 
@@ -279,7 +280,7 @@ static std::string cascadeXorVars(std::queue<std::string>& queue){
 		std::string id2 = queue.front();
 		queue.pop();
 		std::string tmpVar = "tmp" + std::to_string(tmpID++);
-		xorCascade += "\tsize_t " + tmpVar + " = " + id1 + " ^ " +id2 + ";\n";
+		xorCascade += "\t\tsize_t " + tmpVar + " = " + id1 + " ^ " +id2 + ";\n";
 		queue.push(tmpVar);
 	}
     return xorCascade;
@@ -304,7 +305,7 @@ static std::string cascadeXorVarsSIMD(std::queue<std::string>& queue){
 		std::string id2 = queue.front();
 		queue.pop();
 		std::string tmpVar = "tmp" + std::to_string(tmpID++);
-		xorCascade += "\t__m128i " + tmpVar + " = _mm_xor_si128(" + id1 + ", " +id2 + ");\n";
+		xorCascade += "\t\t__m128i " + tmpVar + " = _mm_xor_si128(" + id1 + ", " +id2 + ");\n";
 		queue.push(tmpVar);
 	}
     return xorCascade;
@@ -361,7 +362,7 @@ unrollMasks_calculateShift(std::string& mask, size_t lastMaskShift){
 		long maskInt = std::stold("0x" + currMask);
 		shifts.push_back(countZeros(maskInt)-1);
 
-        masksStr += "\tconstexpr std::size_t mask" + 
+        masksStr += "\t\tconstexpr std::size_t mask" + 
                     std::to_string(maskID) + 
                     " = 0x" + 
                     currMask + 
@@ -381,7 +382,7 @@ unrollMasks_calculateShift(std::string& mask, size_t lastMaskShift){
  * @param offset The offset.
  * @return std::string The synthesized PEXT hash function as a string.
  */
-std::string synthethisePextHashFunc(std::vector<Range>& ranges, size_t offset){
+std::string synthetizePextHashFunc(std::vector<Range>& ranges, size_t offset){
 
     // Calculate offsets
     std::vector<size_t> offsets = calculateOffsets(ranges);
@@ -393,7 +394,7 @@ std::string synthethisePextHashFunc(std::vector<Range>& ranges, size_t offset){
         offsets[offsets.size()-1] = offset - 8;
     }
 
-    std::string synthesizedHashFunc = "std::size_t synthesizedPextHash(const std::string& key) const {\n";
+    std::string synthesizedHashFunc = "struct synthesizedPextHash {\n\tstd::size_t operator()(const std::string& key) const {\n";
     
     // Calculate all concatenated masks based on ranges
     std::string mask = recursivelyCalculateMask(ranges, 0, 0);
@@ -421,9 +422,9 @@ std::string synthethisePextHashFunc(std::vector<Range>& ranges, size_t offset){
     // Create hashable variables and left shift them as much as possible for better collision
 	for (int i = 0; i < hashableID; ++i) {
 		if (i % 2 == 0) {
-			synthesizedHashFunc += "\tsize_t shift" + std::to_string(i) + " = " + "hashable" + std::to_string(i) + ";\n";
+			synthesizedHashFunc += "\t\tsize_t shift" + std::to_string(i) + " = " + "hashable" + std::to_string(i) + ";\n";
 		} else {
-			synthesizedHashFunc += "\tsize_t shift" + std::to_string(i) + " = " + "hashable" + std::to_string(i) + " << " + std::to_string(shifts[i]) + ";\n";
+			synthesizedHashFunc += "\t\tsize_t shift" + std::to_string(i) + " = " + "hashable" + std::to_string(i) + " << " + std::to_string(shifts[i]) + ";\n";
 		}
 	}
 
@@ -436,11 +437,8 @@ std::string synthethisePextHashFunc(std::vector<Range>& ranges, size_t offset){
     // Cascade XOR variables
     synthesizedHashFunc += cascadeXorVars(queue);
 
-    synthesizedHashFunc += "\treturn " + queue.front() + "; \n";
-    synthesizedHashFunc += "}\n";
-
-    // load_u64_le function header
-    synthesizedHashFunc = load_u64_le + "\n" + synthesizedHashFunc;
+    synthesizedHashFunc += "\t\treturn " + queue.front() + "; \n";
+    synthesizedHashFunc += "\t}\n};\n";
 
     return synthesizedHashFunc;
 }
@@ -455,7 +453,7 @@ std::string synthethisePextHashFunc(std::vector<Range>& ranges, size_t offset){
  * @param offset The offset.
  * @return std::string The synthesized Offset XOR hash function as a string.
  */
-std::string synthethiseOffXorHashFunc(std::vector<Range>& ranges, size_t offset){
+std::string synthetizeOffXorHashFunc(std::vector<Range>& ranges, size_t offset){
 
     // Calculate offsets
     std::vector<size_t> offsets = calculateOffsets(ranges);
@@ -465,7 +463,7 @@ std::string synthethiseOffXorHashFunc(std::vector<Range>& ranges, size_t offset)
         offsets[offsets.size()-1] = offset - 8;
     }
 
-    std::string synthesizedHashFunc = "std::size_t synthesizedOffXorHash(const std::string& key) const {\n";
+    std::string synthesizedHashFunc = "struct synthesizedOffXorHash {\n\tstd::size_t operator()(const std::string& key) const {\n";
 
     // Create hashables
     int hashableID = 0;
@@ -482,8 +480,8 @@ std::string synthethiseOffXorHashFunc(std::vector<Range>& ranges, size_t offset)
     // Cascade XOR variables
     synthesizedHashFunc += cascadeXorVars(queue);
 
-    synthesizedHashFunc += "\treturn " + queue.front() + "; \n";
-    synthesizedHashFunc += "}\n";
+    synthesizedHashFunc += "\t\treturn " + queue.front() + "; \n";
+    synthesizedHashFunc += "\t}\n};\n";
 
     return synthesizedHashFunc;
 }
@@ -498,7 +496,7 @@ std::string synthethiseOffXorHashFunc(std::vector<Range>& ranges, size_t offset)
  * @param offset The offset.
  * @return std::string The synthesized Offset XOR SIMD hash function as a string.
  */
-std::string synthethiseOffXorSimdFunc(std::vector<Range>& ranges, size_t offset) {
+std::string synthetizeOffXorSimdFunc(std::vector<Range>& ranges, size_t offset) {
     // Calculate offsets
     std::vector<size_t> offsets = calculateOffsets(ranges, 16);
 
@@ -507,7 +505,7 @@ std::string synthethiseOffXorSimdFunc(std::vector<Range>& ranges, size_t offset)
         offsets[offsets.size()-1] = offset - 16;
     }
 
-    std::string synthesizedHashFunc = "std::size_t synthesizeOffXorSimdHash(const std::string& key) const {\n";
+    std::string synthesizedHashFunc = "struct synthesizeOffXorSimdHash {\n\tstd::size_t operator()(const std::string& key) const {\n";
 
     // Create hashables
     int hashableID = 0;
@@ -524,8 +522,8 @@ std::string synthethiseOffXorSimdFunc(std::vector<Range>& ranges, size_t offset)
     // Cascade XOR variables
     synthesizedHashFunc += cascadeXorVarsSIMD(queue);
 
-    synthesizedHashFunc += "\treturn _mm_extract_epi64("+queue.front()+", 0) ^ _mm_extract_epi64("+queue.front()+" , 1); \n";
-    synthesizedHashFunc += "}\n";
+    synthesizedHashFunc += "\t\treturn _mm_extract_epi64("+queue.front()+", 0) ^ _mm_extract_epi64("+queue.front()+" , 1); \n";
+    synthesizedHashFunc += "\t}\n};\n";
     synthesizedHashFunc =  "#include <immintrin.h>\n" + synthesizedHashFunc;
 
     return synthesizedHashFunc;
@@ -559,11 +557,23 @@ int main(int argc, char** argv){
     ranges = res.first;
     offset = res.second;
 
-    printf("%s\n", synthethisePextHashFunc(ranges,offset).c_str());
-    if(regexStr.size() < 32){
-        printf("%s", synthethiseOffXorHashFunc(ranges,offset).c_str());
+    size_t regexSize = 0;
+    for(const auto& range : ranges){
+        regexSize += range.repetition;
+        regexSize += range.offset;
+    }
+
+    // load_u64_le function header
+    printf("// Helper function, include in your codebase:\n");
+    printf("%s\n", load_u64_le.c_str());
+
+    printf("// Pext Hash Function:\n");
+    printf("%s\n", synthetizePextHashFunc(ranges,offset).c_str());
+    printf("// OffXor Hash Function:\n");
+    if(regexSize < 64){
+        printf("%s", synthetizeOffXorHashFunc(ranges,offset).c_str());
     } else {
-        printf("%s", synthethiseOffXorSimdFunc(ranges,offset).c_str());
+        printf("%s", synthetizeOffXorSimdFunc(ranges,offset).c_str());
     }
 
     return 0;

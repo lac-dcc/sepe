@@ -3,7 +3,6 @@
 # This script reads multiple .csv files produced by keyuser, extracts relevant
 # information and calculate metrics to compare the different hash functions
 
-import sys
 import os
 import argparse
 import importlib
@@ -60,11 +59,10 @@ def handle_distribution_analysis(args):
         file_destination = args.output_destination + regex_name + "_histogram.svg"
         _, ax = plt.subplots(figsize=(10, 5))
     
-    print(args.hash_functions)
     for key, value in arrays.distributions.items():
-        key = key.replace("array_", "")
         if key not in args.hash_functions:
             continue
+        key = key.replace("array_", "")
         if args.plot_graph:
             ax.hist(value, label=key, alpha=0.5)
 
@@ -199,8 +197,8 @@ def handle_performance_analysis(args):
 
 def main():
     parser = argparse.ArgumentParser(description="Keyuser Interpreter")
-    parser.add_argument("-d", "--distribution", type=str, help="Name of the distribution file to interpret. Exclusive with -p option.")
-    parser.add_argument("-p", "--performance", nargs='*', type=str, help="Name of the csv performance files to interpret. Exclusive with -d option.")
+    parser.add_argument("-d", "--distribution", type=str, default="", help="Name of the distribution file to interpret. Exclusive with -p option.")
+    parser.add_argument("-p", "--performance", nargs='*', type=str, default="", help="Name of the csv performance files to interpret. Exclusive with -d option.")
     parser.add_argument("-pg", "--plot-graph", action='store_true', help="Option to plot the results in graphs.")
     parser.add_argument("-od", "--output-destination", type=str, default="results/", help="Output path to output graphs. Default is current file.")
     parser.add_argument("-fp", "--full-print", action='store_true', help="Print the entire dataframe.")
