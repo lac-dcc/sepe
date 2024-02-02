@@ -240,12 +240,12 @@ The `scripts` folder contains some helper scripts that may be useful for some pe
                       Name of the hash functions to analyze.
 ```
 
-Example for interpreting performance of IPV4 keys:
+Example for interpreting performance using IPV4 keys:
 ```sh
 ./bin/sepe-runner IPV4 && ./scripts/keyuser_interpreter.py -p IPV4_performance.csv
 ```
 
-Example for interpreting performance of IPV4 keys:
+Example for interpreting hash distribution using IPV4 keys:
 ```sh
 ./bin/sepe-runner --histogram IPV4 && ./scripts/keyuser_interpreter.py -d IPV4_distribution.py
 ```
