@@ -3,6 +3,7 @@
 #include <queue>
 #include <utility>
 
+// Constant to hold a helper function used within the synthethised functions
 static const std::string load_u64_le = R"(inline static uint64_t load_u64_le(const char* b) {
     uint64_t Ret;
     // This is a way for the compiler to optimize this func to a single movq instruction
@@ -10,18 +11,32 @@ static const std::string load_u64_le = R"(inline static uint64_t load_u64_le(con
     return Ret;
 })";
 
+/**
+ * @brief Converts an integer to a 2 digits hexadecimal string.
+ *
+ * This function takes a size_t integer as input and returns its hexadecimal representation as a string.
+ *
+ * @param num The integer to be converted to hexadecimal.
+ * @return std::string The hexadecimal representation of the input integer.
+ */
 static std::string intToHex(size_t num){
     char numStr[17];
     sprintf(numStr, "%02lx", num);
     return std::string(numStr);
 }
 
+/**
+ * @struct Range
+ * @brief A structure representing a range of characters.
+ *
+ * This structure represents a range of characters, with a start and end character, an offset, a repetition count, and a mask.
+ */
 struct Range{
-    char start;
-    char end;
-    int offset;
-    size_t repetition;
-    char mask;
+    char start; ///< The start character of the range.
+    char end; ///< The end character of the range.
+    int offset; ///< The offset of the range.
+    size_t repetition; ///< The repetition count of the range.
+    char mask; ///< The mask associated with the range. Only useful for PEXT.
 
     Range(char _start, char _end, int _offset, size_t _repetition) : 
         start(_start), 
@@ -29,7 +44,17 @@ struct Range{
         offset(_offset),
         repetition(_repetition)
     {
-        // Calculate mask
+
+        /**
+         * This function calculates a mask that ignores static bits across a start to an end char range. The process is as follows:
+         *  We assume masks are 8 bytes for a range, i.e. [a-z] has a mask of 0x1F, and [a-z0-9] has a mask of 0x7F.
+         * - `zeroes` contain all bits that are always zero. 
+         *   First, we mark all positions that contain at least one one, then we negate it to get all bits that are always zero.
+         * - `ones` contain all bits that are always one.
+         * - Then, we OR `zeroes` and `ones`. The bits that never change are 0, everything else is 1.
+         * - Finally, we invert the mask because we want to keep the bits that change across the range.
+         *   Prety cool right?
+         */
         char zeroes = 0;
         char ones = start;
         for(char ch = start; ch < end ; ch++){
@@ -40,7 +65,7 @@ struct Range{
         mask = zeroes | ones;
         mask = ~mask;
         if(mask == 0){
-            mask = 0x7F;
+            mask = 0x7F; // Default
         }
     }
 
@@ -50,20 +75,50 @@ struct Range{
     
 };
 
+/**
+ * @brief Count the number of zero bits in a size_t value.
+ *
+ * This function counts and returns the number of zero bits in the binary representation of a size_t value.
+ *
+ * @param x The size_t value to count zero bits in.
+ * @return int The number of zero bits in x.
+ */
 static inline int countZeros(const size_t x) {
-	int zeros = 0;
-	for (size_t i = 0; i < sizeof(size_t) * 8; ++i) {
-		if ((x & (1L << i)) == 0) {
-			++zeros;
-		}
-	}
-	return zeros;
+    int zeros = 0;
+    for (size_t i = 0; i < sizeof(size_t) * 8; ++i) {
+        if ((x & (1L << i)) == 0) {
+            ++zeros;
+        }
+    }
+    return zeros;
 }
 
+/**
+ * @brief Check if the next range is continuous with the current range.
+ *
+ * This function checks if the next range in the vector is continuous with the current range. 
+ * It does this by comparing the offset of the next range with the sum of the offset and repetition of the current range.
+ *
+ * @param ranges The vector of Range objects.
+ * @param rangeIdx The index of the current range in the vector.
+ * @return bool True if the next range is continuous with the current range, false otherwise.
+ */
 static bool nextIsContinuous(const std::vector<Range>& ranges, size_t rangeIdx){
     return ((size_t)ranges[rangeIdx+1].offset == ranges[rangeIdx].offset + ranges[rangeIdx].repetition);
 }
 
+/**
+ * @brief Recursively calculate the mask for a vector of Range objects.
+ *
+ * This function recursively calculates the mask for a vector of Range objects. It does this by iterating over the ranges and 
+ * generating a hexadecimal string representation of the mask for each range. The mask size in bytes is (n-1)*8 <= maskSize <= n*8, where n is the range size.
+ * So, if the next range is not continuous with the current range, it adds zeroes to the mask string to represent the gap.
+ *
+ * @param ranges The vector of Range objects.
+ * @param rangeIdx The index of the current range in the vector.
+ * @param numRepetitions The number of times the current range has been repeated.
+ * @return std::string The hexadecimal string representation of the mask for the ranges.
+ */
 static std::string recursivelyCalculateMask(const std::vector<Range>& ranges, size_t rangeIdx, size_t numRepetitions){
 
     // Stop condition
@@ -95,6 +150,7 @@ static std::string recursivelyCalculateMask(const std::vector<Range>& ranges, si
 
 }
 
+// Returns a hashable variable for the pext hash function
 static std::string hashablePext(int hashableID, size_t offset){
     return "\tconst std::size_t hashable" + 
                 std::to_string(hashableID) + 
@@ -105,6 +161,7 @@ static std::string hashablePext(int hashableID, size_t offset){
                 ");\n";
 }
 
+// Returns a hashable variable for the naive hash function
 static std::string hashableNaive(int hashableID, size_t offset){
     return "\tconst std::size_t hashable" + 
                 std::to_string(hashableID) + 
@@ -113,6 +170,7 @@ static std::string hashableNaive(int hashableID, size_t offset){
                 ");\n";
 }
 
+// Returns a hashable variable for the vectorized/SIMD naive hash function
 static std::string hashableNaiveSIMD(int hashableID, size_t offset){
     return "\tconst __m128i hashable" + 
                 std::to_string(hashableID) + 
@@ -121,12 +179,21 @@ static std::string hashableNaiveSIMD(int hashableID, size_t offset){
                 "));\n";
 }
 
+/**
+ * @brief Calculate the offsets for a vector of Range objects.
+ *
+ * This function calculates the offsets for a vector of Range objects. It does this by iterating over the ranges and 
+ * incrementing the current offset based on repetitions and other ranges offsets.
+ *
+ * @param ranges The vector of Range objects.
+ * @param regSize The size of the register. Default is 8.
+ * @return std::vector<size_t> The vector of calculated offsets.
+ */
 static std::vector<size_t> calculateOffsets(std::vector<Range>& ranges, int regSize=8){
     size_t rangesID = 0;
     std::vector<size_t> offsets;
     int currOffset = ranges[rangesID].offset;
     while( rangesID < ranges.size() ){
-        // synthesizedHashFunc += hashablePext(hashableID++, currOffset);
         offsets.push_back(currOffset);
         currOffset += regSize;
         if( currOffset >= (ranges[rangesID].offset + (int)ranges[rangesID].repetition) ){
@@ -147,6 +214,16 @@ static std::vector<size_t> calculateOffsets(std::vector<Range>& ranges, int regS
     return offsets;
 }
 
+/**
+ * @brief Calculate the ranges for a given regular expression string.
+ *
+ * This function calculates the ranges for a given regular expression string. It does this by iterating over the characters in the 
+ * string and creating a Range object for each range found in the string. The offset is incremented for each character in the string 
+ * that is not part of a range. If no ranges are found in the string, the function prints a default function and exits.
+ *
+ * @param regex The regular expression string.
+ * @return std::pair<std::vector<Range>,size_t> A pair containing the vector of Range objects and the final offset.
+ */
 static std::pair<std::vector<Range>,size_t> 
 calculateRanges(std::string& regex){
     std::vector<Range> ranges;
@@ -183,7 +260,16 @@ calculateRanges(std::string& regex){
     return std::make_pair(ranges,offset);
 }
 
-
+/**
+ * @brief Cascade XOR operations on variables.
+ *
+ * This function cascades XOR operations on variables. It does this by dequeuing two variables from the queue at a time, 
+ * performing an XOR operation on them, and storing the result in a temporary variable. The temporary variable is then 
+ * enqueued. This process continues until there is only one variable left in the queue.
+ *
+ * @param queue The queue of variable names.
+ * @return std::string The string representation of the XOR cascade.
+ */
 static std::string cascadeXorVars(std::queue<std::string>& queue){
     std::string xorCascade;
 	int tmpID = 0;
@@ -199,6 +285,16 @@ static std::string cascadeXorVars(std::queue<std::string>& queue){
     return xorCascade;
 }
 
+/**
+ * @brief Cascade XOR operations on variables using SIMD instructions.
+ *
+ * This function cascades XOR operations on variables using SIMD instructions. It does this by dequeuing two variables from the queue at a time, 
+ * performing an XOR operation on them using the _mm_xor_si128 function, and storing the result in a temporary variable. The temporary variable is then 
+ * enqueued. This process continues until there is only one variable left in the queue.
+ *
+ * @param queue The queue of variable names.
+ * @return std::string The string representation of the XOR cascade.
+ */
 static std::string cascadeXorVarsSIMD(std::queue<std::string>& queue){
     std::string xorCascade;
 	int tmpID = 0;
@@ -214,7 +310,17 @@ static std::string cascadeXorVarsSIMD(std::queue<std::string>& queue){
     return xorCascade;
 }
 
-// Yes, this functions does two things. How about that clean coders?
+/**
+ * @brief Unroll masks and calculate shifts.
+ *
+ * This function unrolls masks and calculates shifts. It does this by iterating over the mask string in chunks of 16 characters. 
+ * Each chunk is converted to little-endian, shifted until there are no zeroes on the right, and then adjusted to avoid out of bounds memory access. 
+ * The number of zeroes in the mask is counted and stored in a vector. The mask code string is also constructed for each mask.
+ *
+ * @param mask The mask string.
+ * @param lastMaskShift The shift for the last mask.
+ * @return std::pair<std::vector<int>, std::string> A pair containing the vector of shifts and the resulting mask code strings.
+ */
 static std::pair<std::vector<int>, std::string> 
 unrollMasks_calculateShift(std::string& mask, size_t lastMaskShift){
     int maskID = 0;
@@ -265,6 +371,16 @@ unrollMasks_calculateShift(std::string& mask, size_t lastMaskShift){
     return std::make_pair(shifts, masksStr);
 }
 
+/**
+ * @brief Synthesize a PEXT hash function.
+ *
+ * This function synthesizes a PEXT hash function. It does this by taking a vector of Range objects and an offset as input. 
+ * The general idea of the implementation is to compress the input key into relevant bytes and only hashing them.
+ *
+ * @param ranges The vector of Range objects.
+ * @param offset The offset.
+ * @return std::string The synthesized PEXT hash function as a string.
+ */
 std::string synthethisePextHashFunc(std::vector<Range>& ranges, size_t offset){
 
     // Calculate offsets
@@ -329,6 +445,16 @@ std::string synthethisePextHashFunc(std::vector<Range>& ranges, size_t offset){
     return synthesizedHashFunc;
 }
 
+/**
+ * @brief Synthesize an Offset XOR hash function.
+ *
+ * This function synthesizes an Offset XOR hash function. It does this by taking a vector of Range objects and an offset as input. 
+ * This is a naive implementation that just XORs bytes at the given offsets.
+ *
+ * @param ranges The vector of Range objects.
+ * @param offset The offset.
+ * @return std::string The synthesized Offset XOR hash function as a string.
+ */
 std::string synthethiseOffXorHashFunc(std::vector<Range>& ranges, size_t offset){
 
     // Calculate offsets
@@ -362,6 +488,16 @@ std::string synthethiseOffXorHashFunc(std::vector<Range>& ranges, size_t offset)
     return synthesizedHashFunc;
 }
 
+/**
+ * @brief Synthesize an Offset XOR SIMD hash function.
+ *
+ * This function synthesizes an Offset XOR SIMD hash function. It does this by taking a vector of Range objects and an offset as input. 
+ * This is a Naive implementation that uses SIMD with the _mm_xor_si128 intrinsic to XOR bytes at the given offsets.
+ *
+ * @param ranges The vector of Range objects.
+ * @param offset The offset.
+ * @return std::string The synthesized Offset XOR SIMD hash function as a string.
+ */
 std::string synthethiseOffXorSimdFunc(std::vector<Range>& ranges, size_t offset) {
     // Calculate offsets
     std::vector<size_t> offsets = calculateOffsets(ranges, 16);
@@ -395,6 +531,17 @@ std::string synthethiseOffXorSimdFunc(std::vector<Range>& ranges, size_t offset)
     return synthesizedHashFunc;
 }
 
+/**
+ * @brief Entry point of the program.
+ *
+ * This is the main function of the program. It processes command line arguments, which are expected to be a regular expression representing the key format. 
+ * The regular expression should be generated by the keybuilder component of this project. 
+ * The function then initiates the appropriate processes based on the provided arguments.
+ *
+ * @param argc The count of command line arguments.
+ * @param argv An array of command line arguments.
+ * @return int Returns zero upon successful program execution, non-zero values indicate an error.
+ */
 int main(int argc, char** argv){
 
     if(argc < 2){
