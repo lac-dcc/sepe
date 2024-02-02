@@ -7,12 +7,26 @@ const TOML_FILENAME: &str = "Regexes.toml";
 const KEYGEN: &str = "keygen";
 const KEYUSER: &str = "keyuser";
 const KEYUSER_DEBUG: &str = "keyuser-debug";
+const KEYBUILDER: &str = "keybuilder";
 
+/// Helper program that stitches together the other programs in this repository
+///
+/// It is meant to facilitate testing and benchmarking during development and research.
+///
+/// **End users who only want to synthesize some functions do not have to interact with this**.
+/// They should just use keybuilder and keysynth directly, instead
 #[derive(Parser, Debug)]
-#[command(version, name = "bench-runner")]
+#[command(author, version, name = "sepe-runner")]
 struct Command {
     /// Number of keys to generate
-    #[clap(short, long, default_value = "1000000")]
+    ///
+    /// This is set to 10000 when `--histogram` is set
+    #[clap(
+        short,
+        long,
+        default_value = "1000000",
+        default_value_if("histogram", "true", "10000")
+    )]
     keys: u64,
 
     /// Key generator random number generator seed
@@ -51,8 +65,15 @@ struct Command {
     #[clap(short, long, default_value = "false")]
     verbose: bool,
 
-    /// Suffix of output csv files
-    #[clap(long, default_value = "_performance.csv")]
+    /// Suffix of output csv files.
+    ///
+    /// The prefix is the Regex's entry name in the Regexes.toml file.
+    /// When `--histogram` is set, the default value is '_distribution.py'
+    #[clap(
+        long,
+        default_value = "_performance.csv",
+        default_value_if("histogram", "true", "_distribution.py")
+    )]
     outfile: String,
 
     /// Generate the synthesized function for the given regex, do not run experiments
@@ -67,7 +88,9 @@ struct Command {
     #[clap(long)]
     incremental_generation: bool,
 
-    /// regexes we will benchmark
+    /// Regexes we will benchmark, defined in Regexes.toml
+    ///
+    /// You can send multiple Regexes, separated by spaces
     regexes: Vec<String>,
 }
 
@@ -106,6 +129,7 @@ fn read_toml_file() -> Table {
 
 fn main() {
     let mut cmd = Command::parse();
+
     let regex_table = read_toml_file();
 
     if cmd.regexes.contains(&"ALL".to_string()) {
@@ -155,7 +179,7 @@ fn main() {
         let keygen_out = keygen_cmd.stdout.expect("failed to open keygen stdout");
 
         if cmd.synthesize {
-            let keybuilder_output = Cmd::new(find_file("keybuilder").path())
+            let keybuilder_output = Cmd::new(find_file(KEYBUILDER).path())
                 .stdin(std::process::Stdio::from(keygen_out))
                 .output()
                 .expect("failed to spawn keybuilder!");
@@ -226,11 +250,7 @@ fn main() {
         if !keyuser_out.status.success() {
             eprintln!("        !!!FAILED: {}!!!", keyuser_out.status);
         } else {
-            let filename = if cmd.histogram && &cmd.outfile == "_performance.csv" {
-                cmd_regex + "_distribution.py"
-            } else {
-                cmd_regex + &cmd.outfile
-            };
+            let filename = cmd_regex + &cmd.outfile;
             let mut outfile =
                 std::fs::File::create(filename).expect("failed to create output file!");
             outfile.write_all(&keyuser_out.stdout).unwrap();

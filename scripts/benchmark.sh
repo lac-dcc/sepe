@@ -10,7 +10,7 @@ if [ ! -d output ]; then
 	mkdir output
 fi
 
-make
+make -j"$(nproc)"
 
 NUM_OPS=10000
 NUM_KEYS="500 2000 10000"
