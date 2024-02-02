@@ -1,3 +1,23 @@
+/*
+* The regex generator works by first assuming the entire string is always the
+* same, and adapting that assumption as it reads more inputs. For example,
+* imagine the following 3 lines of input:
+*
+*                                 10:45:AF
+*                                 FF:35:AB
+*                                 07:cb:09
+*
+* After reading the first line, our program assumes 10:45:AF is a fixed string.
+* After reading the second line, our program updates that to a regex. Every byte
+* that is different from the original becomes a [] class:
+*
+*                      [0-Z][0-Z]:[0-9][0-9]:[A-Z][A-Z]
+*
+* Upon reading the third line, we will update again to:
+*
+*                      [0-Z][0-Z]:[0-z][0-z]:[0-Z][0-Z]
+*/
+
 #define _GNU_SOURCE
 
 #include <stdlib.h>
@@ -18,7 +38,7 @@ enum Class {
 	Class_Punct = 0x8,
 };
 
-int range_class(const Range range) {
+static int range_class(const Range range) {
 	int class = 0;
 
 	if (range.start >= '0' && range.start <= '9')
@@ -27,7 +47,7 @@ int range_class(const Range range) {
 		class |= Class_UpperCase;
 	else if (range.start >= 'a' && range.start <= 'z')
 		class |= Class_Lowercase;
-	else 
+	else
 		class |= Class_Punct;
 
 	if (range.end >= '0' && range.end <= '9')
@@ -36,13 +56,13 @@ int range_class(const Range range) {
 		class |= Class_UpperCase;
 	else if (range.end >= 'a' && range.end <= 'z')
 		class |= Class_Lowercase;
-	else 
+	else
 		class |= Class_Punct;
 
 	return class;
 }
 
-void print_class(const Range range) {
+static void print_class(const Range range) {
 	char start = 0;
 	char end = 127;
 
@@ -52,7 +72,7 @@ void print_class(const Range range) {
 		start = 'A';
 	else if (range.start >= 'a' && range.start <= 'z')
 		start = 'a';
-	else 
+	else
 		start = '!';
 
 	if (range.end >= '0' && range.end <= '9')
@@ -61,13 +81,13 @@ void print_class(const Range range) {
 		end = 'Z';
 	else if (range.end >= 'a' && range.end <= 'z')
 		end = 'z';
-	else 
+	else
 		end = '}';
 
 	printf("[%c-%c]", start, end);
 }
 
-int is_special(const char ch) {
+static int is_special(const char ch) {
 	return ch == '\\'
 		|| ch == '['
 		|| ch == '{'
@@ -85,9 +105,9 @@ int main(int argc, const char* argv[]) {
 		printf("keybuilder\n");
 		printf("\nDescription: keybuilder generates a regex from a series of strings separated by newlines\n");
 		printf("\nExample usage: `./keybuilder < keys.txt`\n");
-		printf("\nOptions:\n");	
-		printf("\n    -h    Print this help\n");	
-		printf("\n");	
+		printf("\nOptions:\n");
+		printf("\n    -h    Print this help\n");
+		printf("\n");
 		if (!(strcmp(argv[1], "-h") == 0 || strcmp(argv[1], "--help") == 0)) {
 			fprintf(stderr, "ERROR: unrecognized argument: %s\n", argv[1]);
 			return 1;
@@ -99,6 +119,7 @@ int main(int argc, const char* argv[]) {
 	char* line;
 	size_t n;
 
+	// begin by reading the first line
 	const ssize_t line_size = getline(&line, &n, stdin);
 	if (line_size == -1) {
 		if (errno != 0) {
@@ -112,12 +133,15 @@ int main(int argc, const char* argv[]) {
 
 	Range* ranges = malloc(line_size * sizeof(*ranges));
 
+	// set the initial ranges, according to the first line
 	for (ssize_t i = 0; i < line_size - 1; ++i) {
 		ranges[i].start = line[i];
 		ranges[i].end = line[i];
 	}
 
 
+	// now, read every line, while updating the ranges. We assume all
+	// lines have the same size, and exit with an error if they don't
 	ssize_t in_bytes;
 	while ((in_bytes = getline(&line, &n, stdin)) > -1) {
 		if (in_bytes != line_size) {
@@ -134,6 +158,8 @@ int main(int argc, const char* argv[]) {
 	}
 	free(line);
 
+	// finally, group consecutive identical ranges together. For example,
+	// `[0-9][0-9][0-9]` will turn into `[0-9]{3}`
 	ssize_t i = 0;
 	while (i < line_size - 1) {
 		const Range range = ranges[i++];
