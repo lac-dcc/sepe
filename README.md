@@ -90,7 +90,7 @@ struct synthesizedOffXorHash {
 
 void yourCode(void){
         std::unordered_map<std::string, int, synthesizedOffXorHash> map;
-        map["255.255.255.255"] = 42
+        map["255.255.255.255"] = 42;
         // more code that uses map object
 }
 
