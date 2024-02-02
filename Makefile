@@ -1,4 +1,4 @@
-all: bin bin/keygen bin/keyuser bin/bench-runner bin/keybuilder bin/keysynth
+all: bin bin/keygen bin/keyuser bin/sepe-runner bin/keybuilder bin/keysynth
 
 bin:
 	@mkdir -p bin/
@@ -31,13 +31,13 @@ bin/keysynth-debug:  $(shell find src/keysynth/src/ -type f) src/keysynth/Makefi
 	cd src/keysynth && make keysynth-debug
 	cp src/keysynth/keysynth $@
 
-bin/bench-runner: $(shell find src/bench-runner/src/ -type f)
-	cd src/bench-runner && cargo build --release
-	cp src/bench-runner/target/release/bench-runner $@
+bin/sepe-runner: $(shell find src/sepe-runner/src/ -type f)
+	cd src/sepe-runner && cargo build --release
+	cp src/sepe-runner/target/release/sepe-runner $@
 
 clean:
 	cd src/keygen && cargo clean
-	cd src/bench-runner && cargo clean
+	cd src/sepe-runner && cargo clean
 	cd src/keyuser && make clean
 	cd src/keysynth && make clean
 	cd src/keybuilder && make clean
