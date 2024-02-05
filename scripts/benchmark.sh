@@ -11,11 +11,12 @@ if [ ! -d output ]; then
 fi
 
 make -j"$(nproc)"
+make -j"$(nproc)" benchmark
 
 NUM_OPS=10000
 NUM_KEYS="500 2000 10000"
 REGEXES="$(sed  -n 's/^\[\(.*\)\]/\1/p' Regexes.toml)"
-REPETITIONS=100
+REPETITIONS=10
 DISTRIBUTIONS="
 0.7 0.2 0.1
 0.6 0.2 0.2
@@ -33,7 +34,7 @@ for REGEX in $REGEXES; do
 				SEARCH="$(     echo "$DISTRIBUTIONS" | tr '\n' ' ' | awk "{print \$$((ARG + 1))}")"
 				ELIMINATION="$(echo "$DISTRIBUTIONS" | tr '\n' ' ' | awk "{print \$$((ARG + 2))}")"
 
-				./bin/bench-runner \
+				./bin/sepe-runner \
 					--verbose \
 					--operations "$NUM_OP" \
 					--keys "$NUM_KEY" \
