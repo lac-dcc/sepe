@@ -150,19 +150,10 @@ For more options, do:
 
 **If no [hashes] are specified, only generic hash functions are executed**
 
-Example: *Benchmarking 2 IPV4 Keys with 10 total operations using STDHashBin IPV4HashGeneric hash functions. 50% insertions, 30% search, and 20% elimination operations.*
+Example: *Benchmarking 2 IPV4 Keys with 10 total operations using STDHashBin PextIPV4 hash functions. 50% insertions, 30% search, and 20% elimination operations.*
 
 ```sh
-./bin/keygen "(([0-9]{3})\.){3}[0-9]{3}" -n 2 -s 223554 | ./bin/keyuser --hashes STDHashBin IPV4HashGeneric -n 10 -i 50 -s 30 -e 20
-Execution Mode,Num Operations,Num Keys,Insertions (%),Searches (%),Eliminatons(%),Hash Container,Hash Function,Execution Time (s),Collision Count
-Interweaved,10,2,50,30,20,UnorderedMapBench,STDHashBin,0.000056,0
-Interweaved,10,2,50,30,20,UnorderedMultiMapBench,STDHashBin,0.000004,2
-Interweaved,10,2,50,30,20,UnorderedSetBench,STDHashBin,0.000018,0
-Interweaved,10,2,50,30,20,UnorderedMultisetBench,STDHashBin,0.000003,2
-Batched,10,2,50,30,20,UnorderedMapBench,STDHashBin,0.000002,0
-Batched,10,2,50,30,20,UnorderedMultiMapBench,STDHashBin,0.000003,0
-Batched,10,2,50,30,20,UnorderedSetBench,STDHashBin,0.000002,0
-Batched,10,2,50,30,20,UnorderedMultisetBench,STDHashBin,0.000002,0
+./bin/keygen "(([0-9]{3})\.){3}[0-9]{3}" -n 2 -s 223554 | ./bin/keyuser --hashes STDHashBin PextIPV4 -n 10 -i 50 -s 30 -e 20
 ```
 
 For more options, do:
