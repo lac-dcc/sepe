@@ -1,6 +1,8 @@
 use std::io::{stdout, BufWriter, Write};
 
-use clap::Parser;
+use clap::{Parser, ValueEnum};
+use rand::{Rng, SeedableRng};
+use rand_distr::{Distribution as Dist, Uniform, Normal};
 
 /// Represents a List (e.g. `[0-9]`) of possible values
 #[derive(Debug)]
@@ -13,14 +15,14 @@ struct List {
 
 impl List {
     /// Returns a random character from the list
-    pub fn generate(&self) -> char {
+    pub fn generate<R: Rng, D: Dist<f64>>(&self, r: &mut R, d: &D) -> char {
         if !self.complement {
             self.inner
                 .chars()
-                .nth(fastrand::usize(0..self.inner.len()))
+                .nth((d.sample(r).rem_euclid(1.0) * (self.inner.len() - 1) as f64) as usize)
                 .unwrap()
         } else {
-            let mut ch = fastrand::char(..);
+            let mut ch = rand::random();
             while self.inner.contains(ch) {
                 ch = (ch as u8 + 1) as char;
             }
@@ -98,19 +100,19 @@ impl Regex {
     }
 
     /// Returns random characters according to the regular expression rules
-    pub fn generate(&self) -> String {
+    pub fn generate<R: Rng, D: Dist<f64>>(&self, r: &mut R, d: &D) -> String {
         let repetitions = if self.plus {
-            fastrand::usize(1..5)
+            (d.sample(r) * 5.0 + 1.0) as usize
         } else if self.star {
-            fastrand::usize(0..5)
+            (d.sample(r) * 6.0) as usize
         } else if self.question {
-            fastrand::usize(0..=1)
+            (d.sample(r) > 0.5) as usize
         } else {
             let Repetitions { start, comma, end } = self.repetitions;
             if let Some(end) = end {
-                fastrand::usize(start as usize..=end as usize)
+                d.sample(r) as usize % (end - start) as usize + start as usize
             } else if comma {
-                fastrand::usize(start as usize..start as usize + 5)
+                d.sample(r) as usize % 5 + start as usize
             } else {
                 start as usize
             }
@@ -119,10 +121,12 @@ impl Regex {
         let mut s = String::with_capacity(repetitions);
         for _ in 0..repetitions {
             match &self.symbol {
-                RegexSymbol::Any => s.push(fastrand::char(..)),
+                RegexSymbol::Any => {
+                    s.push(char::from_u32((d.sample(r) * 0x10FFFF as f64) as u32).unwrap())
+                }
                 RegexSymbol::Literal(literal) => s.push(*literal),
-                RegexSymbol::Group(group) => s.push_str(&generate(group)),
-                RegexSymbol::List(list) => s.push(list.generate()),
+                RegexSymbol::Group(group) => s.push_str(&generate(group, r, d)),
+                RegexSymbol::List(list) => s.push(list.generate(r, d)),
             }
         }
 
@@ -132,17 +136,17 @@ impl Regex {
     /// Returns incremental characters according to the regular expression rules
     pub fn generate_inc(&self, i: &mut u64) -> String {
         let repetitions = if self.plus {
-            fastrand::usize(1..5)
+            rand::random::<usize>() % 5 + 1
         } else if self.star {
-            fastrand::usize(0..5)
+            rand::random::<usize>() % 6
         } else if self.question {
-            fastrand::usize(0..=1)
+            rand::random::<usize>() % 2
         } else {
             let Repetitions { start, comma, end } = self.repetitions;
             if let Some(end) = end {
-                fastrand::usize(start as usize..=end as usize)
+                rand::random::<usize>() % (end - start) as usize + start as usize
             } else if comma {
-                fastrand::usize(start as usize..start as usize + 5)
+                rand::random::<usize>() % 5 + start as usize
             } else {
                 start as usize
             }
@@ -169,10 +173,10 @@ impl Regex {
 }
 
 /// generate a random regex
-fn generate(regexes: &[Regex]) -> String {
+fn generate<R: Rng, D: Dist<f64>>(regexes: &[Regex], r: &mut R, d: &D) -> String {
     let mut s = String::with_capacity(regexes.len());
     for regex in regexes {
-        s.push_str(&regex.generate());
+        s.push_str(&regex.generate(r, d));
     }
     s
 }
@@ -306,6 +310,18 @@ fn parse_regex(mut chars: std::str::Chars) -> Vec<Regex> {
     tree
 }
 
+#[derive(Clone, Copy, ValueEnum)]
+enum Distribution {
+    /// Uniform distribution
+    Uniform,
+    /// Normal distribution
+    Normal,
+    /// Incremental distribution
+    ///
+    /// For example, a regex like [0-9]{3} will produce '001', '002', '003', and so on, in order.
+    Incremental,
+}
+
 #[derive(Parser)]
 #[command(version, name = "keygen")]
 /// `keygen` generates random strings based on a regex
@@ -325,18 +341,15 @@ struct Command {
     #[clap(short, long, default_value = "223554")]
     seed: u64,
 
-    /// Whether to generate regexes in incremental fashion, in order
-    ///
-    /// For example, normally, a regex like [0-9]{3} would generate random 3 digit numbers. By
-    /// passing this flag, the gerator will produce '001', '002', '003', and so on, in order.
-    #[clap(short, long)]
-    incremental: bool,
+    /// Distribution used in random generation
+    #[clap(short, long, default_value = "uniform")]
+    distribution: Distribution,
 }
 
 fn main() {
     let cmd = Command::parse();
 
-    fastrand::seed(cmd.seed);
+    let mut r = rand::rngs::StdRng::seed_from_u64(cmd.seed);
 
     let regex = parse_regex(cmd.regex.chars());
 
@@ -348,13 +361,23 @@ fn main() {
     let stdout = stdout();
     let lock = stdout.lock();
     let mut writer = BufWriter::new(lock);
-    if cmd.incremental {
-        for mut i in 0..cmd.number {
-            writeln!(writer, "{}", generate_inc(&regex, &mut i)).unwrap();
+    match cmd.distribution {
+        Distribution::Uniform => {
+            let d = Uniform::new(0.0, 1.0);
+            for _ in 0..cmd.number {
+                writeln!(writer, "{}", generate(&regex, &mut r, &d)).unwrap();
+            }
         }
-    } else {
-        for _ in 0..cmd.number {
-            writeln!(writer, "{}", generate(&regex)).unwrap();
+        Distribution::Normal => {
+            let d = Normal::new(0.5, 0.25).unwrap();
+            for _ in 0..cmd.number {
+                writeln!(writer, "{}", generate(&regex, &mut r, &d)).unwrap();
+            }
+        }
+        Distribution::Incremental => {
+            for mut i in 0..cmd.number {
+                writeln!(writer, "{}", generate_inc(&regex, &mut i)).unwrap();
+            }
         }
     }
 }
