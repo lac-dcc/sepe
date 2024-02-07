@@ -311,12 +311,13 @@ fn parse_regex(mut chars: std::str::Chars) -> Vec<Regex> {
 }
 
 #[derive(Clone, Copy, ValueEnum)]
+/// Distribution to use when randomly generating the characters
 enum Distribution {
     /// Uniform distribution
     Uniform,
     /// Normal distribution
     Normal,
-    /// Incremental distribution
+    /// Incremental distribution (VERY SLOW)
     ///
     /// For example, a regex like [0-9]{3} will produce '001', '002', '003', and so on, in order.
     Incremental,

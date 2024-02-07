@@ -1,6 +1,6 @@
 use std::{fs, io::Write, str::FromStr};
 
-use clap::Parser;
+use clap::{Parser, ValueEnum};
 use toml::Table;
 
 const TOML_FILENAME: &str = "Regexes.toml";
@@ -8,6 +8,29 @@ const KEYGEN: &str = "keygen";
 const KEYUSER: &str = "keyuser";
 const KEYUSER_DEBUG: &str = "keyuser-debug";
 const KEYBUILDER: &str = "keybuilder";
+
+#[derive(Debug, Clone, Copy, ValueEnum)]
+/// Distribution to use when randomly generating the characters
+enum Distribution {
+    /// Uniform distribution
+    Uniform,
+    /// Normal distribution
+    Normal,
+    /// Incremental distribution (VERY SLOW)
+    ///
+    /// For example, a regex like [0-9]{3} will produce '001', '002', '003', and so on, in order.
+    Incremental,
+}
+
+impl Distribution {
+    fn as_str(&self) -> &'static str {
+        match self {
+            Distribution::Uniform => "uniform",
+            Distribution::Normal => "normal",
+            Distribution::Incremental => "incremental",
+        }
+    }
+}
 
 /// Helper program that stitches together the other programs in this repository
 ///
@@ -20,21 +43,26 @@ const KEYBUILDER: &str = "keybuilder";
 struct Command {
     /// Number of keys to generate
     ///
-    /// This is set to 10000 when `--histogram` is set
+    /// This is set to 10000 when `--histogram` is set or if distribution is 'incremental'
     #[clap(
         short,
         long,
         default_value = "1000000",
-        default_value_if("histogram", "true", "10000")
+        default_value_if("histogram", "true", "10000"),
+        default_value_if("distribution", "incremental", "10000")
     )]
     keys: u64,
+
+    /// Distribution used in random generation
+    #[clap(short, long, default_value = "uniform")]
+    distribution: Distribution,
 
     /// Key generator random number generator seed
     #[clap(long, default_value = "223554")]
     keygen_seed: u64,
 
     /// Whether to run keyuser in debug mode
-    #[clap(short, long, default_value = "false")]
+    #[clap(long, default_value = "false")]
     debug: bool,
 
     /// Key user random number generator seed
@@ -163,18 +191,17 @@ fn main() {
 
         use std::process::Command as Cmd;
 
-        let mut keygen_cmd = Cmd::new(keygen.path());
-        keygen_cmd
+        let keygen_cmd = Cmd::new(keygen.path())
             .stdout(std::process::Stdio::piped())
             .arg(regex)
             .arg("-n")
             .arg(format!("{}", cmd.keys))
             .arg("-s")
-            .arg(format!("{}", cmd.keygen_seed));
-        if cmd.incremental_generation {
-            keygen_cmd.arg("--incremental");
-        }
-        let keygen_cmd = keygen_cmd.spawn().expect("failed to spawn keygen command");
+            .arg(format!("{}", cmd.keygen_seed))
+            .arg("-d")
+            .arg(cmd.distribution.as_str())
+            .spawn()
+            .expect("failed to spawn keygen command");
 
         let keygen_out = keygen_cmd.stdout.expect("failed to open keygen stdout");
 
