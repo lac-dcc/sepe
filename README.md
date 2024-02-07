@@ -21,6 +21,27 @@ Rust is only necessary if you want to run the experiments. If you are only inter
 
 ## Quick-Start: Synthesizing functions
 
+You can follow these two steps to use optimized hash functions generated from this project:
+
+(**Obs: keys must have a fixed lenght.**)
+
+1. Obtain your synthesized hash function in one of the two ways: 
+   1. Using a set of [key examples](#synthesizing-from-key-examples).
+   2. Using the [regular expression of the keys](#synthesizing-from-regular-expression).
+2. [Integrate](#integrating-the-synthesized-function-into-your-project) the optimized hash function into your code .
+
+### Synthesizing from Key Examples
+
+To synthesize hash functions from key examples, you only need to create a file containing a non-exhaustive but representative key set. 
+
+Supposing your key strings are saved in the `txt-file-with-strings` file, you can run the following command:
+
+```sh
+./bin/keysynth "$(./bin/keybuilder < txt-file-with-strings)"
+```
+
+### Synthesizing from Regular Expression
+
 To build the hash function from the regular expression of your keys, use:
 
 ```sh
@@ -30,8 +51,10 @@ make
 
 Example: *Generating a custom hash function for IPV4 keys*
 ```sh
-./scripts/make_hash_from_regex.sh "(([0-9]{3})\\.){3}[0-9]{3}" #or single quotes in zshell
+./scripts/make_hash_from_regex.sh "(([0-9]{3})\.){3}[0-9]{3}" #or single quotes in zshell
 ```
+
+See more about regular expressions in the [keygen](#keygen) section.
 
 ### Integrating the Synthesized function into your project
 
@@ -45,7 +68,7 @@ void yourCode(void){
 }
 ```
 
-After running, `./scripts/make_hash_from_regex.sh "(([0-9]{3})\\.){3}[0-9]{3}"`, you should get the following output with two function options:
+After running, `./scripts/make_hash_from_regex.sh "(([0-9]{3})\.){3}[0-9]{3}"`, you should get the following output with two function options:
 
 ```cpp
 // Helper function, include in your codebase:
@@ -70,7 +93,7 @@ struct synthesizedOffXorHash {
 };
 ```
 
-Simply copy and paste the desired hash function, in this example `synthesizedOffXorHash` into your codebase and then add its name as the third argument of in the std::unordered_map template.
+Copy and paste the desired hash function, in this example, `synthesizedOffXorHash`, into your codebase and then add its name as the third argument in the std::unordered_map template.
 
 ```cpp
 inline static uint64_t load_u64_le(const char* b) {
@@ -96,8 +119,6 @@ void yourCode(void){
 }
 ```
 
-You can also get optimized hash functions from key examples. This is shown in the [keysynth](#keysynth) section.
-
 ## Quick-Start: Benchmarking
 
 Building and running with default parameters:
@@ -121,7 +142,9 @@ For more options, see [sepe-runner](#sepe-runner) section:
 
 ### keygen
 
-`keygen` generates (standard output) n random keys from Regex. *Not all valid regexes are accepted.* Specifically, we did not implement the `OR` (`|`) operator.
+`keygen` generates (standard output) n random keys from Regex. 
+
+Not all valid regexes are accepted since we only synthesize hash functions for fixed-length keys. Specifically, we did not implement the `OR` (`|`), `Kleene Star` (`*`),  `Plus` (`+`), and `DOT` (`.`)  operators.
 
 ```sh
 ./bin/keygen REGEX [number_of_elements] [seed]
@@ -165,7 +188,7 @@ For more options, do:
 
 ### keybuilder
 
-`keybuilder` creates a regex from a series of *fixed-sized* strings passed through standard input, separated by a newline.
+`keybuilder` creates a regex from a series of *fixed-sized* strings passed through standard input, separated by a new line.
 
 ```sh
 ./bin/keybuilder < txt-file-with-strings
@@ -214,7 +237,7 @@ The `scripts` folder contains some helper scripts that may be useful for some pe
   * `align_csv.sh` - pretty prints `keyuser`'s generated `.csv` files for easier analysis
   * `benchmark.sh` - helper to run many benchmarks at once
   * `install_abseil.sh` - installs the abseil library locally. Necessary for `keyuser`
-  * `make_hash_from_regex.sh` - creates a hash function from a user defined regex
+  * `make_hash_from_regex.sh` - creates a hash function from a user-defined regex
   * `keyuser_interpreter.py` - interprets the results generated from `keyuser`'s benchmarks
 
 ### Using `keyuser_interpreter.py`
@@ -227,7 +250,7 @@ The `scripts` folder contains some helper scripts that may be useful for some pe
 -d DISTRIBUTION, --distribution DISTRIBUTION
                       Name of the distribution file to interpret. Exclusive with -p option.
 -p [PERFORMANCE ...], --performance [PERFORMANCE ...]
-                      Name of the csv performance files to interpret. Exclusive with -d option.
+                      Name of the CSV performance files to interpret. Exclusive with -d option.
 -pg, --plot-graph     Option to plot the results in graphs.
 -hf [HASH_FUNCTIONS ...], --hash-functions [HASH_FUNCTIONS ...]
                       Name of the hash functions to analyze.
