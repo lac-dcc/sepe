@@ -569,10 +569,10 @@ int main(int argc, char** argv){
 
     printf("// Pext Hash Function:\n");
     printf("%s\n", synthetizePextHashFunc(ranges,offset).c_str());
-    printf("// OffXor Hash Function:\n");
-    if(regexSize < 64){
-        printf("%s", synthetizeOffXorHashFunc(ranges,offset).c_str());
-    } else {
+    printf("// (Recommended) OffXor Hash Function:\n");
+    printf("%s", synthetizeOffXorHashFunc(ranges,offset).c_str());
+    if(regexSize > 128){
+        printf("// OffXorSimd Hash Function:\n");
         printf("%s", synthetizeOffXorSimdFunc(ranges,offset).c_str());
     }
 

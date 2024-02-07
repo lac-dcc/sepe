@@ -93,6 +93,7 @@ struct synthesizedOffXorHash {
 };
 ```
 
+*If in doubt, we always recommend using the synthesizedOffXorHash variant, according to our benchmarks.*
 Copy and paste the desired hash function, in this example, `synthesizedOffXorHash`, into your codebase and then add its name as the third argument in the std::unordered_map template.
 
 ```cpp
