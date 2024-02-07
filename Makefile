@@ -12,27 +12,27 @@ bin/keygen: $(shell find src/keygen/src/ -type f)
 	cp src/keygen/target/release/keygen $@
 
 bin/keyuser: $(shell find src/keyuser/src/ -type f) src/keyuser/Makefile
-	cd src/keyuser && make keyuser
+	make -C src/keyuser keyuser
 	cp src/keyuser/keyuser $@
 
 bin/keyuser-debug: $(shell find src/keyuser/src/ -type f) src/keyuser/Makefile
-	cd src/keyuser && make keyuser-debug
+	make -C src/keyuser keyuser-debug
 	cp src/keyuser/keyuser-debug $@
 
 bin/keybuilder: $(shell find src/keybuilder/src/ -type f) src/keybuilder/Makefile
-	cd src/keybuilder && make keybuilder
+	make -C src/keybuilder keybuilder
 	cp src/keybuilder/keybuilder $@
 
 bin/keybuilder-debug: $(shell find src/keybuilder/src/ -type f) src/keybuilder/Makefile
-	cd src/keybuilder && make keybuilder-debug
+	make -C src/keybuilder keybuilder-debug
 	cp src/keybuilder/keybuilder-debug $@
 
 bin/keysynth:  $(shell find src/keysynth/src/ -type f) src/keysynth/Makefile
-	cd src/keysynth && make keysynth
+	make -C src/keysynth keysynth
 	cp src/keysynth/keysynth $@
 
 bin/keysynth-debug:  $(shell find src/keysynth/src/ -type f) src/keysynth/Makefile
-	cd src/keysynth && make keysynth-debug
+	make -C src/keysynth keysynth-debug
 	cp src/keysynth/keysynth $@
 
 bin/sepe-runner: $(shell find src/sepe-runner/src/ -type f)
@@ -40,11 +40,11 @@ bin/sepe-runner: $(shell find src/sepe-runner/src/ -type f)
 	cp src/sepe-runner/target/release/sepe-runner $@
 
 clean:
-	cd src/keygen && cargo clean
+	cd src/keygen &&      cargo clean
 	cd src/sepe-runner && cargo clean
-	cd src/keyuser && make clean
-	cd src/keysynth && make clean
-	cd src/keybuilder && make clean
+	make -C src/keyuser         clean
+	make -C src/keysynth        clean
+	make -C src/keybuilder      clean
 	rm -rfv bin output *.csv
 
 .PHONY: all clean
