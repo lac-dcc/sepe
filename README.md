@@ -38,9 +38,11 @@ Example: *Generating a custom hash function for IPV4 keys*
 Suppose your code has a C++ STL std::unordered_map with IPV4 std::string as keys and int as values.
 
 ```cpp
-std::unordered_map<std::string, int> map;
-map["255.255.255.255"] = 42
-// more code that uses map object
+void yourCode(void){
+        std::unordered_map<std::string, int, synthesizedOffXorHash> map;
+        map["255.255.255.255"] = 42;
+        // more code that uses map object
+}
 ```
 
 After running, `./scripts/make_hash_from_regex.sh "(([0-9]{3})\\.){3}[0-9]{3}"`, you should get the following output with two function options:
@@ -68,10 +70,9 @@ struct synthesizedOffXorHash {
 };
 ```
 
-Simply copy and paste the desired hash function, in this example `synthesizedOffXorHash` into your codebase and then add its name as the third argument of in the std::unordered_map template like so:
+Simply copy and paste the desired hash function, in this example `synthesizedOffXorHash` into your codebase and then add its name as the third argument of in the std::unordered_map template.
 
 ```cpp
-// Helper function, include in your codebase:
 inline static uint64_t load_u64_le(const char* b) {
         uint64_t Ret;
         // This is a way for the compiler to optimize this func to a single movq instruction
@@ -93,8 +94,9 @@ void yourCode(void){
         map["255.255.255.255"] = 42;
         // more code that uses map object
 }
-
 ```
+
+You can also get optimized hash functions from key examples. This is shown in the [keysynth](#keysynth) section.
 
 ## Quick-Start: Benchmarking
 
