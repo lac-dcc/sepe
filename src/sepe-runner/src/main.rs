@@ -1,4 +1,4 @@
-use std::{fs, io::Write, str::FromStr};
+use std::{fs, io::Write, os::unix::ffi::OsStringExt, str::FromStr};
 
 use clap::{Parser, ValueEnum};
 use toml::Table;
@@ -206,23 +206,21 @@ fn main() {
         let keygen_out = keygen_cmd.stdout.expect("failed to open keygen stdout");
 
         if cmd.synthesize {
-            let keybuilder_output = Cmd::new(find_file(KEYBUILDER).path())
+            let mut keybuilder_output = Cmd::new(find_file(KEYBUILDER).path())
                 .stdin(std::process::Stdio::from(keygen_out))
                 .output()
                 .expect("failed to spawn keybuilder!");
 
+            keybuilder_output.stdout.pop();
+
             let keysynth_output = Cmd::new(find_file("keysynth").path())
-                .arg(
-                    String::from_utf8(keybuilder_output.stdout)
-                        .expect("failed to read keybuilder output"),
-                )
+                .arg(std::ffi::OsString::from_vec(keybuilder_output.stdout))
                 .output()
                 .expect("failed to spawn keysynth!");
 
-            println!(
-                "{}",
-                String::from_utf8(keysynth_output.stdout).expect("failed to read keysynth output")
-            );
+            std::io::stdout()
+                .write_all(&keysynth_output.stdout[0..keysynth_output.stdout.len()])
+                .expect("failed to write keysynth output");
             continue;
         }
 
