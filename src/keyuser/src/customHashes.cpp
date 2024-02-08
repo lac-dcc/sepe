@@ -345,30 +345,30 @@ std::size_t PextMurmurUrlComplex::operator()(const std::string& key) const {
 }
 
 std::size_t PextUrlComplex::operator()(const std::string& key) const {
-        constexpr std::size_t mask0 = 0x1f1f1f1f1f1f1f1f;
-        constexpr std::size_t mask1 = 0x0000000000001f1f;
-        constexpr std::size_t mask2 = 0x00000000000f0f0f;
-        constexpr std::size_t mask3 = 0x0000007f7f7f7f7f;
-        constexpr std::size_t mask4 = 0x7f7f7f7f7f7f7f7f;
-        constexpr std::size_t mask5 = 0x007f7f7f7f7f7f7f;
-        const std::size_t hashable0 = _pext_u64(load_u64_le(key.c_str()+23), mask0);
-        const std::size_t hashable1 = _pext_u64(load_u64_le(key.c_str()+31), mask1);
-        const std::size_t hashable2 = _pext_u64(load_u64_le(key.c_str()+41), mask2);
-        const std::size_t hashable3 = _pext_u64(load_u64_le(key.c_str()+58), mask3);
-        const std::size_t hashable4 = _pext_u64(load_u64_le(key.c_str()+66), mask4);
-        const std::size_t hashable5 = _pext_u64(load_u64_le(key.c_str()+74), mask5);
-        size_t shift0 = hashable0;
-        size_t shift1 = hashable1 << 51;
-        size_t shift2 = hashable2;
-        size_t shift3 = hashable3 << 25;
-        size_t shift4 = hashable4;
-        size_t shift5 = hashable5 << 9;
-        size_t tmp0 = shift0 ^ shift1;
-        size_t tmp1 = shift2 ^ shift3;
-        size_t tmp2 = shift4 ^ shift5;
-        size_t tmp3 = tmp0 ^ tmp1;
-        size_t tmp4 = tmp2 ^ tmp3;
-        return tmp4;
+    constexpr std::size_t mask0 = 0x1f1f1f1f1f1f1f1f;
+    constexpr std::size_t mask1 = 0x0000000000001f1f;
+    constexpr std::size_t mask2 = 0x00000000000f0f0f;
+    constexpr std::size_t mask3 = 0x7f7f7f7f7f7f7f7f;
+    constexpr std::size_t mask4 = 0x7f7f7f7f7f7f7f7f;
+    constexpr std::size_t mask5 = 0x000000007f7f7f7f;
+    const std::size_t hashable0 = _pext_u64(load_u64_le(key.c_str()+23), mask0);
+    const std::size_t hashable1 = _pext_u64(load_u64_le(key.c_str()+31), mask1);
+    const std::size_t hashable2 = _pext_u64(load_u64_le(key.c_str()+41), mask2);
+    const std::size_t hashable3 = _pext_u64(load_u64_le(key.c_str()+58), mask3);
+    const std::size_t hashable4 = _pext_u64(load_u64_le(key.c_str()+66), mask4);
+    const std::size_t hashable5 = _pext_u64(load_u64_le(key.c_str()+74), mask5);
+    size_t shift0 = hashable0;
+    size_t shift1 = hashable1 << 54;
+    size_t shift2 = hashable2;
+    size_t shift3 = hashable3 << 8;
+    size_t shift4 = hashable4;
+    size_t shift5 = hashable5 << 36;
+    size_t tmp0 = shift0 ^ shift1;
+    size_t tmp1 = shift2 ^ shift3;
+    size_t tmp2 = shift4 ^ shift5;
+    size_t tmp3 = tmp0 ^ tmp1;
+    size_t tmp4 = tmp2 ^ tmp3;
+    return tmp4;
 }
 
 std::size_t PextUrl::operator()(const std::string& key) const {
@@ -389,73 +389,69 @@ std::size_t PextUrl::operator()(const std::string& key) const {
 
 std::size_t PextMac::operator()(const std::string& key) const {
     constexpr std::size_t mask0 = 0x7f7f007f7f007f7f;
-    constexpr std::size_t mask1 = 0x007f007f7f007f7f;
-    constexpr std::size_t mask2 = 0x7f00000000000000;
+    constexpr std::size_t mask1 = 0x7f7f007f7f007f7f;
     const std::size_t hashable0 = _pext_u64(load_u64_le(key.c_str()+0), mask0);
-    const std::size_t hashable1 = _pext_u64(load_u64_le(key.c_str()+8), mask1);
-    const std::size_t hashable2 = _pext_u64(load_u64_le(key.c_str()+9), mask2);
+    const std::size_t hashable1 = _pext_u64(load_u64_le(key.c_str()+9), mask1);
     size_t shift0 = hashable0;
-    size_t shift1 = hashable1 << 29;
-    size_t shift2 = hashable2;
+    size_t shift1 = hashable1 << 22;
     size_t tmp0 = shift0 ^ shift1;
-    size_t tmp1 = shift2 ^ tmp0;
-    return tmp1;
+    return tmp0;
 }
 
 std::size_t PextCPF::operator()(const std::string& key) const {
-        constexpr std::size_t mask0 = 0x000f0f0f000f0f0f;
-        constexpr std::size_t mask1 = 0x0f0f000f0f0f0000;
-        const std::size_t hashable0 = _pext_u64(load_u64_le(key.c_str()+0), mask0);
-        const std::size_t hashable1 = _pext_u64(load_u64_le(key.c_str()+6), mask1);
-        size_t shift0 = hashable0;
-        size_t shift1 = hashable1 << 44;
-        size_t tmp0 = shift0 ^ shift1;
-        return tmp0;
+    constexpr std::size_t mask0 = 0x000f0f0f000f0f0f;
+    constexpr std::size_t mask1 = 0x0f0f000f0f0f0000;
+    const std::size_t hashable0 = _pext_u64(load_u64_le(key.c_str()+0), mask0);
+    const std::size_t hashable1 = _pext_u64(load_u64_le(key.c_str()+6), mask1);
+    size_t shift0 = hashable0;
+    size_t shift1 = hashable1 << 44;
+    size_t tmp0 = shift0 ^ shift1;
+    return tmp0;
 }
 
 std::size_t PextSSN::operator()(const std::string& key) const {
-        constexpr std::size_t mask0 = 0x0f000f0f000f0f0f;
-        constexpr std::size_t mask1 = 0x0f0f0f0000000000;
-        const std::size_t hashable0 = _pext_u64(load_u64_le(key.c_str()+0), mask0);
-        const std::size_t hashable1 = _pext_u64(load_u64_le(key.c_str()+3), mask1);
-        size_t shift0 = hashable0;
-        size_t shift1 = hashable1 << 52;
-        size_t tmp0 = shift0 ^ shift1;
-        return tmp0;
+    constexpr std::size_t mask0 = 0x0f000f0f000f0f0f;
+    constexpr std::size_t mask1 = 0x0f0f0f0000000000;
+    const std::size_t hashable0 = _pext_u64(load_u64_le(key.c_str()+0), mask0);
+    const std::size_t hashable1 = _pext_u64(load_u64_le(key.c_str()+3), mask1);
+    size_t shift0 = hashable0;
+    size_t shift1 = hashable1 << 52;
+    size_t tmp0 = shift0 ^ shift1;
+    return tmp0;
 }
 
 std::size_t PextIPV4::operator()(const std::string& key) const {
-        constexpr std::size_t mask0 = 0x000f0f0f000f0f0f;
-        constexpr std::size_t mask1 = 0x0f0f0f000f0f0f00;
-        const std::size_t hashable0 = _pext_u64(load_u64_le(key.c_str()+0), mask0);
-        const std::size_t hashable1 = _pext_u64(load_u64_le(key.c_str()+7), mask1);
-        size_t shift0 = hashable0;
-        size_t shift1 = hashable1 << 40;
-        size_t tmp0 = shift0 ^ shift1;
-        return tmp0;
+    constexpr std::size_t mask0 = 0x000f0f0f000f0f0f;
+    constexpr std::size_t mask1 = 0x0f0f0f000f0f0f00;
+    const std::size_t hashable0 = _pext_u64(load_u64_le(key.c_str()+0), mask0);
+    const std::size_t hashable1 = _pext_u64(load_u64_le(key.c_str()+7), mask1);
+    size_t shift0 = hashable0;
+    size_t shift1 = hashable1 << 40;
+    size_t tmp0 = shift0 ^ shift1;
+    return tmp0;
 }
 
 std::size_t PextIPV6::operator()(const std::string& key) const {
-        constexpr std::size_t mask0 = 0x7f7f7f007f7f7f7f;
-        constexpr std::size_t mask1 = 0x7f007f7f7f7f007f;
-        constexpr std::size_t mask2 = 0x7f7f7f7f007f7f7f;
-        constexpr std::size_t mask3 = 0x007f7f007f7f7f7f;
-        constexpr std::size_t mask4 = 0x7f7f7f7f007f7f00;
-        const std::size_t hashable0 = _pext_u64(load_u64_le(key.c_str()+0), mask0);
-        const std::size_t hashable1 = _pext_u64(load_u64_le(key.c_str()+8), mask1);
-        const std::size_t hashable2 = _pext_u64(load_u64_le(key.c_str()+16), mask2);
-        const std::size_t hashable3 = _pext_u64(load_u64_le(key.c_str()+24), mask3);
-        const std::size_t hashable4 = _pext_u64(load_u64_le(key.c_str()+31), mask4);
-        size_t shift0 = hashable0;
-        size_t shift1 = hashable1 << 22;
-        size_t shift2 = hashable2;
-        size_t shift3 = hashable3 << 22;
-        size_t shift4 = hashable4;
-        size_t tmp0 = shift0 ^ shift1;
-        size_t tmp1 = shift2 ^ shift3;
-        size_t tmp2 = shift4 ^ tmp0;
-        size_t tmp3 = tmp1 ^ tmp2;
-        return tmp3;
+    constexpr std::size_t mask0 = 0x7f7f7f007f7f7f7f;
+    constexpr std::size_t mask1 = 0x7f007f7f7f7f007f;
+    constexpr std::size_t mask2 = 0x7f7f7f7f007f7f7f;
+    constexpr std::size_t mask3 = 0x7f7f7f007f7f7f7f;
+    constexpr std::size_t mask4 = 0x7f7f7f7f007f0000;
+    const std::size_t hashable0 = _pext_u64(load_u64_le(key.c_str()+0), mask0);
+    const std::size_t hashable1 = _pext_u64(load_u64_le(key.c_str()+8), mask1);
+    const std::size_t hashable2 = _pext_u64(load_u64_le(key.c_str()+16), mask2);
+    const std::size_t hashable3 = _pext_u64(load_u64_le(key.c_str()+25), mask3);
+    const std::size_t hashable4 = _pext_u64(load_u64_le(key.c_str()+31), mask4);
+    size_t shift0 = hashable0;
+    size_t shift1 = hashable1 << 22;
+    size_t shift2 = hashable2;
+    size_t shift3 = hashable3 << 15;
+    size_t shift4 = hashable4;
+    size_t tmp0 = shift0 ^ shift1;
+    size_t tmp1 = shift2 ^ shift3;
+    size_t tmp2 = shift4 ^ tmp0;
+    size_t tmp3 = tmp1 ^ tmp2;
+    return tmp3;
 }
 
 static std::size_t __pext_hash_ints(const char* ptr, size_t len, size_t seed) {
@@ -561,7 +557,6 @@ std::size_t PextMurmurINTS::operator()(const std::string& key) const {
 }
 
 std::size_t PextINTS::operator()(const std::string& key) const {
-
     constexpr std::size_t mask0 = 0x0f0f0f0f0f0f0f0f;
     constexpr std::size_t mask1 = 0x0f0f0f0f0f0f0f0f;
     constexpr std::size_t mask2 = 0x0f0f0f0f0f0f0f0f;
@@ -630,6 +625,7 @@ std::size_t OffXorUrlComplex::operator()(const std::string& key) const {
     size_t tmp4 = tmp2 ^ tmp3;
     return tmp4;
 }
+
 std::size_t OffXorUrl::operator()(const std::string& key) const {
     const std::size_t hashable0 = load_u64_le(key.c_str()+45);
     const std::size_t hashable1 = load_u64_le(key.c_str()+53);
@@ -637,32 +633,33 @@ std::size_t OffXorUrl::operator()(const std::string& key) const {
     size_t tmp0 = hashable0 ^ hashable1;
     size_t tmp1 = hashable2 ^ tmp0;
     return tmp1;
+
 }
+
 std::size_t OffXorMac::operator()(const std::string& key) const {
     const std::size_t hashable0 = load_u64_le(key.c_str()+0);
-    const std::size_t hashable1 = load_u64_le(key.c_str()+8);
-    const std::size_t hashable2 = load_u64_le(key.c_str()+10);
+    const std::size_t hashable1 = load_u64_le(key.c_str()+9);
     size_t tmp0 = hashable0 ^ hashable1;
-    size_t tmp1 = hashable2 ^ tmp0;
-    return tmp1;
+    return tmp0;
 }
+
 std::size_t OffXorCPF::operator()(const std::string& key) const {
     const std::size_t hashable0 = load_u64_le(key.c_str()+0);
-    const std::size_t hashable1 = load_u64_le(key.c_str()+7);
+    const std::size_t hashable1 = load_u64_le(key.c_str()+6);
     size_t tmp0 = hashable0 ^ hashable1;
     return tmp0;
 }
 
 std::size_t OffXorSSN::operator()(const std::string& key) const {
     const std::size_t hashable0 = load_u64_le(key.c_str()+0);
-    const std::size_t hashable1 = load_u64_le(key.c_str()+4);
+    const std::size_t hashable1 = load_u64_le(key.c_str()+3);
     size_t tmp0 = hashable0 ^ hashable1;
     return tmp0;
 }
 
 std::size_t OffXorIPV4::operator()(const std::string& key) const {
     const std::size_t hashable0 = load_u64_le(key.c_str()+0);
-    const std::size_t hashable1 = load_u64_le(key.c_str()+8);
+    const std::size_t hashable1 = load_u64_le(key.c_str()+7);
     size_t tmp0 = hashable0 ^ hashable1;
     return tmp0;
 }
@@ -671,8 +668,8 @@ std::size_t OffXorIPV6::operator()(const std::string& key) const {
     const std::size_t hashable0 = load_u64_le(key.c_str()+0);
     const std::size_t hashable1 = load_u64_le(key.c_str()+8);
     const std::size_t hashable2 = load_u64_le(key.c_str()+16);
-    const std::size_t hashable3 = load_u64_le(key.c_str()+24);
-    const std::size_t hashable4 = load_u64_le(key.c_str()+32);
+    const std::size_t hashable3 = load_u64_le(key.c_str()+25);
+    const std::size_t hashable4 = load_u64_le(key.c_str()+31);
     size_t tmp0 = hashable0 ^ hashable1;
     size_t tmp1 = hashable2 ^ hashable3;
     size_t tmp2 = hashable4 ^ tmp0;
@@ -693,7 +690,7 @@ std::size_t OffXorINTS::operator()(const std::string& key) const {
     const std::size_t hashable9 = load_u64_le(key.c_str()+72);
     const std::size_t hashable10 = load_u64_le(key.c_str()+80);
     const std::size_t hashable11 = load_u64_le(key.c_str()+88);
-    const std::size_t hashable12 = load_u64_le(key.c_str()+93);
+    const std::size_t hashable12 = load_u64_le(key.c_str()+92);
     size_t tmp0 = hashable0 ^ hashable1;
     size_t tmp1 = hashable2 ^ hashable3;
     size_t tmp2 = hashable4 ^ hashable5;
@@ -725,17 +722,17 @@ std::size_t NaiveSimdUrlComplex::operator()(const std::string& key) const {
 }
 
 std::size_t NaiveUrlComplex::operator()(const std::string& key) const {
-    std::size_t var0 = load_u64_le(key.c_str() + 0);
-    std::size_t var1 = load_u64_le(key.c_str() + 8);
-    std::size_t var2 = load_u64_le(key.c_str() + 16);
-    std::size_t var3 = load_u64_le(key.c_str() + 24);
-    std::size_t var4 = load_u64_le(key.c_str() + 32);
-    std::size_t var5 = load_u64_le(key.c_str() + 40);
-    std::size_t var6 = load_u64_le(key.c_str() + 48);
-    std::size_t var7 = load_u64_le(key.c_str() + 56);
-    std::size_t var8 = load_u64_le(key.c_str() + 64);
-    std::size_t var9 = load_u64_le(key.c_str() + 72);
-    std::size_t var10 = load_u64_le(key.c_str() + 75);
+    const std::size_t var0 = load_u64_le(key.c_str() + 0);
+    const std::size_t var1 = load_u64_le(key.c_str() + 8);
+    const std::size_t var2 = load_u64_le(key.c_str() + 16);
+    const std::size_t var3 = load_u64_le(key.c_str() + 24);
+    const std::size_t var4 = load_u64_le(key.c_str() + 32);
+    const std::size_t var5 = load_u64_le(key.c_str() + 40);
+    const std::size_t var6 = load_u64_le(key.c_str() + 48);
+    const std::size_t var7 = load_u64_le(key.c_str() + 56);
+    const std::size_t var8 = load_u64_le(key.c_str() + 64);
+    const std::size_t var9 = load_u64_le(key.c_str() + 72);
+    const std::size_t var10 = load_u64_le(key.c_str() + 75);
     std::size_t xor0 = var10 ^ var9;
     std::size_t xor1 = var8 ^ var7;
     std::size_t xor2 = var6 ^ var5;
@@ -750,15 +747,15 @@ std::size_t NaiveUrlComplex::operator()(const std::string& key) const {
 }
 
 std::size_t NaiveUrl::operator()(const std::string& key) const {
-    std::size_t var0 = load_u64_le(key.c_str() + 0);
-    std::size_t var1 = load_u64_le(key.c_str() + 8);
-    std::size_t var2 = load_u64_le(key.c_str() + 16);
-    std::size_t var3 = load_u64_le(key.c_str() + 24);
-    std::size_t var4 = load_u64_le(key.c_str() + 32);
-    std::size_t var5 = load_u64_le(key.c_str() + 40);
-    std::size_t var6 = load_u64_le(key.c_str() + 48);
-    std::size_t var7 = load_u64_le(key.c_str() + 56);
-    std::size_t var8 = load_u64_le(key.c_str() + 62);
+    const std::size_t var0 = load_u64_le(key.c_str() + 0);
+    const std::size_t var1 = load_u64_le(key.c_str() + 8);
+    const std::size_t var2 = load_u64_le(key.c_str() + 16);
+    const std::size_t var3 = load_u64_le(key.c_str() + 24);
+    const std::size_t var4 = load_u64_le(key.c_str() + 32);
+    const std::size_t var5 = load_u64_le(key.c_str() + 40);
+    const std::size_t var6 = load_u64_le(key.c_str() + 48);
+    const std::size_t var7 = load_u64_le(key.c_str() + 56);
+    const std::size_t var8 = load_u64_le(key.c_str() + 62);
     std::size_t xor0 = var8 ^ var7;
     std::size_t xor1 = var6 ^ var5;
     std::size_t xor2 = var4 ^ var3;
@@ -772,41 +769,41 @@ std::size_t NaiveUrl::operator()(const std::string& key) const {
 
 
 std::size_t NaiveMac::operator()(const std::string& key) const {
-    std::size_t var0 = load_u64_le(key.c_str() + 0);
-    std::size_t var1 = load_u64_le(key.c_str() + 8);
-    std::size_t var2 = load_u64_le(key.c_str() + 9);
+    const std::size_t var0 = load_u64_le(key.c_str() + 0);
+    const std::size_t var1 = load_u64_le(key.c_str() + 8);
+    const std::size_t var2 = load_u64_le(key.c_str() + 9);
     std::size_t xor0 = var2 ^ var1;
     std::size_t xor1 = var0 ^ xor0;
     return xor1 ;
 }
 
 std::size_t NaiveCPF::operator()(const std::string& key) const {
-    std::size_t var0 = load_u64_le(key.c_str() + 0);
-    std::size_t var1 = load_u64_le(key.c_str() + 6);
+    const std::size_t var0 = load_u64_le(key.c_str() + 0);
+    const std::size_t var1 = load_u64_le(key.c_str() + 6);
     std::size_t xor0 = var1 ^ var0;
     return xor0 ;
 }
 
 std::size_t NaiveSSN::operator()(const std::string& key) const {
-    std::size_t var0 = load_u64_le(key.c_str() + 0);
-    std::size_t var1 = load_u64_le(key.c_str() + 3);
+    const std::size_t var0 = load_u64_le(key.c_str() + 0);
+    const std::size_t var1 = load_u64_le(key.c_str() + 3);
     std::size_t xor0 = var1 ^ var0;
     return xor0 ;
 }
 
 std::size_t NaiveIPV4::operator()(const std::string& key) const {
-    std::size_t var0 = load_u64_le(key.c_str() + 0);
-    std::size_t var1 = load_u64_le(key.c_str() + 7);
+    const std::size_t var0 = load_u64_le(key.c_str() + 0);
+    const std::size_t var1 = load_u64_le(key.c_str() + 7);
     std::size_t xor0 = var1 ^ var0;
     return xor0 ;
 }
 
 std::size_t NaiveIPV6::operator()(const std::string& key) const {
-    std::size_t var0 = load_u64_le(key.c_str() + 0);
-    std::size_t var1 = load_u64_le(key.c_str() + 8);
-    std::size_t var2 = load_u64_le(key.c_str() + 16);
-    std::size_t var3 = load_u64_le(key.c_str() + 24);
-    std::size_t var4 = load_u64_le(key.c_str() + 31);
+    const std::size_t var0 = load_u64_le(key.c_str() + 0);
+    const std::size_t var1 = load_u64_le(key.c_str() + 8);
+    const std::size_t var2 = load_u64_le(key.c_str() + 16);
+    const std::size_t var3 = load_u64_le(key.c_str() + 24);
+    const std::size_t var4 = load_u64_le(key.c_str() + 31);
     std::size_t xor0 = var4 ^ var3;
     std::size_t xor1 = var2 ^ var1;
     std::size_t xor2 = var0 ^ xor0;
@@ -815,19 +812,19 @@ std::size_t NaiveIPV6::operator()(const std::string& key) const {
 }
 
 std::size_t NaiveINTS::operator()(const std::string& key) const {
-    std::size_t var0 = load_u64_le(key.c_str() + 0);
-    std::size_t var1 = load_u64_le(key.c_str() + 8);
-    std::size_t var2 = load_u64_le(key.c_str() + 16);
-    std::size_t var3 = load_u64_le(key.c_str() + 24);
-    std::size_t var4 = load_u64_le(key.c_str() + 32);
-    std::size_t var5 = load_u64_le(key.c_str() + 40);
-    std::size_t var6 = load_u64_le(key.c_str() + 48);
-    std::size_t var7 = load_u64_le(key.c_str() + 56);
-    std::size_t var8 = load_u64_le(key.c_str() + 64);
-    std::size_t var9 = load_u64_le(key.c_str() + 72);
-    std::size_t var10 = load_u64_le(key.c_str() + 80);
-    std::size_t var11 = load_u64_le(key.c_str() + 88);
-    std::size_t var12 = load_u64_le(key.c_str() + 92);
+    const std::size_t var0 = load_u64_le(key.c_str() + 0);
+    const std::size_t var1 = load_u64_le(key.c_str() + 8);
+    const std::size_t var2 = load_u64_le(key.c_str() + 16);
+    const std::size_t var3 = load_u64_le(key.c_str() + 24);
+    const std::size_t var4 = load_u64_le(key.c_str() + 32);
+    const std::size_t var5 = load_u64_le(key.c_str() + 40);
+    const std::size_t var6 = load_u64_le(key.c_str() + 48);
+    const std::size_t var7 = load_u64_le(key.c_str() + 56);
+    const std::size_t var8 = load_u64_le(key.c_str() + 64);
+    const std::size_t var9 = load_u64_le(key.c_str() + 72);
+    const std::size_t var10 = load_u64_le(key.c_str() + 80);
+    const std::size_t var11 = load_u64_le(key.c_str() + 88);
+    const std::size_t var12 = load_u64_le(key.c_str() + 92);
     std::size_t xor0 = var12 ^ var11;
     std::size_t xor1 = var10 ^ var9;
     std::size_t xor2 = var8 ^ var7;
