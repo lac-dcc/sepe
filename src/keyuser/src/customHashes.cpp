@@ -1,12 +1,12 @@
 /**
  * @file customHashes.cpp
  * @brief Implementation of custom hash functions.
- * 
+ *
  * This file includes the implementation of several custom hash functions as well as helper functions for loading and shifting data.
- * 
+ *
  * Some general function types and their brief implementation strategies are:
  *  - Pext: XORS only relevant bytes after compressing them the PEXT instruction.
- *  - Naive: XORS all bytes. 
+ *  - Naive: XORS all bytes.
  *  - OffXor: XORS all relevant bytes.
  *  - Gpt: Uses the GPT generated hash functions.
  *  - Gperf: Uses the GPERF generated hash functions.
@@ -617,96 +617,96 @@ std::size_t PextINTS::operator()(const std::string& key) const {
 }
 
 std::size_t OffXorUrlComplex::operator()(const std::string& key) const {
-	const std::size_t hashable0 = load_u64_le(key.c_str()+23);
-	const std::size_t hashable1 = load_u64_le(key.c_str()+31);
-	const std::size_t hashable2 = load_u64_le(key.c_str()+41);
-	const std::size_t hashable3 = load_u64_le(key.c_str()+58);
-	const std::size_t hashable4 = load_u64_le(key.c_str()+66);
-	const std::size_t hashable5 = load_u64_le(key.c_str()+74);
-	size_t tmp0 = hashable0 ^ hashable1;
-	size_t tmp1 = hashable2 ^ hashable3;
-	size_t tmp2 = hashable4 ^ hashable5;
-	size_t tmp3 = tmp0 ^ tmp1;
-	size_t tmp4 = tmp2 ^ tmp3;
-	return tmp4;
+    const std::size_t hashable0 = load_u64_le(key.c_str()+23);
+    const std::size_t hashable1 = load_u64_le(key.c_str()+31);
+    const std::size_t hashable2 = load_u64_le(key.c_str()+41);
+    const std::size_t hashable3 = load_u64_le(key.c_str()+58);
+    const std::size_t hashable4 = load_u64_le(key.c_str()+66);
+    const std::size_t hashable5 = load_u64_le(key.c_str()+74);
+    size_t tmp0 = hashable0 ^ hashable1;
+    size_t tmp1 = hashable2 ^ hashable3;
+    size_t tmp2 = hashable4 ^ hashable5;
+    size_t tmp3 = tmp0 ^ tmp1;
+    size_t tmp4 = tmp2 ^ tmp3;
+    return tmp4;
 }
 std::size_t OffXorUrl::operator()(const std::string& key) const {
-	const std::size_t hashable0 = load_u64_le(key.c_str()+45);
-	const std::size_t hashable1 = load_u64_le(key.c_str()+53);
-	const std::size_t hashable2 = load_u64_le(key.c_str()+61);
-	size_t tmp0 = hashable0 ^ hashable1;
-	size_t tmp1 = hashable2 ^ tmp0;
-	return tmp1;
+    const std::size_t hashable0 = load_u64_le(key.c_str()+45);
+    const std::size_t hashable1 = load_u64_le(key.c_str()+53);
+    const std::size_t hashable2 = load_u64_le(key.c_str()+61);
+    size_t tmp0 = hashable0 ^ hashable1;
+    size_t tmp1 = hashable2 ^ tmp0;
+    return tmp1;
 }
 std::size_t OffXorMac::operator()(const std::string& key) const {
-	const std::size_t hashable0 = load_u64_le(key.c_str()+0);
-	const std::size_t hashable1 = load_u64_le(key.c_str()+8);
-	const std::size_t hashable2 = load_u64_le(key.c_str()+10);
-	size_t tmp0 = hashable0 ^ hashable1;
-	size_t tmp1 = hashable2 ^ tmp0;
-	return tmp1;
+    const std::size_t hashable0 = load_u64_le(key.c_str()+0);
+    const std::size_t hashable1 = load_u64_le(key.c_str()+8);
+    const std::size_t hashable2 = load_u64_le(key.c_str()+10);
+    size_t tmp0 = hashable0 ^ hashable1;
+    size_t tmp1 = hashable2 ^ tmp0;
+    return tmp1;
 }
 std::size_t OffXorCPF::operator()(const std::string& key) const {
-	const std::size_t hashable0 = load_u64_le(key.c_str()+0);
-	const std::size_t hashable1 = load_u64_le(key.c_str()+7);
-	size_t tmp0 = hashable0 ^ hashable1;
-	return tmp0;
+    const std::size_t hashable0 = load_u64_le(key.c_str()+0);
+    const std::size_t hashable1 = load_u64_le(key.c_str()+7);
+    size_t tmp0 = hashable0 ^ hashable1;
+    return tmp0;
 }
 
 std::size_t OffXorSSN::operator()(const std::string& key) const {
-	const std::size_t hashable0 = load_u64_le(key.c_str()+0);
-	const std::size_t hashable1 = load_u64_le(key.c_str()+4);
-	size_t tmp0 = hashable0 ^ hashable1;
-	return tmp0;
+    const std::size_t hashable0 = load_u64_le(key.c_str()+0);
+    const std::size_t hashable1 = load_u64_le(key.c_str()+4);
+    size_t tmp0 = hashable0 ^ hashable1;
+    return tmp0;
 }
 
 std::size_t OffXorIPV4::operator()(const std::string& key) const {
-	const std::size_t hashable0 = load_u64_le(key.c_str()+0);
-	const std::size_t hashable1 = load_u64_le(key.c_str()+8);
-	size_t tmp0 = hashable0 ^ hashable1;
-	return tmp0;
+    const std::size_t hashable0 = load_u64_le(key.c_str()+0);
+    const std::size_t hashable1 = load_u64_le(key.c_str()+8);
+    size_t tmp0 = hashable0 ^ hashable1;
+    return tmp0;
 }
 
 std::size_t OffXorIPV6::operator()(const std::string& key) const {
-	const std::size_t hashable0 = load_u64_le(key.c_str()+0);
-	const std::size_t hashable1 = load_u64_le(key.c_str()+8);
-	const std::size_t hashable2 = load_u64_le(key.c_str()+16);
-	const std::size_t hashable3 = load_u64_le(key.c_str()+24);
-	const std::size_t hashable4 = load_u64_le(key.c_str()+32);
-	size_t tmp0 = hashable0 ^ hashable1;
-	size_t tmp1 = hashable2 ^ hashable3;
-	size_t tmp2 = hashable4 ^ tmp0;
-	size_t tmp3 = tmp1 ^ tmp2;
-	return tmp3;
+    const std::size_t hashable0 = load_u64_le(key.c_str()+0);
+    const std::size_t hashable1 = load_u64_le(key.c_str()+8);
+    const std::size_t hashable2 = load_u64_le(key.c_str()+16);
+    const std::size_t hashable3 = load_u64_le(key.c_str()+24);
+    const std::size_t hashable4 = load_u64_le(key.c_str()+32);
+    size_t tmp0 = hashable0 ^ hashable1;
+    size_t tmp1 = hashable2 ^ hashable3;
+    size_t tmp2 = hashable4 ^ tmp0;
+    size_t tmp3 = tmp1 ^ tmp2;
+    return tmp3;
 }
 
 std::size_t OffXorINTS::operator()(const std::string& key) const {
-	const std::size_t hashable0 = load_u64_le(key.c_str()+0);
-	const std::size_t hashable1 = load_u64_le(key.c_str()+8);
-	const std::size_t hashable2 = load_u64_le(key.c_str()+16);
-	const std::size_t hashable3 = load_u64_le(key.c_str()+24);
-	const std::size_t hashable4 = load_u64_le(key.c_str()+32);
-	const std::size_t hashable5 = load_u64_le(key.c_str()+40);
-	const std::size_t hashable6 = load_u64_le(key.c_str()+48);
-	const std::size_t hashable7 = load_u64_le(key.c_str()+56);
-	const std::size_t hashable8 = load_u64_le(key.c_str()+64);
-	const std::size_t hashable9 = load_u64_le(key.c_str()+72);
-	const std::size_t hashable10 = load_u64_le(key.c_str()+80);
-	const std::size_t hashable11 = load_u64_le(key.c_str()+88);
-	const std::size_t hashable12 = load_u64_le(key.c_str()+93);
-	size_t tmp0 = hashable0 ^ hashable1;
-	size_t tmp1 = hashable2 ^ hashable3;
-	size_t tmp2 = hashable4 ^ hashable5;
-	size_t tmp3 = hashable6 ^ hashable7;
-	size_t tmp4 = hashable8 ^ hashable9;
-	size_t tmp5 = hashable10 ^ hashable11;
-	size_t tmp6 = hashable12 ^ tmp0;
-	size_t tmp7 = tmp1 ^ tmp2;
-	size_t tmp8 = tmp3 ^ tmp4;
-	size_t tmp9 = tmp5 ^ tmp6;
-	size_t tmp10 = tmp7 ^ tmp8;
-	size_t tmp11 = tmp9 ^ tmp10;
-	return tmp11;
+    const std::size_t hashable0 = load_u64_le(key.c_str()+0);
+    const std::size_t hashable1 = load_u64_le(key.c_str()+8);
+    const std::size_t hashable2 = load_u64_le(key.c_str()+16);
+    const std::size_t hashable3 = load_u64_le(key.c_str()+24);
+    const std::size_t hashable4 = load_u64_le(key.c_str()+32);
+    const std::size_t hashable5 = load_u64_le(key.c_str()+40);
+    const std::size_t hashable6 = load_u64_le(key.c_str()+48);
+    const std::size_t hashable7 = load_u64_le(key.c_str()+56);
+    const std::size_t hashable8 = load_u64_le(key.c_str()+64);
+    const std::size_t hashable9 = load_u64_le(key.c_str()+72);
+    const std::size_t hashable10 = load_u64_le(key.c_str()+80);
+    const std::size_t hashable11 = load_u64_le(key.c_str()+88);
+    const std::size_t hashable12 = load_u64_le(key.c_str()+93);
+    size_t tmp0 = hashable0 ^ hashable1;
+    size_t tmp1 = hashable2 ^ hashable3;
+    size_t tmp2 = hashable4 ^ hashable5;
+    size_t tmp3 = hashable6 ^ hashable7;
+    size_t tmp4 = hashable8 ^ hashable9;
+    size_t tmp5 = hashable10 ^ hashable11;
+    size_t tmp6 = hashable12 ^ tmp0;
+    size_t tmp7 = tmp1 ^ tmp2;
+    size_t tmp8 = tmp3 ^ tmp4;
+    size_t tmp9 = tmp5 ^ tmp6;
+    size_t tmp10 = tmp7 ^ tmp8;
+    size_t tmp11 = tmp9 ^ tmp10;
+    return tmp11;
 }
 
 std::size_t NaiveSimdUrlComplex::operator()(const std::string& key) const {
@@ -844,47 +844,47 @@ std::size_t NaiveINTS::operator()(const std::string& key) const {
 }
 
 std::size_t OffXorSimdUrlComplex::operator()(const std::string& key) const{
-	const __m128i hashable0 = _mm_lddqu_si128((const __m128i *)(key.c_str()+23));
-	const __m128i hashable1 = _mm_lddqu_si128((const __m128i *)(key.c_str()+41));
-	const __m128i hashable2 = _mm_lddqu_si128((const __m128i *)(key.c_str()+58));
-	const __m128i hashable3 = _mm_lddqu_si128((const __m128i *)(key.c_str()+68));
-	__m128i tmp0 = _mm_xor_si128(hashable0, hashable1);
-	__m128i tmp1 = _mm_xor_si128(hashable2, hashable3);
-	__m128i tmp2 = _mm_xor_si128(tmp0, tmp1);
-	return _mm_extract_epi64(tmp2, 0) ^ _mm_extract_epi64(tmp2 , 1);
+    const __m128i hashable0 = _mm_lddqu_si128((const __m128i *)(key.c_str()+23));
+    const __m128i hashable1 = _mm_lddqu_si128((const __m128i *)(key.c_str()+41));
+    const __m128i hashable2 = _mm_lddqu_si128((const __m128i *)(key.c_str()+58));
+    const __m128i hashable3 = _mm_lddqu_si128((const __m128i *)(key.c_str()+68));
+    __m128i tmp0 = _mm_xor_si128(hashable0, hashable1);
+    __m128i tmp1 = _mm_xor_si128(hashable2, hashable3);
+    __m128i tmp2 = _mm_xor_si128(tmp0, tmp1);
+    return _mm_extract_epi64(tmp2, 0) ^ _mm_extract_epi64(tmp2 , 1);
 }
 
 std::size_t OffXorSimdUrl::operator()(const std::string& key) const{
-	const __m128i hashable0 = _mm_lddqu_si128((const __m128i *)(key.c_str()+45));
-	const __m128i hashable1 = _mm_lddqu_si128((const __m128i *)(key.c_str()+55));
-	__m128i tmp0 = _mm_xor_si128(hashable0, hashable1);
-	return _mm_extract_epi64(tmp0, 0) ^ _mm_extract_epi64(tmp0 , 1);
+    const __m128i hashable0 = _mm_lddqu_si128((const __m128i *)(key.c_str()+45));
+    const __m128i hashable1 = _mm_lddqu_si128((const __m128i *)(key.c_str()+55));
+    __m128i tmp0 = _mm_xor_si128(hashable0, hashable1);
+    return _mm_extract_epi64(tmp0, 0) ^ _mm_extract_epi64(tmp0 , 1);
 }
 
 std::size_t OffXorSimdIPV6::operator()(const std::string& key) const{
-	const __m128i hashable0 = _mm_lddqu_si128((const __m128i *)(key.c_str()+0));
-	const __m128i hashable1 = _mm_lddqu_si128((const __m128i *)(key.c_str()+16));
-	const __m128i hashable2 = _mm_lddqu_si128((const __m128i *)(key.c_str()+24));
-	__m128i tmp0 = _mm_xor_si128(hashable0, hashable1);
-	__m128i tmp1 = _mm_xor_si128(hashable2, tmp0);
-	return _mm_extract_epi64(tmp1, 0) ^ _mm_extract_epi64(tmp1 , 1);
+    const __m128i hashable0 = _mm_lddqu_si128((const __m128i *)(key.c_str()+0));
+    const __m128i hashable1 = _mm_lddqu_si128((const __m128i *)(key.c_str()+16));
+    const __m128i hashable2 = _mm_lddqu_si128((const __m128i *)(key.c_str()+24));
+    __m128i tmp0 = _mm_xor_si128(hashable0, hashable1);
+    __m128i tmp1 = _mm_xor_si128(hashable2, tmp0);
+    return _mm_extract_epi64(tmp1, 0) ^ _mm_extract_epi64(tmp1 , 1);
 }
 
 std::size_t OffXorSimdINTS::operator()(const std::string& key) const{
-	const __m128i hashable0 = _mm_lddqu_si128((const __m128i *)(key.c_str()+0));
-	const __m128i hashable1 = _mm_lddqu_si128((const __m128i *)(key.c_str()+16));
-	const __m128i hashable2 = _mm_lddqu_si128((const __m128i *)(key.c_str()+32));
-	const __m128i hashable3 = _mm_lddqu_si128((const __m128i *)(key.c_str()+48));
-	const __m128i hashable4 = _mm_lddqu_si128((const __m128i *)(key.c_str()+64));
-	const __m128i hashable5 = _mm_lddqu_si128((const __m128i *)(key.c_str()+80));
-	const __m128i hashable6 = _mm_lddqu_si128((const __m128i *)(key.c_str()+85));
-	__m128i tmp0 = _mm_xor_si128(hashable0, hashable1);
-	__m128i tmp1 = _mm_xor_si128(hashable2, hashable3);
-	__m128i tmp2 = _mm_xor_si128(hashable4, hashable5);
-	__m128i tmp3 = _mm_xor_si128(hashable6, tmp0);
-	__m128i tmp4 = _mm_xor_si128(tmp1, tmp2);
-	__m128i tmp5 = _mm_xor_si128(tmp3, tmp4);
-	return _mm_extract_epi64(tmp5, 0) ^ _mm_extract_epi64(tmp5 , 1);
+    const __m128i hashable0 = _mm_lddqu_si128((const __m128i *)(key.c_str()+0));
+    const __m128i hashable1 = _mm_lddqu_si128((const __m128i *)(key.c_str()+16));
+    const __m128i hashable2 = _mm_lddqu_si128((const __m128i *)(key.c_str()+32));
+    const __m128i hashable3 = _mm_lddqu_si128((const __m128i *)(key.c_str()+48));
+    const __m128i hashable4 = _mm_lddqu_si128((const __m128i *)(key.c_str()+64));
+    const __m128i hashable5 = _mm_lddqu_si128((const __m128i *)(key.c_str()+80));
+    const __m128i hashable6 = _mm_lddqu_si128((const __m128i *)(key.c_str()+85));
+    __m128i tmp0 = _mm_xor_si128(hashable0, hashable1);
+    __m128i tmp1 = _mm_xor_si128(hashable2, hashable3);
+    __m128i tmp2 = _mm_xor_si128(hashable4, hashable5);
+    __m128i tmp3 = _mm_xor_si128(hashable6, tmp0);
+    __m128i tmp4 = _mm_xor_si128(tmp1, tmp2);
+    __m128i tmp5 = _mm_xor_si128(tmp3, tmp4);
+    return _mm_extract_epi64(tmp5, 0) ^ _mm_extract_epi64(tmp5 , 1);
 }
 
 std::size_t NaiveSimdUrl::operator()(const std::string& key) const {
@@ -1072,10 +1072,10 @@ std::size_t GptUrl::operator()(const std::string& key) const {
 
     // Unrolled loop for better performance
     for (std::size_t i = 0; i < keySize; i += unrollFactor) {
-        hashValue ^= (static_cast<std::size_t>(key[i]) << 0) | 
-                     (static_cast<std::size_t>(key[i + 1]) << 8) | 
-                     (static_cast<std::size_t>(key[i + 2]) << 16) | 
-                     (static_cast<std::size_t>(key[i + 3]) << 24) | 
+        hashValue ^= (static_cast<std::size_t>(key[i]) << 0) |
+                     (static_cast<std::size_t>(key[i + 1]) << 8) |
+                     (static_cast<std::size_t>(key[i + 2]) << 16) |
+                     (static_cast<std::size_t>(key[i + 3]) << 24) |
                      (static_cast<std::size_t>(key[i + 4]) << 32);
     }
 
