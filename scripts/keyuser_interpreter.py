@@ -47,7 +47,7 @@ def handle_distribution_analysis(args):
         print("If it does not exist, you can obtain it by running keyuser with --test-distribution or bench-runner with --histogram ", args.distribution)
         exit(1)
 
-    regex_name = re.sub(r"_histogram.*\.py", "", os.path.basename(args.distribution))
+    regex_name = os.path.basename(args.distribution).replace(".py", "")
 
     if args.hash_functions is None:
         args.hash_functions = []
@@ -60,9 +60,10 @@ def handle_distribution_analysis(args):
         _, ax = plt.subplots(figsize=(10, 5))
     
     for key, value in arrays.distributions.items():
-        if key not in args.hash_functions:
-            continue
         key = key.replace("array_", "")
+        # if key not in args.hash_functions:
+        #     print("Skipping", key)
+        #     continue
         if args.plot_graph:
             ax.hist(value, label=key, alpha=0.5)
 
@@ -175,13 +176,18 @@ def performance_from_dataframe(args, df, regex_name):
     print("See all results in: ", output_path)
     result.to_csv(output_path, index=False)
 
+    # Normalize "Chi-Test" column using the "STDHashSrc" as the reference
+    # result["GeoTime"] = 100.0 - (result["GeoTime"] / result[result["Func Name"] == "STDHashSrc"]["GeoTime"].values[0]) * 100.0
+    # print("Normalized GeoTime %")
+    # print(result)
+
 def handle_performance_analysis(args):
 
     # Load CSV files into pandas dataframe
     csv_files = args.performance
     dataframes = [pd.read_csv(file) for file in csv_files]
 
-    regex_name = re.sub(r"_results.*\.csv", "", os.path.basename(csv_files[0]))
+    regex_name = os.path.basename(csv_files[0]).replace(".csv", "")
 
     # Concatenate dataframes
     df = pd.concat(dataframes, ignore_index=True)
