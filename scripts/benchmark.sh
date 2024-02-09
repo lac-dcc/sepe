@@ -38,7 +38,7 @@ for REGEX in $REGEXES; do
 
 									./bin/sepe-runner \
 											--verbose \
-											--distributions "$DISTRIBUTION" \
+											--distribution "$DISTRIBUTION" \
 											--operations "$NUM_OP" \
 											--keys "$NUM_KEY" \
 											--insert "$INSERTION" \
