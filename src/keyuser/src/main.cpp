@@ -27,6 +27,7 @@ std::string correctBenchUsage(){
            "       -r or --repetitions: number of times to repeat the benchmark\n"
            "       -seed: integer that represents the seed for the random number generator\n "
            "       --test-distribution: test the distribution of '--hashes' specified hash functions\n"
+           "       --distribution: specify the randon distribution of the keys to be used in the benchmark\n"
            "       -v or --verbose: print the results of each operation\n"
            "       -h or --help: print this message\n"
            ;
@@ -72,6 +73,18 @@ BenchmarkParameters parseArgs(int argc, char** argv){
             i++;
         }else if(strcmp(argv[i], "--test-distribution") == 0){
             args.testDistribution = true;
+            i++;
+        }else if(strcmp(argv[i], "--distribution") == 0){
+            i++;
+            std::string distribution = argv[i];
+            if(distribution == "normal"){
+                args.distribution = "normal";
+            }else if(distribution == "uniform"){
+                args.distribution = "uniform";
+            }else{
+                fprintf(stderr,"Invalid distribution: %s! Defaulting to normal.\n", distribution.c_str());
+                args.distribution = "normal";
+            }
             i++;
         }else if(strcmp(argv[i], "-h") == 0 || 
                  strcmp(argv[i], "--help") == 0){

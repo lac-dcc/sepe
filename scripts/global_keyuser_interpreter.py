@@ -34,7 +34,7 @@ def distribution_test(key, value):
 
     skewness = stats.skew(value)
 
-    return pd.DataFrame(pd.DataFrame({"Hash Function": [key], "Skewness": [skewness], "Chi-Test": [chi2], "Symmetric?": [p > 0.05]}))
+    return pd.DataFrame(pd.DataFrame({"Hash Function": [key], "Skewness": [skewness], "Chi-Test": [chi2], "Uniform?": [p > 0.05]}))
     
 def handle_distribution_analysis(args):
     try:

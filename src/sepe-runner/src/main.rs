@@ -239,7 +239,9 @@ fn main() {
             .arg("-seed")
             .arg(format!("{}", cmd.keyuser_seed))
             .arg("-r")
-            .arg(format!("{}", cmd.repetitions));
+            .arg(format!("{}", cmd.repetitions))
+            .arg("--distribution")
+            .arg(cmd.distribution.as_str());
 
         if cmd.verbose {
             keyuser_cmd.arg("--verbose");

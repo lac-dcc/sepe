@@ -11,6 +11,7 @@
 #include <chrono>
 #include <algorithm>
 #include <map>
+#include <random>
 
 void executeInterweaved(Benchmark* bench, 
                         const std::vector<std::string>& keys, 
@@ -22,22 +23,47 @@ void executeInterweaved(Benchmark* bench,
     // Interweaved execution mode parameters
     int numInsert = (args.insert * args.numOperations) / 100;
 
-    // First, insert 50% of the numInserts
-    for(int j = 0; j < numInsert/2; j++){
-        int randomKey = rand() % keys.size();
-        bench->insert(keys[randomKey]);
-    }
-    for(int j = 0; j < (args.numOperations-(numInsert/2)); j++){
-        int randomKey = rand() % keys.size();
-        int randomOp = rand() % 100;
-        if(randomOp < args.insert){
+
+    if ( args.distribution == "normal" ) {
+        // Create a binomial distribution with parameters n=10 and p=0.5
+        std::default_random_engine generator;
+        std::binomial_distribution<int> distribution(keys.size(), 0.5);
+
+        // First, insert 50% of the numInserts
+        for(int j = 0; j < numInsert/2; j++){
+            int randomKey = distribution(generator) % keys.size();
             bench->insert(keys[randomKey]);
-        }else if(randomOp < args.insert + args.search){
-            bench->search(keys[randomKey]);
-        }else{
-            bench->elimination(keys[randomKey]);
+        }
+        for(int j = 0; j < (args.numOperations-(numInsert/2)); j++){
+            int randomKey = distribution(generator) % keys.size();
+            int randomOp = rand() % 100;
+            if(randomOp < args.insert){
+                bench->insert(keys[randomKey]);
+            }else if(randomOp < args.insert + args.search){
+                bench->search(keys[randomKey]);
+            }else{
+                bench->elimination(keys[randomKey]);
+            }
+        }
+    } else if ( args.distribution == "uniform" ) {
+        // First, insert 50% of the numInserts
+        for(int j = 0; j < numInsert/2; j++){
+            int randomKey = rand() % keys.size();
+            bench->insert(keys[randomKey]);
+        }
+        for(int j = 0; j < (args.numOperations-(numInsert/2)); j++){
+            int randomKey = rand() % keys.size();
+            int randomOp = rand() % 100;
+            if(randomOp < args.insert){
+                bench->insert(keys[randomKey]);
+            }else if(randomOp < args.insert + args.search){
+                bench->search(keys[randomKey]);
+            }else{
+                bench->elimination(keys[randomKey]);
+            }
         }
     }
+
 }
 
 void executeBatched(Benchmark* bench, 
@@ -52,17 +78,35 @@ void executeBatched(Benchmark* bench,
     int numSearch = (args.search * args.numOperations) / 100;
     int numElimination = (args.elimination * args.numOperations) / 100;
 
-    for(int j = 0; j < numInsert; j++){
-        int randomKey = rand() % keys.size();
-        bench->insert(keys[randomKey]);
-    }
-    for(int j = 0; j < numSearch; j++){
-        int randomKey = rand() % keys.size();
-        bench->search(keys[randomKey]);
-    }
-    for(int j = 0; j < numElimination; j++){
-        int randomKey = rand() % keys.size();
-        bench->elimination(keys[randomKey]);
+    if ( args.distribution == "normal" ) {
+        // Create a binomial distribution with parameters n=10 and p=0.5
+        std::default_random_engine generator;
+        std::binomial_distribution<int> distribution(keys.size(), 0.5);
+        for(int j = 0; j < numInsert; j++){
+            int randomKey = distribution(generator) % keys.size();
+            bench->insert(keys[randomKey]);
+        }
+        for(int j = 0; j < numSearch; j++){
+            int randomKey = distribution(generator) % keys.size();
+            bench->search(keys[randomKey]);
+        }
+        for(int j = 0; j < numElimination; j++){
+            int randomKey = distribution(generator) % keys.size();
+            bench->elimination(keys[randomKey]);
+        }
+    } else if ( args.distribution == "uniform" ) {
+        for(int j = 0; j < numInsert; j++){
+            int randomKey = rand() % keys.size();
+            bench->insert(keys[randomKey]);
+        }
+        for(int j = 0; j < numSearch; j++){
+            int randomKey = rand() % keys.size();
+            bench->search(keys[randomKey]);
+        }
+        for(int j = 0; j < numElimination; j++){
+            int randomKey = rand() % keys.size();
+            bench->elimination(keys[randomKey]);
+        }
     }
 }
 
@@ -98,8 +142,9 @@ void benchmarkExecutor(const std::vector<Benchmark*>& benchmarks,
 {
 
     // Init CSV File
-    printf("%s,%s,%s,%s,%s,%s,%s,%s,%s,%s\n",
+    printf("%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s\n",
         "Execution Mode",
+        "Key Distribution",
         "Num Operations",
         "Num Keys",
         "Insertions (%)",
@@ -111,7 +156,8 @@ void benchmarkExecutor(const std::vector<Benchmark*>& benchmarks,
         "Collision Count");
     
     char* argsString = (char*)malloc(sizeof(char)*100);
-    sprintf(argsString, "%d,%ld,%d,%d,%d",
+    sprintf(argsString, "%s,%d,%ld,%d,%d,%d",
+                        args.distribution.c_str(),
                         args.numOperations,
                         keys.size(),
                         args.insert,

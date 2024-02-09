@@ -400,6 +400,7 @@ struct BenchmarkParameters{
     int repetitions     = 1; ///< Number of repetitions for each benchmark.
     bool verbose        = false; ///< Verbose output flag.
     bool testDistribution = false; ///< Flag to test distribution.
+    std::string distribution = "normal"; ///< Distribution to use for testing.
 };
 
 /**
