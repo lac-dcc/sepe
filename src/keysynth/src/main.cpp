@@ -2,6 +2,7 @@
 #include <vector>
 #include <queue>
 #include <utility>
+#include <algorithm>
 
 // Constant to hold a helper function used within the synthetized functions
 static const std::string load_u64_le = "inline static uint64_t load_u64_le(const char* b) {\n\
@@ -36,12 +37,14 @@ struct Range{
     int offset; ///< The offset of the range.
     size_t repetition; ///< The repetition count of the range.
     char mask; ///< The mask associated with the range. Only useful for PEXT.
+    float entropy; ///< The associated entropy of the range.
 
-    Range(char _start, char _end, int _offset, size_t _repetition) :
+    Range(char _start, char _end, int _offset, size_t _repetition, float _entropy) :
         start(_start),
         end(_end),
         offset(_offset),
-        repetition(_repetition)
+        repetition(_repetition),
+        entropy(_entropy)
     {
 
         /**
@@ -220,10 +223,11 @@ static std::vector<size_t> calculateOffsets(std::vector<Range>& ranges, int regS
  * that is not part of a range. If no ranges are found in the string, the function prints a default function and exits.
  *
  * @param regex The regular expression string.
+ * @param charEntropy The vector of character entropy values.
  * @return std::pair<std::vector<Range>,size_t> A pair containing the vector of Range objects and the final offset.
  */
 static std::pair<std::vector<Range>,size_t>
-calculateRanges(std::string& regex){
+calculateRanges(std::string& regex, std::vector<float>& charEntropy){
     std::vector<Range> ranges;
     size_t offset = 0;
     for(size_t i = 0; i < regex.size(); i++){
@@ -231,12 +235,12 @@ calculateRanges(std::string& regex){
             if(regex[i+5] == '{'){
                 size_t closeBracketPos = regex.find('}', i+6);
                 size_t repetition = std::stoi(regex.substr(i+6, closeBracketPos));
-                ranges.push_back(Range(regex[i+1],regex[i+3],offset,repetition));
+                ranges.push_back(Range(regex[i+1],regex[i+3],offset,repetition,charEntropy[i+1]));
                 offset += repetition;
                 i = closeBracketPos;
             } else {
                 offset++;
-                ranges.push_back(Range(regex[i+1],regex[i+3],offset,1));
+                ranges.push_back(Range(regex[i+1],regex[i+3],offset,1,charEntropy[i+1]));
                 i += 4;
             }
         } else if(regex[i] == '\\') {
@@ -551,20 +555,24 @@ std::string synthetizeOffXorSimdFunc(std::vector<Range>& ranges, size_t offset) 
  */
 int main(int argc, char** argv){
 
-    if(argc < 2){
-        fprintf(stderr, "Incorrect arguments!\n"
-                "Usage: %s <regex>\n", argv[0]);
-        return 1;
-    }
-
     std::string regexStr = std::string(argv[1]);
+    std::vector<float> charEntropy;
+    for(int i = 2; i < argc; i++){
+        charEntropy.push_back(std::stof(argv[i]));
+    }
 
     // Create ranges
     size_t offset;
     std::vector<Range> ranges;
-    std::pair<std::vector<Range>,size_t> res = calculateRanges(regexStr);
+    std::pair<std::vector<Range>,size_t> res = calculateRanges(regexStr,charEntropy);
     ranges = res.first;
     offset = res.second;
+
+    constexpr float ENTROPY_THRESHOLD = 4.0;
+    // Remove all ranges that have lower than ENTROPY_THRESHOLD entropy
+    ranges.erase(std::remove_if(ranges.begin(), ranges.end(), [ENTROPY_THRESHOLD](const Range& range) {
+        return range.entropy < ENTROPY_THRESHOLD;
+    }), ranges.end());
 
     size_t regexSize = 0;
     for(const auto& range : ranges){

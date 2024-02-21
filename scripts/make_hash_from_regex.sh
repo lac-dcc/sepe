@@ -11,5 +11,5 @@ if [ "$(basename "$(pwd)")" = "scripts" ]; then
 fi
 
 make --silent -j"$(nproc)" bin/keygen bin/keybuilder bin/keysynth
-# ./bin/keysynth "$(./bin/keygen "$1" | ./bin/keybuilder)"
-../bin/keygen "$1" | ./bin/keybuilder
+./bin/keysynth "$(./bin/keygen "$1" | ./bin/keybuilder)"
+# ./bin/keygen "$1" | ./bin/keybuilder

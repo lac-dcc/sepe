@@ -243,7 +243,6 @@ void testDistribution(const std::vector<Benchmark*>& benchmarks,
     for ( const auto & [hashName, collisions] : hashFuncCollisions ) {
         printf("# Hash Function: %s, Collisions: %lu\n", hashName.c_str(), collisions);
     }
-
 }
 
 void testHashPerformance(const std::vector<Benchmark*>& benchmarks, 

@@ -132,8 +132,6 @@ int main(int argc, const char* argv[]) {
 		free(line);
 		return 1;
 	}
-	free(line);
-	line = NULL;
 
 	Range* ranges = malloc(line_size * sizeof(*ranges));
 
@@ -161,9 +159,9 @@ int main(int argc, const char* argv[]) {
 		}
 
 		++line_count;
-		free(line);
-		line = NULL;
 	}
+	free(line);
+	line = NULL;
 
 	// finally, group consecutive identical ranges together. For example,
 	// `[0-9][0-9][0-9]` will turn into `[0-9]{3}`
