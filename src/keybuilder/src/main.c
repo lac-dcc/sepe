@@ -29,6 +29,7 @@
 typedef struct Range {
 	char start;
 	char end;
+	unsigned long count[256];
 } Range;
 
 enum Class {
@@ -152,6 +153,7 @@ int main(int argc, const char* argv[]) {
 		for (ssize_t i = 0; i < line_size - 1; ++i) {
 			ranges[i].start = line[i] < ranges[i].start ? line[i] : ranges[i].start;
 			ranges[i].end = line[i] > ranges[i].end ? line[i] : ranges[i].end;
+			ranges[i].count[line[i]]++;
 		}
 	}
 	free(line);
@@ -180,6 +182,14 @@ int main(int argc, const char* argv[]) {
 				printf("{%d}", repetitions);
 			}
 		}
+	}
+	puts("");
+
+	for (ssize_t i = 0; i < line_size - 1; ++i) {
+		ssize_t nonzeros = 0;
+		for (int j = 0; j < 256; ++j)
+			nonzeros += ranges[i].count[j] != 0;
+		printf("%ld ", nonzeros);
 	}
 	puts("");
 
