@@ -120,7 +120,7 @@ int main(int argc, const char* argv[]) {
 	size_t n;
 
 	// begin by reading the first line
-	const ssize_t line_size = getline(&line, &n, stdin);
+	ssize_t line_size = getline(&line, &n, stdin);
 	if (line_size == -1) {
 		if (errno != 0) {
 			fprintf(stderr, "failed to read initial line from standard input: %s\n", strerror(errno));
@@ -145,11 +145,9 @@ int main(int argc, const char* argv[]) {
 	ssize_t in_bytes;
 	while ((in_bytes = getline(&line, &n, stdin)) > -1) {
 		if (in_bytes != line_size) {
-			fprintf(stderr, "ERROR: all lines must have the exact same size!\n");
-			free(line);
-			free(ranges);
-			return 2;
+			fprintf(stderr, "WARNING: lines have different size!\n");
 		}
+		line_size = line_size < in_bytes ? line_size : in_bytes;
 
 		for (ssize_t i = 0; i < line_size - 1; ++i) {
 			ranges[i].start = line[i] < ranges[i].start ? line[i] : ranges[i].start;
