@@ -1,5 +1,5 @@
 # Compilation variables
-COMMON_FLAGS  := -std=c18 -Wall -Wextra -pedantic -pipe
+COMMON_FLAGS  := -std=c18 -Wall -Wextra -pedantic -pipe -lm
 RELEASE_FLAGS := $(COMMON_FLAGS) -O2 -flto=auto -march=native
 DEBUG_FLAGS   := $(COMMON_FLAGS) -Og -g3 -fsanitize=address,undefined
 

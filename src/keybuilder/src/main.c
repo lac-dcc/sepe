@@ -25,6 +25,7 @@
 #include <errno.h>
 #include <string.h>
 #include <sys/types.h>
+#include <math.h>
 
 typedef struct Range {
 	char start;
@@ -117,7 +118,7 @@ int main(int argc, const char* argv[]) {
 		}
 	}
 
-	char* line;
+	char* line = NULL;
 	size_t n;
 
 	// begin by reading the first line
@@ -131,6 +132,8 @@ int main(int argc, const char* argv[]) {
 		free(line);
 		return 1;
 	}
+	free(line);
+	line = NULL;
 
 	Range* ranges = malloc(line_size * sizeof(*ranges));
 
@@ -144,6 +147,7 @@ int main(int argc, const char* argv[]) {
 	// now, read every line, while updating the ranges. We assume all
 	// lines have the same size, and exit with an error if they don't
 	ssize_t in_bytes;
+	ssize_t line_count = 1;
 	while ((in_bytes = getline(&line, &n, stdin)) > -1) {
 		if (in_bytes != line_size) {
 			fprintf(stderr, "WARNING: lines have different size!\n");
@@ -155,8 +159,11 @@ int main(int argc, const char* argv[]) {
 			ranges[i].end = line[i] > ranges[i].end ? line[i] : ranges[i].end;
 			ranges[i].count[line[i]]++;
 		}
+
+		++line_count;
+		free(line);
+		line = NULL;
 	}
-	free(line);
 
 	// finally, group consecutive identical ranges together. For example,
 	// `[0-9][0-9][0-9]` will turn into `[0-9]{3}`
@@ -186,10 +193,14 @@ int main(int argc, const char* argv[]) {
 	puts("");
 
 	for (ssize_t i = 0; i < line_size - 1; ++i) {
-		ssize_t nonzeros = 0;
-		for (int j = 0; j < 256; ++j)
-			nonzeros += ranges[i].count[j] != 0;
-		printf("%ld ", nonzeros);
+		double entropy = 0;
+		for (int j = 0; j < 256; ++j) {
+			if (ranges[i].count[j] != 0) {
+				double p = (double)ranges[i].count[j] / (double)line_count;
+				entropy += p * log2(p);
+			}
+		}
+		printf("%g \n", -entropy);
 	}
 	puts("");
 
