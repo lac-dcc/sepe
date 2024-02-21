@@ -112,6 +112,10 @@ struct Command {
     #[clap(long)]
     histogram: bool,
 
+    /// Measure the performance of the hash functions without containers
+    #[clap(long)]
+    hash_performance : bool, 
+
     /// Whether to generate the keys incrementally, rather than randomly (VERY SLOW)
     #[clap(long)]
     incremental_generation: bool,
@@ -249,6 +253,10 @@ fn main() {
 
         if cmd.histogram {
             keyuser_cmd.arg("--test-distribution");
+        }
+        
+        if cmd.hash_performance {
+            keyuser_cmd.arg("--hash-performance");
         }
 
         keyuser_cmd.arg("--hashes");

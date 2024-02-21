@@ -112,8 +112,6 @@ def mannwhitneyu_from_dataframe(args, regex_name, df, column_to_group, column_to
             # Append a new row to the DataFrame
             result = pd.concat([result, pd.DataFrame({"Hash Function 1": [hashFunc1], "Hash Function 2": [hashFunc2], "p-value": [p], "Same Distribution?": [p > alpha]})], ignore_index=True)
 
-
-    
     print("Below DataFrame from Regex: ", regex_name)
     print(result)
     output_path = args.output_destination + regex_name + "_mannwhitneyu.csv"

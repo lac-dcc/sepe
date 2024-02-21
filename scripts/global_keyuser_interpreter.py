@@ -66,11 +66,6 @@ def handle_distribution_analysis(args):
         
         for key, value in current_module.distributions.items():
             key = key.replace("array_", "")
-            # if key not in args.hash_functions:
-            #     print("Skipping ", key)
-            #     continue
-            # if args.plot_graph:
-            #     ax.hist(value, label=key, alpha=0.5)
 
             if result is None:
                 result = distribution_test(key, value)

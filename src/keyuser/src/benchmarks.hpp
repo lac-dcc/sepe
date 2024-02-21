@@ -400,6 +400,7 @@ struct BenchmarkParameters{
     int repetitions     = 1; ///< Number of repetitions for each benchmark.
     bool verbose        = false; ///< Verbose output flag.
     bool testDistribution = false; ///< Flag to test distribution.
+    bool hashPerformance = false; ///< Flag to test hash performance.
     std::string distribution = "normal"; ///< Distribution to use for testing.
 };
 
@@ -449,6 +450,18 @@ void benchmarkExecutor(const std::vector<Benchmark*>& benchmarks,
  */
 void testDistribution(const std::vector<Benchmark*>& benchmarks, 
                        const std::vector<std::string>& keys);
+
+/**
+ * @brief Tests the performance of a hash function.
+ * 
+ * This function takes a vector of keys and benchmark parameters as input, 
+ * and prints to standard output the elapsed time in seconds to hash all informed keys.
+ *
+ * @param keys A constant reference to a vector of strings that represent the keys to be hashed.
+ * @param args A constant reference to the BenchmarkParameters object that contains the parameters for the benchmark.
+ */
+void testHashPerformance(const std::vector<Benchmark*>& benchmarks, 
+                         const std::vector<std::string>& keys);
 
 /**
  * @brief Frees the memory allocated for the benchmarks.

@@ -28,6 +28,7 @@ std::string correctBenchUsage(){
            "       -seed: integer that represents the seed for the random number generator\n "
            "       --test-distribution: test the distribution of '--hashes' specified hash functions\n"
            "       --distribution: specify the randon distribution of the keys to be used in the benchmark\n"
+           "       --hash-performance: test the execution time of the hash functions over a set of keys\n"  
            "       -v or --verbose: print the results of each operation\n"
            "       -h or --help: print this message\n"
            ;
@@ -73,6 +74,9 @@ BenchmarkParameters parseArgs(int argc, char** argv){
             i++;
         }else if(strcmp(argv[i], "--test-distribution") == 0){
             args.testDistribution = true;
+            i++;
+        }else if(strcmp(argv[i], "--hash-performance") == 0){
+            args.hashPerformance = true;
             i++;
         }else if(strcmp(argv[i], "--distribution") == 0){
             i++;
@@ -142,6 +146,11 @@ int main(int argc, char** argv){
     }
 
     // Run benchmarks
+    if(args.hashPerformance){
+        testHashPerformance(filteredBenchmarks, keys);
+        freeBenchmarks(filteredBenchmarks);
+        return 0;
+    }
     if(args.testDistribution){
         testDistribution(filteredBenchmarks, keys);
         freeBenchmarks(filteredBenchmarks);

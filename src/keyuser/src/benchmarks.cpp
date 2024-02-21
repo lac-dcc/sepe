@@ -211,6 +211,7 @@ void testDistribution(const std::vector<Benchmark*>& benchmarks,
                        const std::vector<std::string>& keys){
 
     std::unordered_set<std::string> hashFuncExecuted;
+    std::unordered_map<std::string,size_t> hashFuncCollisions;
     printf("import numpy as np\n");
     printf("distributions = {}\n");
     for (const auto& bench : benchmarks){
@@ -230,12 +231,44 @@ void testDistribution(const std::vector<Benchmark*>& benchmarks,
 
         std::sort(buckets.begin(), buckets.end());
         printf("distributions['array_%s'] = np.array([", bench->getHashName().c_str());
-        // printf(" array_%s = np.array([\n", bench->getHashName().c_str());
         for (size_t i = 0; i < buckets.size(); ++i) {
             printf("%lu,",buckets[i]);
         }
         printf("])\n");
+        // Count number of replicated values in the buckets
+        auto newEnd = std::unique(buckets.begin(), buckets.end());
+        size_t numRepeated = buckets.end() - newEnd;
+        hashFuncCollisions[bench->getHashName()] = numRepeated;
     }
+
+    for ( const auto & [hashName, collisions] : hashFuncCollisions ) {
+        printf("# Hash Function: %s, Collisions: %lu\n", hashName.c_str(), collisions);
+    }
+
+}
+
+void testHashPerformance(const std::vector<Benchmark*>& benchmarks, 
+                         const std::vector<std::string>& keys){
+
+    std::unordered_set<std::string> hashFuncExecuted;
+    for (const auto& bench : benchmarks){
+        if(hashFuncExecuted.find(bench->getHashName()) != hashFuncExecuted.end()){
+            continue;
+        }
+        
+        hashFuncExecuted.insert(bench->getHashName());
+        auto hashFunc = bench->getHashFunction();
+
+        auto start = std::chrono::system_clock::now();
+        for(const auto& key : keys){
+            size_t hashID = hashFunc(key);
+        }
+        auto end = std::chrono::system_clock::now();
+        std::chrono::duration<double> elapsed_seconds = end-start;
+        printf("Hash Function: %s, Elapsed time: %f (s)\n", bench->getHashName().c_str(), elapsed_seconds.count());
+    }
+
+
 }
 
 void freeBenchmarks(std::vector<Benchmark*>& benchmarks){
