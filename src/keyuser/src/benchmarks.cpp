@@ -10,7 +10,6 @@
 
 #include <chrono>
 #include <algorithm>
-#include <map>
 #include <random>
 
 void executeInterweaved(Benchmark* bench, 
@@ -248,27 +247,29 @@ void testDistribution(const std::vector<Benchmark*>& benchmarks,
 }
 
 void testHashPerformance(const std::vector<Benchmark*>& benchmarks, 
-                         const std::vector<std::string>& keys){
+                         const std::vector<std::string>& keys,
+                         const BenchmarkParameters& args){
 
     std::unordered_set<std::string> hashFuncExecuted;
+    printf("Hash Function,Elapsed Time (seconds)\n");
     for (const auto& bench : benchmarks){
         if(hashFuncExecuted.find(bench->getHashName()) != hashFuncExecuted.end()){
             continue;
         }
-        
-        hashFuncExecuted.insert(bench->getHashName());
-        auto hashFunc = bench->getHashFunction();
 
-        auto start = std::chrono::system_clock::now();
-        for(const auto& key : keys){
-            size_t hashID = hashFunc(key);
+        for(int r=0; r < args.repetitions; ++r){
+            hashFuncExecuted.insert(bench->getHashName());
+            auto hashFunc = bench->getHashFunction();
+
+            auto start = std::chrono::system_clock::now();
+            for(const auto& key : keys){
+                size_t hashID = hashFunc(key);
+            }
+            auto end = std::chrono::system_clock::now();
+            std::chrono::duration<double> elapsed_seconds = end-start;
+            printf("%s,%f\n", bench->getHashName().c_str(), elapsed_seconds.count());
         }
-        auto end = std::chrono::system_clock::now();
-        std::chrono::duration<double> elapsed_seconds = end-start;
-        printf("Hash Function: %s, Elapsed time: %f (s)\n", bench->getHashName().c_str(), elapsed_seconds.count());
     }
-
-
 }
 
 void freeBenchmarks(std::vector<Benchmark*>& benchmarks){

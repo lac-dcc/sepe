@@ -147,7 +147,7 @@ int main(int argc, char** argv){
 
     // Run benchmarks
     if(args.hashPerformance){
-        testHashPerformance(filteredBenchmarks, keys);
+        testHashPerformance(filteredBenchmarks, keys, args);
         freeBenchmarks(filteredBenchmarks);
         return 0;
     }
@@ -160,3 +160,4 @@ int main(int argc, char** argv){
     freeBenchmarks(filteredBenchmarks);
 
 }
+

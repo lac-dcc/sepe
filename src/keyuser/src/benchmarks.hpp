@@ -6,12 +6,10 @@
 #ifndef BENCHMARKS_HPP
 #define BENCHMARKS_HPP
 
-#include <iostream>
+#include <string>
 #include <unordered_map>
 #include <unordered_set>
 #include <functional>
-
-#include "customHashes.hpp"
 
 /**
  * @brief Base class for benchmarking.
@@ -461,7 +459,8 @@ void testDistribution(const std::vector<Benchmark*>& benchmarks,
  * @param args A constant reference to the BenchmarkParameters object that contains the parameters for the benchmark.
  */
 void testHashPerformance(const std::vector<Benchmark*>& benchmarks, 
-                         const std::vector<std::string>& keys);
+                         const std::vector<std::string>& keys,
+                         const BenchmarkParameters& args);
 
 /**
  * @brief Frees the memory allocated for the benchmarks.
