@@ -860,8 +860,10 @@ std::size_t AesUrl::operator()(const std::string& key) const{
 std::size_t AesIPV6::operator()(const std::string& key) const{
     const __m128i hashable0 = _mm_lddqu_si128((const __m128i *)(key.c_str()+0));
     const __m128i hashable1 = _mm_lddqu_si128((const __m128i *)(key.c_str()+16));
+    const __m128i hashable2 = _mm_lddqu_si128((const __m128i *)(key.c_str()+23));
     __m128i tmp0 = _mm_aesenc_si128(hashable0, hashable1);
-    return _mm_extract_epi64(tmp0, 0) ^ _mm_extract_epi64(tmp0 , 1);
+    __m128i tmp1 = _mm_aesenc_si128(hashable2, tmp0);
+    return _mm_extract_epi64(tmp1, 0) ^ _mm_extract_epi64(tmp1 , 1);
 }
 
 std::size_t AesINTS::operator()(const std::string& key) const{

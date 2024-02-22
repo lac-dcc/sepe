@@ -282,7 +282,7 @@ DECLARE_SYNTH_OFFXOR_NAIVE_CHATGPT_AND_GPERF_FUNCTIONS(IPV6)
 DECLARE_SYNTH_OFFXOR_NAIVE_CHATGPT_AND_GPERF_FUNCTIONS(INTS)
 
 /**
- * @brief Struct for OffXorSimdUrlComplex.
+ * @brief Struct for AesUrlComplex.
  */
 struct AesUrlComplex{
     /**
@@ -334,7 +334,7 @@ struct AesINTS {
 }; 
 
 /**
- * @brief Struct for AesUrlComplex.
+ * @brief Struct for NaiveSimdUrlComplex.
  */
 struct NaiveSimdUrlComplex{
     /**
