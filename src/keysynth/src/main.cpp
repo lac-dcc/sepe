@@ -290,16 +290,16 @@ static std::string cascadeXorVars(std::queue<std::string>& queue){
 }
 
 /**
- * @brief Cascade XOR operations on variables using SIMD instructions.
+ * @brief Cascade XOR operations on variables using aes SIMD instructions.
  *
- * This function cascades XOR operations on variables using SIMD instructions. It does this by dequeuing two variables from the queue at a time,
- * performing an XOR operation on them using the _mm_xor_si128 function, and storing the result in a temporary variable. The temporary variable is then
+ * This function cascades XOR operations on variables using aes SIMD instructions. It does this by dequeuing two variables from the queue at a time,
+ * performing an AES operation on them using the _mm_aesenc_si128 function, and storing the result in a temporary variable. The temporary variable is then
  * enqueued. This process continues until there is only one variable left in the queue.
  *
  * @param queue The queue of variable names.
  * @return std::string The string representation of the XOR cascade.
  */
-static std::string cascadeXorVarsSIMD(std::queue<std::string>& queue){
+static std::string cascadeAesVars(std::queue<std::string>& queue){
     std::string xorCascade;
     int tmpID = 0;
     while (queue.size() > 1) {
@@ -533,7 +533,7 @@ std::string synthetizeAesHashFunc(std::vector<Range>& ranges, size_t offset) {
     }
 
     // Cascade XOR variables
-    synthesizedHashFunc += cascadeXorVarsSIMD(queue);
+    synthesizedHashFunc += cascadeAesVars(queue);
 
     synthesizedHashFunc += "\t\treturn _mm_extract_epi64("+queue.front()+", 0) ^ _mm_extract_epi64("+queue.front()+" , 1); \n";
     synthesizedHashFunc += "\t}\n};\n";
@@ -568,10 +568,11 @@ int main(int argc, char** argv){
     ranges = res.first;
     offset = res.second;
 
-    constexpr float ENTROPY_THRESHOLD = 4.0;
-    // Remove all ranges that have lower than ENTROPY_THRESHOLD entropy
-    ranges.erase(std::remove_if(ranges.begin(), ranges.end(), [ENTROPY_THRESHOLD](const Range& range) {
-        return range.entropy < ENTROPY_THRESHOLD;
+    float maxEntropy = *std::max_element(charEntropy.begin(), charEntropy.end());
+    float entropyThreshold = maxEntropy / 2.0;
+    // Remove all ranges that have lower than entropyThreshold entropy
+    ranges.erase(std::remove_if(ranges.begin(), ranges.end(), [entropyThreshold](const Range& range) {
+        return range.entropy < entropyThreshold;
     }), ranges.end());
 
     size_t regexSize = 0;
@@ -586,10 +587,10 @@ int main(int argc, char** argv){
 
     printf("// Pext Hash Function:\n");
     printf("%s\n", synthetizePextHashFunc(ranges,offset).c_str());
-    printf("// (Recommended) OffXor Hash Function:\n");
+    printf("// OffXor Hash Function:\n");
     printf("%s", synthetizeOffXorHashFunc(ranges,offset).c_str());
     if(regexSize > 32){
-        printf("// Aes Hash Function:\n");
+        printf("// (Recommended) Aes Hash Function:\n");
         printf("%s", synthetizeAesHashFunc(ranges,offset).c_str());
     }
 
