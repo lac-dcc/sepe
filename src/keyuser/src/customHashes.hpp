@@ -385,4 +385,8 @@ struct NaiveSimdINTS {
     std::size_t operator()(const std::string& key) const;
 }; 
 
+struct ExperimentalHash {
+    std::size_t operator()(const std::string& key) const;
+};
+
 #endif

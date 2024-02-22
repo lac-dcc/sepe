@@ -6,18 +6,17 @@ set -e
 
 ABSEIL_PATH="../deps/"
 
+# Check to see if the current directory is the root of the project
+if [ -f "LICENSE" ]; then
+    ABSEIL_PATH="deps/"
+fi
+
 # Parse arguments
 if [ $# -eq 1 ]; then
     ABSEIL_PATH=$1
 else
-    mkdir -p ../deps
+    mkdir -p "$ABSEIL_PATH"
 fi
-
-# Check if directory exists
-#if [ ! -d "$ABSEIL_PATH" ]; then
-#    echo "Installation directory $ABSEIL_PATH DOES NOT exists!"
-#    exit 1
-#fi
 
 # Convert into absolute path
 ABSEIL_PATH=$(cd "$ABSEIL_PATH"; pwd)

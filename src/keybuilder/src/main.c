@@ -147,9 +147,6 @@ int main(int argc, const char* argv[]) {
 	ssize_t in_bytes;
 	ssize_t line_count = 1;
 	while ((in_bytes = getline(&line, &n, stdin)) > -1) {
-		if (in_bytes != line_size) {
-			fprintf(stderr, "WARNING: lines have different size!\n");
-		}
 		line_size = line_size < in_bytes ? line_size : in_bytes;
 
 		for (ssize_t i = 0; i < line_size - 1; ++i) {

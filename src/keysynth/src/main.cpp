@@ -4,12 +4,12 @@
 #include <utility>
 #include <algorithm>
 
-// Constant to hold a helper function used within the synthetized functions
-static const std::string load_u64_le = "inline static uint64_t load_u64_le(const char* b) {\n\
-\tuint64_t Ret;\n\
-\t// This is a way for the compiler to optimize this func to a single movq instruction\n\
-\tmemcpy(&Ret, b, sizeof(uint64_t));\n\
-\treturn Ret;\n}";
+// // Constant to hold a helper function used within the synthetized functions
+// static const std::string load_u64_le = "inline static uint64_t load_u64_le(const char* b) {\n\
+// \tuint64_t Ret;\n\
+// \t// This is a way for the compiler to optimize this func to a single movq instruction\n\
+// \tmemcpy(&Ret, b, sizeof(uint64_t));\n\
+// \treturn Ret;\n}";
 
 /**
  * @brief Converts an integer to a 2 digits hexadecimal string.
@@ -72,7 +72,7 @@ struct Range{
     }
 
     void print(){
-        printf("Range: %c - %c : offset %d repetition %lu\n", start, end, offset, repetition);
+        printf("Range: %c - %c : offset %d repetition %lu entropy %f\n", start, end, offset, repetition, entropy);
     }
 
 };
@@ -164,8 +164,8 @@ static std::string hashablePext(int hashableID, size_t offset){
 }
 
 // Returns a hashable variable for the naive hash function
-static std::string hashableNaive(int hashableID, size_t offset){
-    return "\t\tconst std::size_t hashable" +
+static std::string hashableByte(int hashableID, size_t offset){
+    return "\tconst std::size_t hashable" +
                 std::to_string(hashableID) +
                 " = load_u64_le(key.c_str()+" +
                 std::to_string(offset) +
@@ -173,7 +173,7 @@ static std::string hashableNaive(int hashableID, size_t offset){
 }
 
 // Returns a hashable variable for the vectorized/SIMD naive hash function
-static std::string hashableNaiveSIMD(int hashableID, size_t offset){
+static std::string hashableByteSIMD(int hashableID, size_t offset){
     return "\t\tconst __m128i hashable" +
                 std::to_string(hashableID) +
                 " = _mm_lddqu_si128((const __m128i *)(key.c_str()+" +
@@ -235,10 +235,18 @@ calculateRanges(std::string& regex, std::vector<float>& charEntropy){
             if(regex[i+5] == '{'){
                 size_t closeBracketPos = regex.find('}', i+6);
                 size_t repetition = std::stoi(regex.substr(i+6, closeBracketPos));
-                ranges.push_back(Range(regex[i+1],regex[i+3],offset,repetition,charEntropy[i+1]));
+
+                float rangeEntropy = 0.0;
+                for(size_t j = offset; j < offset+repetition; j++){
+                    rangeEntropy += charEntropy[j];
+                }
+                rangeEntropy /= float(repetition);
+
+                ranges.push_back(Range(regex[i+1],regex[i+3],offset,repetition,rangeEntropy));
                 offset += repetition;
                 i = closeBracketPos;
             } else {
+                // No repetition, so only one character
                 offset++;
                 ranges.push_back(Range(regex[i+1],regex[i+3],offset,1,charEntropy[i+1]));
                 i += 4;
@@ -481,7 +489,7 @@ std::string synthetizeOffXorHashFunc(std::vector<Range>& ranges, size_t offset){
     // Create hashables
     int hashableID = 0;
     for(const auto& off : offsets){
-        synthesizedHashFunc += hashableNaive(hashableID++, off);
+        synthesizedHashFunc += hashableByte(hashableID++, off);
     }
 
     // Create queue of "XORable" variables
@@ -523,7 +531,7 @@ std::string synthetizeOffXorSimdFunc(std::vector<Range>& ranges, size_t offset) 
     // Create hashables
     int hashableID = 0;
     for(const auto& off : offsets){
-        synthesizedHashFunc += hashableNaiveSIMD(hashableID++, off);
+        synthesizedHashFunc += hashableByteSIMD(hashableID++, off);
     }
 
     // Create queue of "XORable" variables
@@ -542,6 +550,104 @@ std::string synthetizeOffXorSimdFunc(std::vector<Range>& ranges, size_t offset) 
     return synthesizedHashFunc;
 }
 
+struct EntropyThresholds {
+    float high;
+    float medium;
+    float low;
+
+    EntropyThresholds(float _high, float _medium, float _low) :
+        high(_high),
+        medium(_medium),
+        low(_low)
+    {}
+};
+
+std::string experimental(std::vector<Range>& ranges,
+            size_t offset, 
+            std::vector<float>& charEntropy, 
+            EntropyThresholds entropyThresholds)
+{
+
+    // Calculate offsets
+    std::vector<size_t> offsets = calculateOffsets(ranges);
+
+    // Avoid out of bounds memory access on the last mask/offset
+    if (offsets[offsets.size()-1] + 8 >= offset){
+        offsets[offsets.size()-1] = offset - 8;
+    }
+
+    std::string synthesizedHashFunc = R"(
+    std::size_t EXPERIMENTAL_HASH_FUNC::operator()(const std::string& key) const{
+        constexpr size_t __seed = static_cast<size_t>(0xc70f6907UL);
+        return _Hash_bytes(key.c_str(), key.size(), __seed);
+    }
+    )";
+
+    synthesizedHashFunc += R"(
+    static size_t _Hash_bytes(const void* ptr, size_t len, size_t seed){
+
+        static const size_t mul = (((size_t) 0xc6a4a793UL) << 32UL)
+                        + (size_t) 0x5bd1e995UL;
+
+        size_t hash = seed ^ (len * mul);
+
+    )";
+
+    // Create hashables
+    int hashableID = 0;
+    for(const auto& off : offsets){
+        synthesizedHashFunc += hashableByte(hashableID++, off);
+    }
+
+    // Create queue of "hashable" bytes
+    std::queue<std::string> hashableBytes;
+    for (int i = 0; i < hashableID; ++i) {
+        hashableBytes.push("hashable" + std::to_string(i));
+    }
+
+    // Cascade XOR variables
+    // synthesizedHashFunc += cascadeXorVars(hashableBytes);
+    int tmpID = 0;
+    while (hashableBytes.size() > 0) {
+        std::string id1 = hashableBytes.front();
+        hashableBytes.pop();    
+
+        // std::string tmpVar = "tmp" + std::to_string(tmpID++);
+
+        // synthesizedHashFunc += "\t\tsize_t " + tmpVar + " = shift_mix(" + id1 + " * mul) * mul;\n";
+        synthesizedHashFunc += "\thash ^= shift_mix(" + id1 + " * mul) * mul;\n";
+        synthesizedHashFunc += "\thash *= mul;\n";
+
+
+        // hashableBytes.push(tmpVar);
+    }
+
+    synthesizedHashFunc += "\tconst char* const buf = static_cast<const char*>(ptr + " + 
+        std::to_string(ranges[ranges.size()-1].offset + ranges[ranges.size()-1].repetition) + ");\n" +
+        "\tconst size_t len_aligned = len & ~(size_t)0x7;\n" +
+        "\tconst char* const end = buf + len_aligned;\n";
+
+    synthesizedHashFunc += R"(
+        for (const char* p = buf; p != end; p += 8){
+            const size_t data = shift_mix(unaligned_load(p) * mul) * mul;
+            hash ^= data;
+            hash *= mul;
+        }
+        if ((len & 0x7) != 0)
+        {
+            const size_t data = load_bytes(end, len & 0x7);
+            hash ^= data;
+            hash *= mul;
+        }
+        hash = shift_mix(hash) * mul;
+        hash = shift_mix(hash);
+        return hash;)";
+
+    synthesizedHashFunc += "\n    }\n};\n";
+
+    return synthesizedHashFunc;
+}
+
 /**
  * @brief Entry point of the program.
  *
@@ -555,11 +661,26 @@ std::string synthetizeOffXorSimdFunc(std::vector<Range>& ranges, size_t offset) 
  */
 int main(int argc, char** argv){
 
+    if(argc < 2){
+        fprintf(stderr, "Incorrect arguments!\n"
+                "Usage: %s <regex>\n", argv[0]);
+        return 1;
+    }
+
+    // Read data from standard-input
     std::string regexStr = std::string(argv[1]);
     std::vector<float> charEntropy;
     for(int i = 2; i < argc; i++){
         charEntropy.push_back(std::stof(argv[i]));
+        printf("Entropy: %f\n", std::stof(argv[i]));
     }
+    printf("DEBUG: Input string: %s\n", regexStr.c_str());
+
+    float highEntropy = *std::max_element(charEntropy.begin(), charEntropy.end());
+    float mediumEntropy = highEntropy / 2.0;
+    float lowEntropy = highEntropy / 4.0;
+
+    EntropyThresholds entropyThresholds(highEntropy, mediumEntropy, lowEntropy);
 
     // Create ranges
     size_t offset;
@@ -568,10 +689,14 @@ int main(int argc, char** argv){
     ranges = res.first;
     offset = res.second;
 
-    constexpr float ENTROPY_THRESHOLD = 4.0;
-    // Remove all ranges that have lower than ENTROPY_THRESHOLD entropy
-    ranges.erase(std::remove_if(ranges.begin(), ranges.end(), [ENTROPY_THRESHOLD](const Range& range) {
-        return range.entropy < ENTROPY_THRESHOLD;
+    // // Print all ranges
+    // for(auto& range : ranges){
+    //     range.print();
+    // }
+
+    // Remove all ranges that have lower than lowEntropy entropy
+    ranges.erase(std::remove_if(ranges.begin(), ranges.end(), [lowEntropy](const Range& range) {
+        return range.entropy < lowEntropy;
     }), ranges.end());
 
     size_t regexSize = 0;
@@ -581,17 +706,37 @@ int main(int argc, char** argv){
     }
 
     // load_u64_le function header
-    printf("// Helper function, include in your codebase:\n");
-    printf("%s\n", load_u64_le.c_str());
+    printf("// Helper functions, include in your codebase:\n");
+    printf("%s\n", R"(static inline std::size_t unaligned_load(const char* p)
+                    {
+                        std::size_t result;
+                        __builtin_memcpy(&result, p, sizeof(result));
+                        return result;
+                    }
+                    static inline std::size_t shift_mix(std::size_t v)
+                    { return v ^ (v >> 47);}
 
-    printf("// Pext Hash Function:\n");
-    printf("%s\n", synthetizePextHashFunc(ranges,offset).c_str());
-    printf("// (Recommended) OffXor Hash Function:\n");
-    printf("%s", synthetizeOffXorHashFunc(ranges,offset).c_str());
-    if(regexSize > 128){
-        printf("// OffXorSimd Hash Function:\n");
-        printf("%s", synthetizeOffXorSimdFunc(ranges,offset).c_str());
-    }
+                    static inline std::size_t load_bytes(const char* p, int n)
+                    {
+                        std::size_t result = 0;
+                        --n;
+                        do
+                        result = (result << 8) + static_cast<unsigned char>(p[n]);
+                        while (--n >= 0);
+                        return result;
+                    })");
+
+    printf("// Experimental Hash Function:\n");
+    printf("%s\n", experimental(ranges,offset, charEntropy, entropyThresholds).c_str());
+
+    // printf("// Pext Hash Function:\n");
+    // printf("%s\n", synthetizePextHashFunc(ranges,offset).c_str());
+    // printf("// (Recommended) OffXor Hash Function:\n");
+    // printf("%s", synthetizeOffXorHashFunc(ranges,offset).c_str());
+    // if(regexSize > 128){
+    //     printf("// OffXorSimd Hash Function:\n");
+    //     printf("%s", synthetizeOffXorSimdFunc(ranges,offset).c_str());
+    // }
 
     return 0;
 

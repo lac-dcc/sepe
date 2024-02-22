@@ -1142,3 +1142,41 @@ std::size_t GperfUrl::operator()(const std::string& key) const {
 std::size_t GperfUrlComplex::operator()(const std::string& key) const {
     return GperfUrlComplexHash(key.c_str(), key.size());
 }
+    
+    static inline size_t HAAASH(const void* ptr, size_t len, size_t seed){
+
+        static const size_t mul = (((size_t) 0xc6a4a793UL) << 32UL)
+                        + (size_t) 0x5bd1e995UL;
+
+        size_t hash = seed ^ (len * mul);
+
+    	const std::size_t hashable0 = unaligned_load((const char*)ptr+106);
+        const std::size_t hashable1 = unaligned_load((const char*)ptr+124);
+        // const std::size_t hashable2 = unaligned_load((const char*)ptr+26);
+        hash ^= hashable0;
+        hash ^= hashable1;
+
+        const char* const buf = static_cast<const char*>(ptr+134);
+        const size_t len_aligned = len & ~(size_t)0x7;
+        const char* const end = buf + len_aligned;
+
+        for (const char* p = buf; p != end; p += 8){
+            const size_t data = shift_mix(unaligned_load(p) * mul) * mul;
+            hash ^= data;
+            hash *= mul;
+        }
+        if ((len & 0x7) != 0)
+        {
+            const size_t data = load_bytes(end, len & 0x7);
+            hash ^= data;
+            hash *= mul;
+        }
+        hash = shift_mix(hash) * mul;
+        hash = shift_mix(hash);
+        return hash;
+    }
+
+    std::size_t ExperimentalHash::operator()(const std::string& key) const{
+        constexpr size_t __seed = static_cast<size_t>(0xc70f6907UL);
+        return HAAASH(key.c_str(), key.size(), __seed);
+    }
