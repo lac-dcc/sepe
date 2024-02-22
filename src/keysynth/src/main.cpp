@@ -308,7 +308,7 @@ static std::string cascadeXorVarsSIMD(std::queue<std::string>& queue){
         std::string id2 = queue.front();
         queue.pop();
         std::string tmpVar = "tmp" + std::to_string(tmpID++);
-        xorCascade += "\t\t__m128i " + tmpVar + " = _mm_xor_si128(" + id1 + ", " +id2 + ");\n";
+        xorCascade += "\t\t__m128i " + tmpVar + " = _mm_aesenc_si128(" + id1 + ", " +id2 + ");\n";
         queue.push(tmpVar);
     }
     return xorCascade;
@@ -509,7 +509,7 @@ std::string synthetizeOffXorHashFunc(std::vector<Range>& ranges, size_t offset){
  * @param offset The offset.
  * @return std::string The synthesized Offset XOR SIMD hash function as a string.
  */
-std::string synthetizeOffXorSimdFunc(std::vector<Range>& ranges, size_t offset) {
+std::string synthetizeAesHashFunc(std::vector<Range>& ranges, size_t offset) {
     // Calculate offsets
     std::vector<size_t> offsets = calculateOffsets(ranges, 16);
 
@@ -518,7 +518,7 @@ std::string synthetizeOffXorSimdFunc(std::vector<Range>& ranges, size_t offset) 
         offsets[offsets.size()-1] = offset - 16;
     }
 
-    std::string synthesizedHashFunc = "struct synthesizeOffXorSimdHash {\n\tstd::size_t operator()(const std::string& key) const {\n";
+    std::string synthesizedHashFunc = "struct synthesizeAesHash {\n\tstd::size_t operator()(const std::string& key) const {\n";
 
     // Create hashables
     int hashableID = 0;
@@ -537,7 +537,7 @@ std::string synthetizeOffXorSimdFunc(std::vector<Range>& ranges, size_t offset) 
 
     synthesizedHashFunc += "\t\treturn _mm_extract_epi64("+queue.front()+", 0) ^ _mm_extract_epi64("+queue.front()+" , 1); \n";
     synthesizedHashFunc += "\t}\n};\n";
-    synthesizedHashFunc =  "#include <immintrin.h>\n" + synthesizedHashFunc;
+    synthesizedHashFunc = "#include <immintrin.h>\n#include <wmmintrin.h>\n" + synthesizedHashFunc;
 
     return synthesizedHashFunc;
 }
@@ -588,11 +588,10 @@ int main(int argc, char** argv){
     printf("%s\n", synthetizePextHashFunc(ranges,offset).c_str());
     printf("// (Recommended) OffXor Hash Function:\n");
     printf("%s", synthetizeOffXorHashFunc(ranges,offset).c_str());
-    if(regexSize > 128){
-        printf("// OffXorSimd Hash Function:\n");
-        printf("%s", synthetizeOffXorSimdFunc(ranges,offset).c_str());
+    if(regexSize > 32){
+        printf("// Aes Hash Function:\n");
+        printf("%s", synthetizeAesHashFunc(ranges,offset).c_str());
     }
 
     return 0;
-
 }

@@ -284,7 +284,7 @@ DECLARE_SYNTH_OFFXOR_NAIVE_CHATGPT_AND_GPERF_FUNCTIONS(INTS)
 /**
  * @brief Struct for OffXorSimdUrlComplex.
  */
-struct OffXorSimdUrlComplex{
+struct AesUrlComplex{
     /**
      * @brief Function call operator that calculates the hash of a key.
      * 
@@ -295,9 +295,9 @@ struct OffXorSimdUrlComplex{
 };
 
 /**
- * @brief Struct for OffXorSimdUrl.
+ * @brief Struct for AesUrl.
  */
-struct OffXorSimdUrl {
+struct AesUrl {
     /**
      * @brief Function call operator that calculates the hash of a key.
      * 
@@ -308,9 +308,9 @@ struct OffXorSimdUrl {
 };
 
 /**
- * @brief Struct for OffXorSimdIPV6.
+ * @brief Struct for AesIPV6.
  */
-struct OffXorSimdIPV6 {
+struct AesIPV6 {
     /**
      * @brief Function call operator that calculates the hash of a key.
      * 
@@ -321,9 +321,9 @@ struct OffXorSimdIPV6 {
 }; 
 
 /**
- * @brief Struct for OffXorSimdINTS.
+ * @brief Struct for AesINTS.
  */
-struct OffXorSimdINTS {
+struct AesINTS {
     /**
      * @brief Function call operator that calculates the hash of a key.
      * 
@@ -334,7 +334,7 @@ struct OffXorSimdINTS {
 }; 
 
 /**
- * @brief Struct for NaiveSimdUrlComplex.
+ * @brief Struct for AesUrlComplex.
  */
 struct NaiveSimdUrlComplex{
     /**

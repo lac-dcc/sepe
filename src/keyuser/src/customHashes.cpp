@@ -16,6 +16,7 @@
 #include <smmintrin.h>
 #include <pmmintrin.h>
 #include <immintrin.h>
+#include <wmmintrin.h>
 
 #include "customHashes.hpp"
 #include "google-hashes/city.hpp"
@@ -840,34 +841,30 @@ std::size_t NaiveINTS::operator()(const std::string& key) const {
     return xor11 ;
 }
 
-std::size_t OffXorSimdUrlComplex::operator()(const std::string& key) const{
+std::size_t AesUrlComplex::operator()(const std::string& key) const{
     const __m128i hashable0 = _mm_lddqu_si128((const __m128i *)(key.c_str()+23));
-    const __m128i hashable1 = _mm_lddqu_si128((const __m128i *)(key.c_str()+41));
-    const __m128i hashable2 = _mm_lddqu_si128((const __m128i *)(key.c_str()+58));
-    const __m128i hashable3 = _mm_lddqu_si128((const __m128i *)(key.c_str()+67));
-    __m128i tmp0 = _mm_xor_si128(hashable0, hashable1);
-    __m128i tmp1 = _mm_xor_si128(hashable2, hashable3);
-    __m128i tmp2 = _mm_xor_si128(tmp0, tmp1);
-    return _mm_extract_epi64(tmp2, 0) ^ _mm_extract_epi64(tmp2 , 1);
-}
-
-std::size_t OffXorSimdUrl::operator()(const std::string& key) const{
-    const __m128i hashable0 = _mm_lddqu_si128((const __m128i *)(key.c_str()+45));
-    const __m128i hashable1 = _mm_lddqu_si128((const __m128i *)(key.c_str()+55));
-    __m128i tmp0 = _mm_xor_si128(hashable0, hashable1);
-    return _mm_extract_epi64(tmp0, 0) ^ _mm_extract_epi64(tmp0 , 1);
-}
-
-std::size_t OffXorSimdIPV6::operator()(const std::string& key) const{
-    const __m128i hashable0 = _mm_lddqu_si128((const __m128i *)(key.c_str()+0));
-    const __m128i hashable1 = _mm_lddqu_si128((const __m128i *)(key.c_str()+16));
-    const __m128i hashable2 = _mm_lddqu_si128((const __m128i *)(key.c_str()+23));
-    __m128i tmp0 = _mm_xor_si128(hashable0, hashable1);
-    __m128i tmp1 = _mm_xor_si128(hashable2, tmp0);
+    const __m128i hashable1 = _mm_lddqu_si128((const __m128i *)(key.c_str()+58));
+    const __m128i hashable2 = _mm_lddqu_si128((const __m128i *)(key.c_str()+67));
+    __m128i tmp0 = _mm_aesenc_si128(hashable0, hashable1);
+    __m128i tmp1 = _mm_aesenc_si128(hashable2, tmp0);
     return _mm_extract_epi64(tmp1, 0) ^ _mm_extract_epi64(tmp1 , 1);
 }
 
-std::size_t OffXorSimdINTS::operator()(const std::string& key) const{
+std::size_t AesUrl::operator()(const std::string& key) const{
+    const __m128i hashable0 = _mm_lddqu_si128((const __m128i *)(key.c_str()+45));
+    const __m128i hashable1 = _mm_lddqu_si128((const __m128i *)(key.c_str()+54));
+    __m128i tmp0 = _mm_aesenc_si128(hashable0, hashable1);
+    return _mm_extract_epi64(tmp0, 0) ^ _mm_extract_epi64(tmp0 , 1);
+}
+
+std::size_t AesIPV6::operator()(const std::string& key) const{
+    const __m128i hashable0 = _mm_lddqu_si128((const __m128i *)(key.c_str()+0));
+    const __m128i hashable1 = _mm_lddqu_si128((const __m128i *)(key.c_str()+16));
+    __m128i tmp0 = _mm_aesenc_si128(hashable0, hashable1);
+    return _mm_extract_epi64(tmp0, 0) ^ _mm_extract_epi64(tmp0 , 1);
+}
+
+std::size_t AesINTS::operator()(const std::string& key) const{
     const __m128i hashable0 = _mm_lddqu_si128((const __m128i *)(key.c_str()+0));
     const __m128i hashable1 = _mm_lddqu_si128((const __m128i *)(key.c_str()+16));
     const __m128i hashable2 = _mm_lddqu_si128((const __m128i *)(key.c_str()+32));
@@ -875,12 +872,12 @@ std::size_t OffXorSimdINTS::operator()(const std::string& key) const{
     const __m128i hashable4 = _mm_lddqu_si128((const __m128i *)(key.c_str()+64));
     const __m128i hashable5 = _mm_lddqu_si128((const __m128i *)(key.c_str()+80));
     const __m128i hashable6 = _mm_lddqu_si128((const __m128i *)(key.c_str()+84));
-    __m128i tmp0 = _mm_xor_si128(hashable0, hashable1);
-    __m128i tmp1 = _mm_xor_si128(hashable2, hashable3);
-    __m128i tmp2 = _mm_xor_si128(hashable4, hashable5);
-    __m128i tmp3 = _mm_xor_si128(hashable6, tmp0);
-    __m128i tmp4 = _mm_xor_si128(tmp1, tmp2);
-    __m128i tmp5 = _mm_xor_si128(tmp3, tmp4);
+    __m128i tmp0 = _mm_aesenc_si128(hashable0, hashable1);
+    __m128i tmp1 = _mm_aesenc_si128(hashable2, hashable3);
+    __m128i tmp2 = _mm_aesenc_si128(hashable4, hashable5);
+    __m128i tmp3 = _mm_aesenc_si128(hashable6, tmp0);
+    __m128i tmp4 = _mm_aesenc_si128(tmp1, tmp2);
+    __m128i tmp5 = _mm_aesenc_si128(tmp3, tmp4);
     return _mm_extract_epi64(tmp5, 0) ^ _mm_extract_epi64(tmp5 , 1);
 }
 

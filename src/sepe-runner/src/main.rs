@@ -114,7 +114,7 @@ struct Command {
 
     /// Measure the performance of the hash functions without containers
     #[clap(long)]
-    hash_performance : bool, 
+    hash_performance: bool,
 
     /// Whether to generate the keys incrementally, rather than randomly (VERY SLOW)
     #[clap(long)]
@@ -217,14 +217,25 @@ fn main() {
 
             keybuilder_output.stdout.pop();
 
-            let keysynth_output = Cmd::new(find_file("keysynth").path())
-                .arg(std::ffi::OsString::from_vec(keybuilder_output.stdout))
-                .output()
-                .expect("failed to spawn keysynth!");
+            let args = std::ffi::OsString::from_vec(keybuilder_output.stdout);
+            let args = args.to_string_lossy();
+            let args: Box<[String]> = args.split_whitespace().map(|e| e.to_string()).collect();
+            match Cmd::new(find_file("keysynth").path())
+                .args(args.iter())
+                .spawn()
+                .expect("failed to spawn keysynth!")
+                .wait()
+            {
+                Ok(exit_status) => {
+                    if !exit_status.success() {
+                        eprintln!("ERROR: keysynth failed!");
+                    }
+                }
+                Err(e) => {
+                    eprintln!("ERROR: keysynth couldn't run to completion: {e}!");
+                }
+            }
 
-            std::io::stdout()
-                .write_all(&keysynth_output.stdout[0..keysynth_output.stdout.len()])
-                .expect("failed to write keysynth output");
             continue;
         }
 
@@ -254,7 +265,7 @@ fn main() {
         if cmd.histogram {
             keyuser_cmd.arg("--test-distribution");
         }
-        
+
         if cmd.hash_performance {
             keyuser_cmd.arg("--hash-performance");
         }
