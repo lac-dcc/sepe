@@ -1,3 +1,4 @@
+#include <cassert>
 #include <iostream>
 #include <vector>
 #include <queue>
@@ -300,7 +301,7 @@ static std::string cascadeXorVars(std::queue<std::string>& queue){
  * @return std::string The string representation of the XOR cascade.
  */
 static std::string cascadeAesVars(std::queue<std::string>& queue){
-    std::string xorCascade;
+    std::string aesCascade;
     int tmpID = 0;
     while (queue.size() > 1) {
         std::string id1 = queue.front();
@@ -308,10 +309,10 @@ static std::string cascadeAesVars(std::queue<std::string>& queue){
         std::string id2 = queue.front();
         queue.pop();
         std::string tmpVar = "tmp" + std::to_string(tmpID++);
-        xorCascade += "\t\t__m128i " + tmpVar + " = _mm_aesenc_si128(" + id1 + ", " +id2 + ");\n";
+        aesCascade += "\t\t__m128i " + tmpVar + " = _mm_aesenc_si128(" + id1 + ", " +id2 + ");\n";
         queue.push(tmpVar);
     }
-    return xorCascade;
+    return aesCascade;
 }
 
 /**
@@ -500,10 +501,10 @@ std::string synthetizeOffXorHashFunc(std::vector<Range>& ranges, size_t offset){
 }
 
 /**
- * @brief Synthesize an Offset XOR SIMD hash function.
+ * @brief Synthesize an Aes Hash Function.
  *
- * This function synthesizes an Offset XOR SIMD hash function. It does this by taking a vector of Range objects and an offset as input.
- * This is a Naive implementation that uses SIMD with the _mm_xor_si128 intrinsic to XOR bytes at the given offsets.
+ * This function synthesizes an Aes hash function. It does this by taking a vector of Range objects and an offset as input.
+ * This is an implementation that keeps reducing the number of available bytes by repeatedly calling Aes instructions
  *
  * @param ranges The vector of Range objects.
  * @param offset The offset.
@@ -526,7 +527,7 @@ std::string synthetizeAesHashFunc(std::vector<Range>& ranges, size_t offset) {
         synthesizedHashFunc += hashableNaiveSIMD(hashableID++, off);
     }
 
-    // Create queue of "XORable" variables
+    // Create queue of "AESable" variables
     std::queue<std::string> queue;
     for (int i = 0; i < hashableID; ++i) {
         queue.push("hashable" + std::to_string(i));
@@ -536,6 +537,43 @@ std::string synthetizeAesHashFunc(std::vector<Range>& ranges, size_t offset) {
     synthesizedHashFunc += cascadeAesVars(queue);
 
     synthesizedHashFunc += "\t\treturn _mm_extract_epi64("+queue.front()+", 0) ^ _mm_extract_epi64("+queue.front()+" , 1); \n";
+    synthesizedHashFunc += "\t}\n};\n";
+    synthesizedHashFunc = "#include <immintrin.h>\n#include <wmmintrin.h>\n" + synthesizedHashFunc;
+
+    return synthesizedHashFunc;
+}
+
+/**
+ * @brief Synthesize an Aes Hash Function for keys of size < 16.
+ *
+ * This function does the same as the synthesizedHashFunc, but deals with the special case of the key's size
+ * being smaller of equal to 16
+ *
+ * @param ranges The vector of Range objects.
+ * @param regexSize The full key's size.
+ * @return std::string The synthesized Offset XOR SIMD hash function as a string.
+ */
+std::string synthetizeAesHashFuncLe16bytes(size_t keySize) {
+	keySize = keySize > 16 ? 16 : keySize;
+
+    std::string synthesizedHashFunc = "struct synthesizeAesHash {\n\tstd::size_t operator()(const std::string& key) const {\n";
+
+	if (keySize == 16) {
+		// if we have exactly 16 bytes, just load them all at once
+		std::string setStr = "";
+		synthesizedHashFunc += "\t\tconst __m128i load = _mm_lddqu_si128((const __m128i *)(key.c_str()));\n";
+	} else {
+		std::string setStr = "";
+		for (size_t i = 0; i < keySize; ++i)
+			setStr += "key[" + std::to_string(i) + "],";
+		for (size_t i = keySize; i < 16; ++i)
+			setStr += "0,";
+		setStr.pop_back();
+		synthesizedHashFunc += "\t\tconst __m128i load = _mm_set_epi8(" + setStr + ");\n";
+	}
+
+    synthesizedHashFunc += "\t\tconst __m128i hash = _mm_aesenc_si128(load, load);\n";
+    synthesizedHashFunc += "\t\treturn _mm_extract_epi64(hash , 0) ^ _mm_extract_epi64(hash, 1); \n";
     synthesizedHashFunc += "\t}\n};\n";
     synthesizedHashFunc = "#include <immintrin.h>\n#include <wmmintrin.h>\n" + synthesizedHashFunc;
 
@@ -568,6 +606,8 @@ int main(int argc, char** argv){
     ranges = res.first;
     offset = res.second;
 
+    size_t keySize = offset;
+
     float maxEntropy = *std::max_element(charEntropy.begin(), charEntropy.end());
     float entropyThreshold = maxEntropy / 2.0;
     // Remove all ranges that have lower than entropyThreshold entropy
@@ -586,13 +626,16 @@ int main(int argc, char** argv){
     printf("%s\n", load_u64_le.c_str());
 
     printf("// Pext Hash Function:\n");
-    printf("%s\n", synthetizePextHashFunc(ranges,offset).c_str());
+    printf("%s\n", synthetizePextHashFunc(ranges, offset).c_str());
     printf("// OffXor Hash Function:\n");
-    printf("%s", synthetizeOffXorHashFunc(ranges,offset).c_str());
-    if(regexSize > 32){
+    printf("%s\n", synthetizeOffXorHashFunc(ranges, offset).c_str());
+    if(regexSize > 16){
         printf("// (Recommended) Aes Hash Function:\n");
-        printf("%s", synthetizeAesHashFunc(ranges,offset).c_str());
-    }
+        printf("%s", synthetizeAesHashFunc(ranges, offset).c_str());
+    } else {
+        printf("%s", synthetizeAesHashFuncLe16bytes(keySize).c_str());
+
+	}
 
     return 0;
 }

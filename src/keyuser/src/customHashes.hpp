@@ -255,6 +255,9 @@ struct PextMurmurUrlComplex{
  * @param NAME The name to append to the struct names.
  */
 #define DECLARE_SYNTH_OFFXOR_NAIVE_CHATGPT_AND_GPERF_FUNCTIONS(NAME) \
+    struct Aes ## NAME { \
+        std::size_t operator()(const std::string& key) const; \
+    }; \
     struct Pext ## NAME { \
         std::size_t operator()(const std::string& key) const; \
     }; \
@@ -280,58 +283,6 @@ DECLARE_SYNTH_OFFXOR_NAIVE_CHATGPT_AND_GPERF_FUNCTIONS(SSN)
 DECLARE_SYNTH_OFFXOR_NAIVE_CHATGPT_AND_GPERF_FUNCTIONS(IPV4)
 DECLARE_SYNTH_OFFXOR_NAIVE_CHATGPT_AND_GPERF_FUNCTIONS(IPV6)
 DECLARE_SYNTH_OFFXOR_NAIVE_CHATGPT_AND_GPERF_FUNCTIONS(INTS)
-
-/**
- * @brief Struct for AesUrlComplex.
- */
-struct AesUrlComplex{
-    /**
-     * @brief Function call operator that calculates the hash of a key.
-     * 
-     * @param key The fixed lenght std::string key to hash.
-     * @return The hash of the key.
-     */
-    std::size_t operator()(const std::string& key) const;
-};
-
-/**
- * @brief Struct for AesUrl.
- */
-struct AesUrl {
-    /**
-     * @brief Function call operator that calculates the hash of a key.
-     * 
-     * @param key The fixed lenght std::string key to hash.
-     * @return The hash of the key.
-     */
-    std::size_t operator()(const std::string& key) const;
-};
-
-/**
- * @brief Struct for AesIPV6.
- */
-struct AesIPV6 {
-    /**
-     * @brief Function call operator that calculates the hash of a key.
-     * 
-     * @param key The fixed lenght std::string key to hash.
-     * @return The hash of the key.
-     */
-    std::size_t operator()(const std::string& key) const;
-}; 
-
-/**
- * @brief Struct for AesINTS.
- */
-struct AesINTS {
-    /**
-     * @brief Function call operator that calculates the hash of a key.
-     * 
-     * @param key The fixed lenght std::string key to hash.
-     * @return The hash of the key.
-     */
-    std::size_t operator()(const std::string& key) const;
-}; 
 
 /**
  * @brief Struct for NaiveSimdUrlComplex.

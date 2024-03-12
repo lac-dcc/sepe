@@ -857,6 +857,30 @@ std::size_t AesUrl::operator()(const std::string& key) const{
     return _mm_extract_epi64(tmp0, 0) ^ _mm_extract_epi64(tmp0 , 1);
 }
 
+std::size_t AesMac::operator()(const std::string& key) const{
+		const __m128i load = _mm_lddqu_si128((const __m128i *)(key.c_str()));
+		const __m128i hash = _mm_aesenc_si128(load, load);
+		return _mm_extract_epi64(hash , 0) ^ _mm_extract_epi64(hash, 1);
+}
+
+std::size_t AesCPF::operator()(const std::string& key) const{
+	const __m128i load = _mm_set_epi8(key[0],key[1],key[2],key[3],key[4],key[5],key[6],key[7],key[8],key[9],key[10],key[11],key[12],key[13],0,0);
+	const __m128i hash = _mm_aesenc_si128(load, load);
+	return _mm_extract_epi64(hash , 0) ^ _mm_extract_epi64(hash, 1);
+}
+
+std::size_t AesSSN::operator()(const std::string& key) const{
+	const __m128i load = _mm_set_epi8(key[0],key[1],key[2],key[3],key[4],key[5],key[6],key[7],key[8],key[9],key[10],0,0,0,0,0);
+	const __m128i hash = _mm_aesenc_si128(load, load);
+	return _mm_extract_epi64(hash , 0) ^ _mm_extract_epi64(hash, 1);
+}
+
+std::size_t AesIPV4::operator()(const std::string& key) const{
+		const __m128i load = _mm_set_epi8(key[0],key[1],key[2],key[3],key[4],key[5],key[6],key[7],key[8],key[9],key[10],key[11],key[12],key[13],key[14],0);
+	const __m128i hash = _mm_aesenc_si128(load, load);
+	return _mm_extract_epi64(hash , 0) ^ _mm_extract_epi64(hash, 1);
+}
+
 std::size_t AesIPV6::operator()(const std::string& key) const{
     const __m128i hashable0 = _mm_lddqu_si128((const __m128i *)(key.c_str()+0));
     const __m128i hashable1 = _mm_lddqu_si128((const __m128i *)(key.c_str()+16));
