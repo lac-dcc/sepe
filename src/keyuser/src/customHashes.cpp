@@ -2,7 +2,8 @@
  * @file customHashes.cpp
  * @brief Implementation of custom hash functions.
  *
- * This file includes the implementation of several custom hash functions as well as helper functions for loading and shifting data.
+ * This file includes the implementation of several custom hash functions as
+ * well as helper functions for loading and shifting data.
  *
  * Some general function types and their brief implementation strategies are:
  *  - Pext: XORS only relevant bytes after compressing them the PEXT instruction.
@@ -10,13 +11,38 @@
  *  - OffXor: XORS all relevant bytes.
  *  - Gpt: Uses the GPT generated hash functions.
  *  - Gperf: Uses the GPERF generated hash functions.
- */
+ *
+ *  NOTE THAT THE ARM IMPLEMENTATIONS ARE INCOMPLETE. In particular, we've only
+ *  properly implemented the aes hash functions properly on Arm. 
+**/
+
+#if defined(__amd64__)  || \
+    defined(__amd64)    || \
+    defined(__x86_64__) || \
+    defined(__x86_64)   || \
+    defined(_M_X64)     || \
+    defined(_M_AMD64)
+    #define x86_64
+#elif defined(__arm64__) || \
+    defined(__arm64)     || \
+    defined(__aarch64__) || \
+    defined(__aarch64)
+    #define ARM
+#else
+    #error "ARCHITECTURE NOT SUPPORTED"
+#endif
+
+
+#if defined(x86_64)
+    #include <smmintrin.h>
+    #include <pmmintrin.h>
+    #include <immintrin.h>
+    #include <wmmintrin.h>
+#elif defined(ARM)
+    #include <arm_neon.h>
+#endif
 
 #include <cstring>
-#include <smmintrin.h>
-#include <pmmintrin.h>
-#include <immintrin.h>
-#include <wmmintrin.h>
 
 #include "customHashes.hpp"
 #include "google-hashes/city.hpp"
@@ -135,17 +161,6 @@ std::size_t IPV4HashMove::operator()(const std::string& key) const {
     return ((std::size_t*)key.c_str())[0];
 }
 
-std::size_t IPV4HashBitOps::operator()(const std::string& key) const{
-
-    constexpr std::size_t mask1 = 0x000F0F0F000F0F0F;
-    const std::size_t low = _pext_u64(load_u64_le(key.c_str()), mask1);
-
-    constexpr std::size_t mask2 = 0x000F0F0F000F0F0F;
-    const std::size_t high = _pext_u64(load_u64_le(key.c_str() + 7), mask2);
-
-    return low | (high << 24);
-}
-
 std::size_t CPFHashVectorizedMul::operator()(const std::string& key) const {
     __m128i vector = _mm_lddqu_si128((const __m128i *)key.c_str());
     const __m128i zeros = _mm_set1_epi8('0');
@@ -166,69 +181,8 @@ std::size_t CPFHashVectorizedMul::operator()(const std::string& key) const {
     return hash_code;
 }
 
-std::size_t CPFHashBitOps::operator()(const std::string& key) const{
-
-    constexpr std::size_t mask1 = 0x000F0F0F000F0F0F;
-    const std::size_t low = _pext_u64(load_u64_le(key.c_str()), mask1);
-
-    constexpr std::size_t mask2 = 0x0F0F000F0F0F0000;
-    const std::size_t high = _pext_u64(load_u64_le(key.c_str() + 6), mask2);
-
-    return low | (high << 24);
-}
-
-std::size_t SSNHashBitOps::operator()(const std::string& key) const{
-
-    constexpr std::size_t mask1 = 0x0F000F0F000F0F0F;
-    const std::size_t low = _pext_u64(load_u64_le(key.c_str()), mask1);
-
-    constexpr std::size_t mask2 = 0x0F0F0F0000000000;
-    const std::size_t high = _pext_u64(load_u64_le(key.c_str() + 3), mask2);
-
-    return low | (high << 24);
-}
-
-
-std::size_t CarPlateHashBitOps::operator()(const std::string& key) const{
-    return load_u64_le(key.c_str());
-}
-
-std::size_t MacAddressHashBitOps::operator()(const std::string& key) const{
-
-    constexpr std::size_t mask1 = 0x7F7F007F7F007F7F;
-    const std::size_t low = _pext_u64(load_u64_le(key.c_str()), mask1);
-
-    constexpr std::size_t mask2 = 0x7F7F007F7F007F7F;
-    const std::size_t high = _pext_u64(load_u64_le(key.c_str() + 9), mask2);
-
-    return low ^ (high << 21);
-}
-
-std::size_t UrlCompress::operator()(const std::string& key) const {
-// http:/google.github.io/[a-z]{2}/version[0-9]{2}/doxygen/html/[a-z0-9]{20}.html
-
-//[a-z] 1F -- 10 bytes
-    constexpr std::size_t mask1 = 0x1F1F1F1F1F1F1F1F;
-    const std::size_t low1 = _pext_u64(load_u64_le(key.c_str()+23), mask1);
-    constexpr std::size_t mask2 = 0x0000000000001F1F;
-    const std::size_t high1 = _pext_u64(load_u64_le(key.c_str()+31), mask2);
-
-//[0-9] 0F -- 2 bytes
-    constexpr std::size_t mask3 = 0x0000000000000F0F;
-    const std::size_t low2 = _pext_u64(load_u64_le(key.c_str()+41), mask3);
-
-//[a-z0-9] 7F -- 16 bytes
-    constexpr std::size_t mask4 = 0x7F7F7F7F7F7F7F7F;
-    const std::size_t high2 = _pext_u64(load_u64_le(key.c_str()+58), mask4);
-    constexpr std::size_t mask5 = 0x7F7F7F7F7F7F7F7F;
-    const std::size_t low3 = _pext_u64(load_u64_le(key.c_str()+66), mask5);
-    constexpr std::size_t mask6 = 0x000000007F7F7F7F;
-    const std::size_t high3 = _pext_u64(load_u64_le(key.c_str()+74), mask6);
-
-    return (low1 ^ ( high1 << 24 )) ^ (low2 ^ ( high2 << 8 )) ^ (low3 ^ ( high3 << 24 ));
-}
-
 std::size_t IntSimdHash::operator()(const std::string& key) const {
+#ifdef x86_64
     __m128i bits[7] = {
         _mm_loadu_si64(key.c_str()),
         _mm_loadu_si64(key.c_str() + 16),
@@ -253,36 +207,13 @@ std::size_t IntSimdHash::operator()(const std::string& key) const {
     const __m128i xor_final = _mm_xor_si128(xor1, xor2);
     std::size_t const * xor_final_ptr = (std::size_t const *)&xor_final;
     return xor_final_ptr[0] ^ xor_final[1];
-}
-
-std::size_t IntBitHash::operator()(const std::string& key) const {
-    constexpr std::size_t mask = 0x0F0F0F0F0F0F0F0F;
-
-    std::size_t bits1 = _pext_u64(load_u64_le(key.c_str()), mask);
-    bits1 |= _pext_u64(load_u64_le(key.c_str() + 8), mask) << 32;
-
-    std::size_t bits2 = _pext_u64(load_u64_le(key.c_str() + 16), mask);
-    bits2 |= _pext_u64(load_u64_le(key.c_str() + 24), mask) << 32;
-
-    std::size_t bits3 = _pext_u64(load_u64_le(key.c_str() + 32), mask);
-    bits3 |= _pext_u64(load_u64_le(key.c_str() + 40), mask) << 32;
-
-    std::size_t bits4 = _pext_u64(load_u64_le(key.c_str() + 48), mask);
-    bits4 |= _pext_u64(load_u64_le(key.c_str() + 56), mask) << 32;
-
-    std::size_t bits5 = _pext_u64(load_u64_le(key.c_str() + 64), mask);
-    bits5 |= _pext_u64(load_u64_le(key.c_str() + 72), mask) << 32;
-
-    std::size_t bits6 = _pext_u64(load_u64_le(key.c_str() + 80), mask);
-    bits6 |= _pext_u64(load_u64_le(key.c_str() + 88), mask) << 32;
-
-    std::size_t bits7 = _pext_u64(load_u64_le(key.c_str() + 92), mask);
-
-    return bits1 ^ bits2 ^ bits3 ^ bits4 ^ bits5 ^ bits6 ^ bits7;
+#elif defined(ARM)
+    // we don't care about the ARM Simd implementation right now
+    return load_u64_le(key.c_str());
+#endif
 }
 
 static std::size_t __pext_hash_url_complex(const char* ptr, size_t len, size_t seed) {
-
     static const size_t mul = (((size_t) 0xc6a4a793UL) << 32UL)
                     + (size_t) 0x5bd1e995UL;
     const char* const buf = static_cast<const char*>(ptr);
@@ -300,12 +231,21 @@ static std::size_t __pext_hash_url_complex(const char* ptr, size_t len, size_t s
         constexpr std::size_t mask4 = 0x7f7f7f7f7f7f7f7f;
         constexpr std::size_t mask5 = 0x007f7f7f7f7f7f7f;
 
+#ifdef x86_64
         const std::size_t hashable0 = _pext_u64(load_u64_le(ptr+23), mask0);
         const std::size_t hashable1 = _pext_u64(load_u64_le(ptr+31), mask1);
         const std::size_t hashable2 = _pext_u64(load_u64_le(ptr+41), mask2);
         const std::size_t hashable3 = _pext_u64(load_u64_le(ptr+58), mask3);
         const std::size_t hashable4 = _pext_u64(load_u64_le(ptr+66), mask4);
         const std::size_t hashable5 = _pext_u64(load_u64_le(ptr+74), mask5);
+#elif defined(ARM)
+        const std::size_t hashable0 = load_u64_le(ptr+23) ^ mask0;
+        const std::size_t hashable1 = load_u64_le(ptr+31) ^ mask1;
+        const std::size_t hashable2 = load_u64_le(ptr+41) ^ mask2;
+        const std::size_t hashable3 = load_u64_le(ptr+58) ^ mask3;
+        const std::size_t hashable4 = load_u64_le(ptr+66) ^ mask4;
+        const std::size_t hashable5 = load_u64_le(ptr+74) ^ mask5;
+#endif
 
         size_t data = shift_mix(hashable0 * mul) * mul;
         hash ^= data;
@@ -352,12 +292,21 @@ std::size_t PextUrlComplex::operator()(const std::string& key) const {
     constexpr std::size_t mask3 = 0x7f7f7f7f7f7f7f7f;
     constexpr std::size_t mask4 = 0x7f7f7f7f7f7f7f7f;
     constexpr std::size_t mask5 = 0x000000007f7f7f7f;
+#ifdef x86_64
     const std::size_t hashable0 = _pext_u64(load_u64_le(key.c_str()+23), mask0);
     const std::size_t hashable1 = _pext_u64(load_u64_le(key.c_str()+31), mask1);
     const std::size_t hashable2 = _pext_u64(load_u64_le(key.c_str()+41), mask2);
     const std::size_t hashable3 = _pext_u64(load_u64_le(key.c_str()+58), mask3);
     const std::size_t hashable4 = _pext_u64(load_u64_le(key.c_str()+66), mask4);
     const std::size_t hashable5 = _pext_u64(load_u64_le(key.c_str()+74), mask5);
+#elif defined(ARM)
+    const std::size_t hashable0 = load_u64_le(key.c_str()+23) ^ mask0;
+    const std::size_t hashable1 = load_u64_le(key.c_str()+31) ^ mask1;
+    const std::size_t hashable2 = load_u64_le(key.c_str()+41) ^ mask2;
+    const std::size_t hashable3 = load_u64_le(key.c_str()+58) ^ mask3;
+    const std::size_t hashable4 = load_u64_le(key.c_str()+66) ^ mask4;
+    const std::size_t hashable5 = load_u64_le(key.c_str()+74) ^ mask5;
+#endif
     size_t shift0 = hashable0;
     size_t shift1 = hashable1 << 54;
     size_t shift2 = hashable2;
@@ -376,9 +325,15 @@ std::size_t PextUrl::operator()(const std::string& key) const {
     constexpr std::size_t mask0 = 0x7f7f7f7f7f7f7f7f;
     constexpr std::size_t mask1 = 0x7f7f7f7f7f7f7f7f;
     constexpr std::size_t mask2 = 0x000000007f7f7f7f;
+#ifdef x86_64
     const std::size_t hashable0 = _pext_u64(load_u64_le(key.c_str()+45), mask0);
     const std::size_t hashable1 = _pext_u64(load_u64_le(key.c_str()+53), mask1);
     const std::size_t hashable2 = _pext_u64(load_u64_le(key.c_str()+61), mask2);
+#elif defined(ARM)
+    const std::size_t hashable0 = load_u64_le(key.c_str()+45) ^ mask0;
+    const std::size_t hashable1 = load_u64_le(key.c_str()+53) ^ mask1;
+    const std::size_t hashable2 = load_u64_le(key.c_str()+61) ^ mask2;
+#endif
     size_t shift0 = hashable0;
     size_t shift1 = hashable1 << 8;
     size_t shift2 = hashable2;
@@ -391,8 +346,13 @@ std::size_t PextUrl::operator()(const std::string& key) const {
 std::size_t PextMac::operator()(const std::string& key) const {
     constexpr std::size_t mask0 = 0x7f7f007f7f007f7f;
     constexpr std::size_t mask1 = 0x7f7f007f7f007f7f;
+#ifdef x86_64
     const std::size_t hashable0 = _pext_u64(load_u64_le(key.c_str()+0), mask0);
     const std::size_t hashable1 = _pext_u64(load_u64_le(key.c_str()+9), mask1);
+#elif defined(ARM)
+    const std::size_t hashable0 = load_u64_le(key.c_str()+0) ^ mask0;
+    const std::size_t hashable1 = load_u64_le(key.c_str()+9) ^ mask1;
+#endif
     size_t shift0 = hashable0;
     size_t shift1 = hashable1 << 22;
     size_t tmp0 = shift0 ^ shift1;
@@ -402,8 +362,13 @@ std::size_t PextMac::operator()(const std::string& key) const {
 std::size_t PextCPF::operator()(const std::string& key) const {
     constexpr std::size_t mask0 = 0x000f0f0f000f0f0f;
     constexpr std::size_t mask1 = 0x0f0f000f0f0f0000;
+#ifdef x86_64
     const std::size_t hashable0 = _pext_u64(load_u64_le(key.c_str()+0), mask0);
     const std::size_t hashable1 = _pext_u64(load_u64_le(key.c_str()+6), mask1);
+#elif defined(ARM)
+    const std::size_t hashable0 = load_u64_le(key.c_str()+0) ^ mask0;
+    const std::size_t hashable1 = load_u64_le(key.c_str()+6) ^ mask1;
+#endif
     size_t shift0 = hashable0;
     size_t shift1 = hashable1 << 44;
     size_t tmp0 = shift0 ^ shift1;
@@ -413,8 +378,13 @@ std::size_t PextCPF::operator()(const std::string& key) const {
 std::size_t PextSSN::operator()(const std::string& key) const {
     constexpr std::size_t mask0 = 0x0f000f0f000f0f0f;
     constexpr std::size_t mask1 = 0x0f0f0f0000000000;
+#ifdef x86_64
     const std::size_t hashable0 = _pext_u64(load_u64_le(key.c_str()+0), mask0);
     const std::size_t hashable1 = _pext_u64(load_u64_le(key.c_str()+3), mask1);
+#elif defined(ARM)
+    const std::size_t hashable0 = load_u64_le(key.c_str()+0) ^ mask0;
+    const std::size_t hashable1 = load_u64_le(key.c_str()+3) ^ mask1;
+#endif
     size_t shift0 = hashable0;
     size_t shift1 = hashable1 << 52;
     size_t tmp0 = shift0 ^ shift1;
@@ -424,8 +394,13 @@ std::size_t PextSSN::operator()(const std::string& key) const {
 std::size_t PextIPV4::operator()(const std::string& key) const {
     constexpr std::size_t mask0 = 0x000f0f0f000f0f0f;
     constexpr std::size_t mask1 = 0x0f0f0f000f0f0f00;
+#ifdef x86_64
     const std::size_t hashable0 = _pext_u64(load_u64_le(key.c_str()+0), mask0);
     const std::size_t hashable1 = _pext_u64(load_u64_le(key.c_str()+7), mask1);
+#elif defined(ARM)
+    const std::size_t hashable0 = load_u64_le(key.c_str()+0) ^ mask0;
+    const std::size_t hashable1 = load_u64_le(key.c_str()+7) ^ mask1;
+#endif
     size_t shift0 = hashable0;
     size_t shift1 = hashable1 << 40;
     size_t tmp0 = shift0 ^ shift1;
@@ -438,11 +413,19 @@ std::size_t PextIPV6::operator()(const std::string& key) const {
     constexpr std::size_t mask2 = 0x7f7f7f7f007f7f7f;
     constexpr std::size_t mask3 = 0x7f7f7f007f7f7f7f;
     constexpr std::size_t mask4 = 0x7f7f7f7f007f0000;
+#ifdef x86_64
     const std::size_t hashable0 = _pext_u64(load_u64_le(key.c_str()+0), mask0);
     const std::size_t hashable1 = _pext_u64(load_u64_le(key.c_str()+8), mask1);
     const std::size_t hashable2 = _pext_u64(load_u64_le(key.c_str()+16), mask2);
     const std::size_t hashable3 = _pext_u64(load_u64_le(key.c_str()+25), mask3);
     const std::size_t hashable4 = _pext_u64(load_u64_le(key.c_str()+31), mask4);
+#elif defined(ARM)
+    const std::size_t hashable0 = load_u64_le(key.c_str()+0) ^ mask0;
+    const std::size_t hashable1 = load_u64_le(key.c_str()+8) ^ mask1;
+    const std::size_t hashable2 = load_u64_le(key.c_str()+16) ^ mask2;
+    const std::size_t hashable3 = load_u64_le(key.c_str()+25) ^ mask3;
+    const std::size_t hashable4 = load_u64_le(key.c_str()+31) ^ mask4;
+#endif
     size_t shift0 = hashable0;
     size_t shift1 = hashable1 << 22;
     size_t shift2 = hashable2;
@@ -467,89 +450,105 @@ static std::size_t __pext_hash_ints(const char* ptr, size_t len, size_t seed) {
     const char* const end = buf + len_aligned;
     size_t hash = seed ^ (len * mul);
 
-        constexpr std::size_t mask0 = 0x0f0f0f0f0f0f0f0f;
-        constexpr std::size_t mask1 = 0x0f0f0f0f0f0f0f0f;
-        constexpr std::size_t mask2 = 0x0f0f0f0f0f0f0f0f;
-        constexpr std::size_t mask3 = 0x0f0f0f0f0f0f0f0f;
-        constexpr std::size_t mask4 = 0x0f0f0f0f0f0f0f0f;
-        constexpr std::size_t mask5 = 0x0f0f0f0f0f0f0f0f;
-        constexpr std::size_t mask6 = 0x0f0f0f0f0f0f0f0f;
-        constexpr std::size_t mask7 = 0x0f0f0f0f0f0f0f0f;
-        constexpr std::size_t mask8 = 0x0f0f0f0f0f0f0f0f;
-        constexpr std::size_t mask9 = 0x0f0f0f0f0f0f0f0f;
-        constexpr std::size_t mask10 = 0x0f0f0f0f0f0f0f0f;
-        constexpr std::size_t mask11 = 0x0f0f0f0f0f0f0f0f;
-        constexpr std::size_t mask12 = 0x0f0f0f0f00000000;
-        const std::size_t hashable0 = _pext_u64(load_u64_le(ptr+0), mask0);
-        const std::size_t hashable1 = _pext_u64(load_u64_le(ptr+8), mask1);
-        const std::size_t hashable2 = _pext_u64(load_u64_le(ptr+16), mask2);
-        const std::size_t hashable3 = _pext_u64(load_u64_le(ptr+24), mask3);
-        const std::size_t hashable4 = _pext_u64(load_u64_le(ptr+32), mask4);
-        const std::size_t hashable5 = _pext_u64(load_u64_le(ptr+40), mask5);
-        const std::size_t hashable6 = _pext_u64(load_u64_le(ptr+48), mask6);
-        const std::size_t hashable7 = _pext_u64(load_u64_le(ptr+56), mask7);
-        const std::size_t hashable8 = _pext_u64(load_u64_le(ptr+64), mask8);
-        const std::size_t hashable9 = _pext_u64(load_u64_le(ptr+72), mask9);
-        const std::size_t hashable10 = _pext_u64(load_u64_le(ptr+80), mask10);
-        const std::size_t hashable11 = _pext_u64(load_u64_le(ptr+88), mask11);
-        const std::size_t hashable12 = _pext_u64(load_u64_le(ptr+92), mask12);
+    constexpr std::size_t mask0 = 0x0f0f0f0f0f0f0f0f;
+    constexpr std::size_t mask1 = 0x0f0f0f0f0f0f0f0f;
+    constexpr std::size_t mask2 = 0x0f0f0f0f0f0f0f0f;
+    constexpr std::size_t mask3 = 0x0f0f0f0f0f0f0f0f;
+    constexpr std::size_t mask4 = 0x0f0f0f0f0f0f0f0f;
+    constexpr std::size_t mask5 = 0x0f0f0f0f0f0f0f0f;
+    constexpr std::size_t mask6 = 0x0f0f0f0f0f0f0f0f;
+    constexpr std::size_t mask7 = 0x0f0f0f0f0f0f0f0f;
+    constexpr std::size_t mask8 = 0x0f0f0f0f0f0f0f0f;
+    constexpr std::size_t mask9 = 0x0f0f0f0f0f0f0f0f;
+    constexpr std::size_t mask10 = 0x0f0f0f0f0f0f0f0f;
+    constexpr std::size_t mask11 = 0x0f0f0f0f0f0f0f0f;
+    constexpr std::size_t mask12 = 0x0f0f0f0f00000000;
+#ifdef x86_64
+    const std::size_t hashable0 = _pext_u64(load_u64_le(ptr+0), mask0);
+    const std::size_t hashable1 = _pext_u64(load_u64_le(ptr+8), mask1);
+    const std::size_t hashable2 = _pext_u64(load_u64_le(ptr+16), mask2);
+    const std::size_t hashable3 = _pext_u64(load_u64_le(ptr+24), mask3);
+    const std::size_t hashable4 = _pext_u64(load_u64_le(ptr+32), mask4);
+    const std::size_t hashable5 = _pext_u64(load_u64_le(ptr+40), mask5);
+    const std::size_t hashable6 = _pext_u64(load_u64_le(ptr+48), mask6);
+    const std::size_t hashable7 = _pext_u64(load_u64_le(ptr+56), mask7);
+    const std::size_t hashable8 = _pext_u64(load_u64_le(ptr+64), mask8);
+    const std::size_t hashable9 = _pext_u64(load_u64_le(ptr+72), mask9);
+    const std::size_t hashable10 = _pext_u64(load_u64_le(ptr+80), mask10);
+    const std::size_t hashable11 = _pext_u64(load_u64_le(ptr+88), mask11);
+    const std::size_t hashable12 = _pext_u64(load_u64_le(ptr+92), mask12);
+#elif defined(ARM)
+    const std::size_t hashable0 = load_u64_le(ptr+0) ^ mask0;
+    const std::size_t hashable1 = load_u64_le(ptr+8) ^ mask1;
+    const std::size_t hashable2 = load_u64_le(ptr+16) ^ mask2;
+    const std::size_t hashable3 = load_u64_le(ptr+24) ^ mask3;
+    const std::size_t hashable4 = load_u64_le(ptr+32) ^ mask4;
+    const std::size_t hashable5 = load_u64_le(ptr+40) ^ mask5;
+    const std::size_t hashable6 = load_u64_le(ptr+48) ^ mask6;
+    const std::size_t hashable7 = load_u64_le(ptr+56) ^ mask7;
+    const std::size_t hashable8 = load_u64_le(ptr+64) ^ mask8;
+    const std::size_t hashable9 = load_u64_le(ptr+72) ^ mask9;
+    const std::size_t hashable10 = load_u64_le(ptr+80) ^ mask10;
+    const std::size_t hashable11 = load_u64_le(ptr+88) ^ mask11;
+    const std::size_t hashable12 = load_u64_le(ptr+92) ^ mask12;
+#endif
 
-        size_t data = shift_mix(hashable0 * mul) * mul;
-        hash ^= data;
-        hash *= mul;
+    size_t data = shift_mix(hashable0 * mul) * mul;
+    hash ^= data;
+    hash *= mul;
 
-        data = shift_mix(hashable1 * mul) * mul;
-        hash ^= data;
-        hash *= mul;
+    data = shift_mix(hashable1 * mul) * mul;
+    hash ^= data;
+    hash *= mul;
 
-        data = shift_mix(hashable2 * mul) * mul;
-        hash ^= data;
-        hash *= mul;
+    data = shift_mix(hashable2 * mul) * mul;
+    hash ^= data;
+    hash *= mul;
 
-        data = shift_mix(hashable3 * mul) * mul;
-        hash ^= data;
-        hash *= mul;
+    data = shift_mix(hashable3 * mul) * mul;
+    hash ^= data;
+    hash *= mul;
 
-        data = shift_mix(hashable4 * mul) * mul;
-        hash ^= data;
-        hash *= mul;
+    data = shift_mix(hashable4 * mul) * mul;
+    hash ^= data;
+    hash *= mul;
 
-        data = shift_mix(hashable5 * mul) * mul;
-        hash ^= data;
-        hash *= mul;
+    data = shift_mix(hashable5 * mul) * mul;
+    hash ^= data;
+    hash *= mul;
 
-        data = shift_mix(hashable6 * mul) * mul;
-        hash ^= data;
-        hash *= mul;
+    data = shift_mix(hashable6 * mul) * mul;
+    hash ^= data;
+    hash *= mul;
 
-        data = shift_mix(hashable7 * mul) * mul;
-        hash ^= data;
-        hash *= mul;
+    data = shift_mix(hashable7 * mul) * mul;
+    hash ^= data;
+    hash *= mul;
 
-        data = shift_mix(hashable8 * mul) * mul;
-        hash ^= data;
-        hash *= mul;
+    data = shift_mix(hashable8 * mul) * mul;
+    hash ^= data;
+    hash *= mul;
 
-        data = shift_mix(hashable9 * mul) * mul;
-        hash ^= data;
-        hash *= mul;
+    data = shift_mix(hashable9 * mul) * mul;
+    hash ^= data;
+    hash *= mul;
 
-        data = shift_mix(hashable10 * mul) * mul;
-        hash ^= data;
-        hash *= mul;
+    data = shift_mix(hashable10 * mul) * mul;
+    hash ^= data;
+    hash *= mul;
 
-        data = shift_mix(hashable11 * mul) * mul;
-        hash ^= data;
-        hash *= mul;
+    data = shift_mix(hashable11 * mul) * mul;
+    hash ^= data;
+    hash *= mul;
 
-        data = shift_mix(hashable12 * mul) * mul;
-        hash ^= data;
-        hash *= mul;
+    data = shift_mix(hashable12 * mul) * mul;
+    hash ^= data;
+    hash *= mul;
 
-        hash = shift_mix(hash) * mul;
-        hash = shift_mix(hash);
+    hash = shift_mix(hash) * mul;
+    hash = shift_mix(hash);
 
-        return hash;
+    return hash;
 }
 
 std::size_t PextMurmurINTS::operator()(const std::string& key) const {
@@ -571,6 +570,7 @@ std::size_t PextINTS::operator()(const std::string& key) const {
     constexpr std::size_t mask10 = 0x0f0f0f0f0f0f0f0f;
     constexpr std::size_t mask11 = 0x0f0f0f0f0f0f0f0f;
     constexpr std::size_t mask12 = 0x0f0f0f0f00000000;
+#ifdef x86_64
     const std::size_t hashable0 = _pext_u64(load_u64_le(key.c_str()+0), mask0);
     const std::size_t hashable1 = _pext_u64(load_u64_le(key.c_str()+8), mask1);
     const std::size_t hashable2 = _pext_u64(load_u64_le(key.c_str()+16), mask2);
@@ -584,6 +584,21 @@ std::size_t PextINTS::operator()(const std::string& key) const {
     const std::size_t hashable10 = _pext_u64(load_u64_le(key.c_str()+80), mask10);
     const std::size_t hashable11 = _pext_u64(load_u64_le(key.c_str()+88), mask11);
     const std::size_t hashable12 = _pext_u64(load_u64_le(key.c_str()+92), mask12);
+#elif defined(ARM)
+    const std::size_t hashable0 = load_u64_le(key.c_str()+0) ^ mask0;
+    const std::size_t hashable1 = load_u64_le(key.c_str()+8) ^ mask1;
+    const std::size_t hashable2 = load_u64_le(key.c_str()+16) ^ mask2;
+    const std::size_t hashable3 = load_u64_le(key.c_str()+24) ^ mask3;
+    const std::size_t hashable4 = load_u64_le(key.c_str()+32) ^ mask4;
+    const std::size_t hashable5 = load_u64_le(key.c_str()+40) ^ mask5;
+    const std::size_t hashable6 = load_u64_le(key.c_str()+48) ^ mask6;
+    const std::size_t hashable7 = load_u64_le(key.c_str()+56) ^ mask7;
+    const std::size_t hashable8 = load_u64_le(key.c_str()+64) ^ mask8;
+    const std::size_t hashable9 = load_u64_le(key.c_str()+72) ^ mask9;
+    const std::size_t hashable10 = load_u64_le(key.c_str()+80) ^ mask10;
+    const std::size_t hashable11 = load_u64_le(key.c_str()+88) ^ mask11;
+    const std::size_t hashable12 = load_u64_le(key.c_str()+92) ^ mask12;
+#endif
     size_t shift0 = hashable0;
     size_t shift1 = hashable1 << 32;
     size_t shift2 = hashable2;
@@ -708,6 +723,7 @@ std::size_t OffXorINTS::operator()(const std::string& key) const {
 }
 
 std::size_t NaiveSimdUrlComplex::operator()(const std::string& key) const {
+#ifdef x86_64
     __m128i var0 = _mm_lddqu_si128((const __m128i *)(key.c_str() + 0));
     __m128i var1 = _mm_lddqu_si128((const __m128i *)(key.c_str() + 16));
     __m128i var2 = _mm_lddqu_si128((const __m128i *)(key.c_str() + 32));
@@ -720,6 +736,10 @@ std::size_t NaiveSimdUrlComplex::operator()(const std::string& key) const {
     __m128i xor3 = _mm_xor_si128(xor0, xor1);
     __m128i xor4 = _mm_xor_si128(xor2, xor3);
     return _mm_extract_epi64(xor4 , 0) ^ _mm_extract_epi64(xor4 , 1);
+#elif defined(ARM)
+    // we don't care about the ARM Simd implementation right now
+    return load_u64_le(key.c_str());
+#endif
 }
 
 std::size_t NaiveUrlComplex::operator()(const std::string& key) const {
@@ -842,55 +862,112 @@ std::size_t NaiveINTS::operator()(const std::string& key) const {
 }
 
 std::size_t AesUrlComplex::operator()(const std::string& key) const{
+#ifdef x86_64
     const __m128i hashable0 = _mm_lddqu_si128((const __m128i *)(key.c_str()+23));
     const __m128i hashable1 = _mm_lddqu_si128((const __m128i *)(key.c_str()+58));
     const __m128i hashable2 = _mm_lddqu_si128((const __m128i *)(key.c_str()+67));
     __m128i tmp0 = _mm_aesenc_si128(hashable0, hashable1);
     __m128i tmp1 = _mm_aesenc_si128(hashable2, tmp0);
     return _mm_extract_epi64(tmp1, 0) ^ _mm_extract_epi64(tmp1 , 1);
+#elif defined(ARM)
+    const uint8x16_t hashable0 = vld1q_u8((const __m128i *)(key.c_str()+23));
+    const uint8x16_t hashable1 = vld1q_u8((const __m128i *)(key.c_str()+58));
+    const uint8x16_t hashable2 = vld1q_u8((const __m128i *)(key.c_str()+67));
+    const uint8x16_t tmp0 = vaeseq_u8(hashable0, hashable1);
+    const uint8x16_t tmp1 = vaeseq_u8(hashable2, tmp0);
+    const uint64x2_t ret = vreinterpretq_u64_u8(tmp1);
+    return vgetq_lane_u64(ret, 0) ^ vgetq_lane_u64(ret, 1);
+#endif
 }
 
 std::size_t AesUrl::operator()(const std::string& key) const{
+#ifdef x86_64
     const __m128i hashable0 = _mm_lddqu_si128((const __m128i *)(key.c_str()+45));
     const __m128i hashable1 = _mm_lddqu_si128((const __m128i *)(key.c_str()+54));
     __m128i tmp0 = _mm_aesenc_si128(hashable0, hashable1);
     return _mm_extract_epi64(tmp0, 0) ^ _mm_extract_epi64(tmp0 , 1);
+#elif defined(ARM)
+    const uint8x16_t hashable0 = vld1q_u8((const __m128i *)(key.c_str()+45));
+    const uint8x16_t hashable1 = vld1q_u8((const __m128i *)(key.c_str()+54));
+    const uint8x16_t tmp0 = vaeseq_u8(hashable0, hashable1);
+    const uint64x2_t ret = vreinterpretq_u64_u8(tmp0);
+    return vgetq_lane_u64(ret, 0) ^ vgetq_lane_u64(ret, 1);
+#endif
 }
 
 std::size_t AesMac::operator()(const std::string& key) const{
-		const __m128i load = _mm_lddqu_si128((const __m128i *)(key.c_str()));
-		const __m128i hash = _mm_aesenc_si128(load, load);
-		return _mm_extract_epi64(hash , 0) ^ _mm_extract_epi64(hash, 1);
+#ifdef x86_64
+    const __m128i load = _mm_lddqu_si128((const __m128i *)(key.c_str()));
+    const __m128i hash = _mm_aesenc_si128(load, load);
+    return _mm_extract_epi64(hash , 0) ^ _mm_extract_epi64(hash, 1);
+#elif defined(ARM)
+    const uint8x16_t load = vld1q_u8((const __m128i *)(key.c_str()));
+    const uint8x16_t hash = vaeseq_u8(load, load);
+    const uint64x2_t ret = vreinterpretq_u64_u8(hash);
+    return vgetq_lane_u64(ret, 0) ^ vgetq_lane_u64(ret, 1);
+#endif
 }
 
 std::size_t AesCPF::operator()(const std::string& key) const{
-	const __m128i load = _mm_set_epi8(key[0],key[1],key[2],key[3],key[4],key[5],key[6],key[7],key[8],key[9],key[10],key[11],key[12],key[13],0,0);
-	const __m128i hash = _mm_aesenc_si128(load, load);
-	return _mm_extract_epi64(hash , 0) ^ _mm_extract_epi64(hash, 1);
+#ifdef x86_64
+    const __m128i load = _mm_set_epi8(key[0],key[1],key[2],key[3],key[4],key[5],key[6],key[7],key[8],key[9],key[10],key[11],key[12],key[13],0,0);
+    const __m128i hash = _mm_aesenc_si128(load, load);
+    return _mm_extract_epi64(hash , 0) ^ _mm_extract_epi64(hash, 1);
+#elif defined(ARM)
+    const uint8x16_t load = vld1q_u8(key[0],key[1],key[2],key[3],key[4],key[5],key[6],key[7],key[8],key[9],key[10],key[11],key[12],key[13],0,0);
+    const uint8x16_t hash = vaeseq_u8(load, load);
+    const uint64x2_t ret = vreinterpretq_u64_u8(hash);
+    return vgetq_lane_u64(ret, 0) ^ vgetq_lane_u64(ret, 1);
+#endif
 }
 
 std::size_t AesSSN::operator()(const std::string& key) const{
-	const __m128i load = _mm_set_epi8(key[0],key[1],key[2],key[3],key[4],key[5],key[6],key[7],key[8],key[9],key[10],0,0,0,0,0);
-	const __m128i hash = _mm_aesenc_si128(load, load);
-	return _mm_extract_epi64(hash , 0) ^ _mm_extract_epi64(hash, 1);
+#ifdef x86_64
+    const __m128i load = _mm_set_epi8(key[0],key[1],key[2],key[3],key[4],key[5],key[6],key[7],key[8],key[9],key[10],0,0,0,0,0);
+    const __m128i hash = _mm_aesenc_si128(load, load);
+    return _mm_extract_epi64(hash , 0) ^ _mm_extract_epi64(hash, 1);
+#elif defined(ARM)
+    const uint8x16_t load = vld1q_u8(key[0],key[1],key[2],key[3],key[4],key[5],key[6],key[7],key[8],key[9],key[10],0,0,0,0,0);
+    const uint8x16_t hash = vaeseq_u8(load, load);
+    const uint64x2_t ret = vreinterpretq_u64_u8(hash);
+    return vgetq_lane_u64(ret, 0) ^ vgetq_lane_u64(ret, 1);
+#endif
 }
 
 std::size_t AesIPV4::operator()(const std::string& key) const{
-		const __m128i load = _mm_set_epi8(key[0],key[1],key[2],key[3],key[4],key[5],key[6],key[7],key[8],key[9],key[10],key[11],key[12],key[13],key[14],0);
-	const __m128i hash = _mm_aesenc_si128(load, load);
-	return _mm_extract_epi64(hash , 0) ^ _mm_extract_epi64(hash, 1);
+#ifdef x86_64
+    const __m128i load = _mm_set_epi8(key[0],key[1],key[2],key[3],key[4],key[5],key[6],key[7],key[8],key[9],key[10],key[11],key[12],key[13],key[14],0);
+    const __m128i hash = _mm_aesenc_si128(load, load);
+    return _mm_extract_epi64(hash , 0) ^ _mm_extract_epi64(hash, 1);
+#elif defined(ARM)
+    const uint8x16_t load = vld1q_u8(key[0],key[1],key[2],key[3],key[4],key[5],key[6],key[7],key[8],key[9],key[10],key[11],key[12],key[13],key[14],0);
+    const uint8x16_t hash = vaeseq_u8(load, load);
+    const uint64x2_t ret = vreinterpretq_u64_u8(hash);
+    return vgetq_lane_u64(ret, 0) ^ vgetq_lane_u64(ret, 1);
+#endif
 }
 
 std::size_t AesIPV6::operator()(const std::string& key) const{
+#ifdef x86_64
     const __m128i hashable0 = _mm_lddqu_si128((const __m128i *)(key.c_str()+0));
     const __m128i hashable1 = _mm_lddqu_si128((const __m128i *)(key.c_str()+16));
     const __m128i hashable2 = _mm_lddqu_si128((const __m128i *)(key.c_str()+23));
     __m128i tmp0 = _mm_aesenc_si128(hashable0, hashable1);
     __m128i tmp1 = _mm_aesenc_si128(hashable2, tmp0);
     return _mm_extract_epi64(tmp1, 0) ^ _mm_extract_epi64(tmp1 , 1);
+#elif defined(ARM)
+    const uint8x16_t hashable0 = vld1q_u8((const __m128i *)(key.c_str()+0));
+    const uint8x16_t hashable1 = vld1q_u8((const __m128i *)(key.c_str()+16));
+    const uint8x16_t hashable2 = vld1q_u8((const __m128i *)(key.c_str()+23));
+    const uint8x16_t tmp0 = vaeseq_u8(hashable0, hashable1);
+    const uint8x16_t tmp1 = vaeseq_u8(hashable2, tmp0);
+    const uint64x2_t ret = vreinterpretq_u64_u8(tmp1);
+    return vgetq_lane_u64(ret, 0) ^ vgetq_lane_u64(ret, 1);
+#endif
 }
 
 std::size_t AesINTS::operator()(const std::string& key) const{
+#ifdef x86_64
     const __m128i hashable0 = _mm_lddqu_si128((const __m128i *)(key.c_str()+0));
     const __m128i hashable1 = _mm_lddqu_si128((const __m128i *)(key.c_str()+16));
     const __m128i hashable2 = _mm_lddqu_si128((const __m128i *)(key.c_str()+32));
@@ -905,9 +982,27 @@ std::size_t AesINTS::operator()(const std::string& key) const{
     __m128i tmp4 = _mm_aesenc_si128(tmp1, tmp2);
     __m128i tmp5 = _mm_aesenc_si128(tmp3, tmp4);
     return _mm_extract_epi64(tmp5, 0) ^ _mm_extract_epi64(tmp5 , 1);
+#elif defined(ARM)
+    const uint8x16_t hashable0 = vld1q_u8((const __m128i *)(key.c_str()+0));
+    const uint8x16_t hashable1 = vld1q_u8((const __m128i *)(key.c_str()+16));
+    const uint8x16_t hashable2 = vld1q_u8((const __m128i *)(key.c_str()+32));
+    const uint8x16_t hashable3 = vld1q_u8((const __m128i *)(key.c_str()+48));
+    const uint8x16_t hashable4 = vld1q_u8((const __m128i *)(key.c_str()+64));
+    const uint8x16_t hashable5 = vld1q_u8((const __m128i *)(key.c_str()+80));
+    const uint8x16_t hashable6 = vld1q_u8((const __m128i *)(key.c_str()+84));
+    const uint8x16_t tmp0 = vaeseq_u8(hashable0, hashable1);
+    const uint8x16_t tmp1 = vaeseq_u8(hashable2, hashable3);
+    const uint8x16_t tmp2 = vaeseq_u8(hashable4, hashable5);
+    const uint8x16_t tmp3 = vaeseq_u8(hashable6, tmp0);
+    const uint8x16_t tmp4 = vaeseq_u8(tmp1, tmp2);
+    const uint8x16_t tmp5 = vaeseq_u8(tmp3, tmp4);
+    const uint64x2_t ret = vreinterpretq_u64_u8(tmp5);
+    return vgetq_lane_u64(ret, 0) ^ vgetq_lane_u64(ret, 1);
+#endif
 }
 
 std::size_t NaiveSimdUrl::operator()(const std::string& key) const {
+#ifdef x86_64
     __m128i var0 = _mm_lddqu_si128((const __m128i *)(key.c_str() + 0));
     __m128i var1 = _mm_lddqu_si128((const __m128i *)(key.c_str() + 16));
     __m128i var2 = _mm_lddqu_si128((const __m128i *)(key.c_str() + 32));
@@ -918,9 +1013,14 @@ std::size_t NaiveSimdUrl::operator()(const std::string& key) const {
     __m128i xor2 = _mm_xor_si128(var0, xor0);
     __m128i xor3 = _mm_xor_si128(xor1, xor2);
     return _mm_extract_epi64(xor3 , 0) ^ _mm_extract_epi64(xor3 , 1);
+#elif defined(ARM)
+    // we don't care about the ARM Simd implementation right now
+    return load_u64_le(key.c_str());
+#endif
 }
 
 std::size_t NaiveSimdINTS::operator()(const std::string& key) const {
+#ifdef x86_64
     __m128i var0 = _mm_lddqu_si128((const __m128i *)(key.c_str() + 0));
     __m128i var1 = _mm_lddqu_si128((const __m128i *)(key.c_str() + 16));
     __m128i var2 = _mm_lddqu_si128((const __m128i *)(key.c_str() + 32));
@@ -935,15 +1035,24 @@ std::size_t NaiveSimdINTS::operator()(const std::string& key) const {
     __m128i xor4 = _mm_xor_si128(xor1, xor2);
     __m128i xor5 = _mm_xor_si128(xor3, xor4);
     return _mm_extract_epi64(xor5 , 0) ^ _mm_extract_epi64(xor5 , 1);
+#elif defined(ARM)
+    // we don't care about the ARM Simd implementation right now
+    return load_u64_le(key.c_str());
+#endif
 }
 
 std::size_t NaiveSimdIPV6::operator()(const std::string& key) const {
+#ifdef x86_64
     __m128i var0 = _mm_lddqu_si128((const __m128i *)(key.c_str() + 0));
     __m128i var1 = _mm_lddqu_si128((const __m128i *)(key.c_str() + 16));
     __m128i var2 = _mm_lddqu_si128((const __m128i *)(key.c_str() + 23));
     __m128i xor0 = _mm_xor_si128(var2, var1);
     __m128i xor1 = _mm_xor_si128(var0, xor0);
     return _mm_extract_epi64(xor1 , 0) ^ _mm_extract_epi64(xor1 , 1);
+#elif defined(ARM)
+    // we don't care about the ARM Simd implementation right now
+    return load_u64_le(key.c_str());
+#endif
 }
 
 std::size_t GptCPF::operator()(const std::string& key) const {
@@ -951,14 +1060,14 @@ std::size_t GptCPF::operator()(const std::string& key) const {
 
     // Unrolled loop for calculating the hash
     std::size_t hashValue = 0;
-    hashValue += key[0] * 1000000000000ULL;
-    hashValue += key[1] * 100000000000ULL;
-    hashValue += key[2] * 10000000000ULL;
-    hashValue += key[4] * 1000000000ULL;
-    hashValue += key[5] * 100000000ULL;
-    hashValue += key[6] * 10000000ULL;
-    hashValue += key[8] * 1000000ULL;
-    hashValue += key[9] * 100000ULL;
+    hashValue += key[0]  * 1000000000000ULL;
+    hashValue += key[1]  * 100000000000ULL;
+    hashValue += key[2]  * 10000000000ULL;
+    hashValue += key[4]  * 1000000000ULL;
+    hashValue += key[5]  * 100000000ULL;
+    hashValue += key[6]  * 10000000ULL;
+    hashValue += key[8]  * 1000000ULL;
+    hashValue += key[9]  * 100000ULL;
     hashValue += key[10] * 10000ULL;
     hashValue += key[11] * 1000ULL;
     hashValue += key[12] * 100ULL;

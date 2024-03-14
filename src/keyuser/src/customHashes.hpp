@@ -104,19 +104,6 @@ struct IPV4HashMove{
 };
 
 /**
- * @brief Struct for IPV4HashBitOps.
- */
-struct IPV4HashBitOps{
-    /**
-     * @brief Function call operator that calculates the hash of a key.
-     * 
-     * @param key The fixed lenght std::string key to hash.
-     * @return The hash of the key.
-     */
-    std::size_t operator()(const std::string& key) const;
-};
-
-/**
  * @brief Struct for CPFHashVectorizedMul.
  */
 struct CPFHashVectorizedMul{
@@ -130,87 +117,9 @@ struct CPFHashVectorizedMul{
 };
 
 /**
- * @brief Struct for CPFHashBitOps.
- */
-struct CPFHashBitOps{
-    /**
-     * @brief Function call operator that calculates the hash of a key.
-     * 
-     * @param key The fixed lenght std::string key to hash.
-     * @return The hash of the key.
-     */
-    std::size_t operator()(const std::string& key) const;
-};
-
-/**
- * @brief Struct for SSNHashBitOps.
- */
-struct SSNHashBitOps{
-    /**
-     * @brief Function call operator that calculates the hash of a key.
-     * 
-     * @param key The fixed lenght std::string key to hash.
-     * @return The hash of the key.
-     */
-    std::size_t operator()(const std::string& key) const;
-};
-
-/**
- * @brief Struct for CarPlateHashBitOps.
- */
-struct CarPlateHashBitOps{
-    /**
-     * @brief Function call operator that calculates the hash of a key.
-     * 
-     * @param key The fixed lenght std::string key to hash.
-     * @return The hash of the key.
-     */
-    std::size_t operator()(const std::string& key) const;
-};
-
-/**
- * @brief Struct for MacAddressHashBitOps.
- */
-struct MacAddressHashBitOps{
-    /**
-     * @brief Function call operator that calculates the hash of a key.
-     * 
-     * @param key The fixed lenght std::string key to hash.
-     * @return The hash of the key.
-     */
-    std::size_t operator()(const std::string& key) const;
-};
-
-/**
- * @brief Struct for IntBitHash.
- */
-struct IntBitHash{
-    /**
-     * @brief Function call operator that calculates the hash of a key.
-     * 
-     * @param key The fixed lenght std::string key to hash.
-     * @return The hash of the key.
-     */
-    std::size_t operator()(const std::string& key) const;
-};
-
-/**
  * @brief Struct for IntSimdHash.
  */
 struct IntSimdHash{
-    /**
-     * @brief Function call operator that calculates the hash of a key.
-     * 
-     * @param key The fixed lenght std::string key to hash.
-     * @return The hash of the key.
-     */
-    std::size_t operator()(const std::string& key) const;
-};
-
-/**
- * @brief Struct for UrlCompress.
- */
-struct UrlCompress{
     /**
      * @brief Function call operator that calculates the hash of a key.
      * 

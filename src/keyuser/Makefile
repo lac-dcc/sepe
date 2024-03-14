@@ -20,11 +20,19 @@ ABSL_LIB := $(ABSL_DIR)/lib
 ABSL_INC := $(ABSL_DIR)/include
 ABSL_LIB_FILES :=-labsl_hash -labsl_city -labsl_low_level_hash
 
+ifeq ($(PLATFORM),x86_64)
+	INTRINSICS=-mbmi2 -msse2 -msse3
+endif
+
+ifeq ($(PLATFORM),aarch64)
+	INTRINSICS=-march=armv8-a+crypto
+endif
+
 # Compilation variables
 CXXFLAGS += -std=c++20 
 COMMON_FLAGS  := -Wall -Wextra -pedantic -I$(ABSL_INC) -L$(ABSL_LIB) -Igperf_hashes/
-RELEASE_FLAGS := $(COMMON_FLAGS) -O2 -pipe -flto=auto -march=native
-DEBUG_FLAGS   := $(COMMON_FLAGS) -Og -g3 -fsanitize=address,undefined -mbmi2 -msse2 -msse3
+RELEASE_FLAGS := $(COMMON_FLAGS) -O2 -pipe -flto=auto -march=native $(INTRINSICS)
+DEBUG_FLAGS   := $(COMMON_FLAGS) -Og -g3 -fsanitize=address,undefined $(INTRINSICS)
 
 all: $(TARGET)
 
