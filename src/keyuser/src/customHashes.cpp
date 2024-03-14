@@ -870,9 +870,9 @@ std::size_t AesUrlComplex::operator()(const std::string& key) const{
     __m128i tmp1 = _mm_aesenc_si128(hashable2, tmp0);
     return _mm_extract_epi64(tmp1, 0) ^ _mm_extract_epi64(tmp1 , 1);
 #elif defined(ARM)
-    const uint8x16_t hashable0 = vld1q_u8((const __m128i *)(key.c_str()+23));
-    const uint8x16_t hashable1 = vld1q_u8((const __m128i *)(key.c_str()+58));
-    const uint8x16_t hashable2 = vld1q_u8((const __m128i *)(key.c_str()+67));
+    const uint8x16_t hashable0 = vld1q_u8(key.c_str()+23);
+    const uint8x16_t hashable1 = vld1q_u8(key.c_str()+58);
+    const uint8x16_t hashable2 = vld1q_u8(key.c_str()+67);
     const uint8x16_t tmp0 = vaeseq_u8(hashable0, hashable1);
     const uint8x16_t tmp1 = vaeseq_u8(hashable2, tmp0);
     const uint64x2_t ret = vreinterpretq_u64_u8(tmp1);
@@ -887,8 +887,8 @@ std::size_t AesUrl::operator()(const std::string& key) const{
     __m128i tmp0 = _mm_aesenc_si128(hashable0, hashable1);
     return _mm_extract_epi64(tmp0, 0) ^ _mm_extract_epi64(tmp0 , 1);
 #elif defined(ARM)
-    const uint8x16_t hashable0 = vld1q_u8((const __m128i *)(key.c_str()+45));
-    const uint8x16_t hashable1 = vld1q_u8((const __m128i *)(key.c_str()+54));
+    const uint8x16_t hashable0 = vld1q_u8((key.c_str()+45));
+    const uint8x16_t hashable1 = vld1q_u8((key.c_str()+54));
     const uint8x16_t tmp0 = vaeseq_u8(hashable0, hashable1);
     const uint64x2_t ret = vreinterpretq_u64_u8(tmp0);
     return vgetq_lane_u64(ret, 0) ^ vgetq_lane_u64(ret, 1);
@@ -901,7 +901,7 @@ std::size_t AesMac::operator()(const std::string& key) const{
     const __m128i hash = _mm_aesenc_si128(load, load);
     return _mm_extract_epi64(hash , 0) ^ _mm_extract_epi64(hash, 1);
 #elif defined(ARM)
-    const uint8x16_t load = vld1q_u8((const __m128i *)(key.c_str()));
+    const uint8x16_t load = vld1q_u8((key.c_str()));
     const uint8x16_t hash = vaeseq_u8(load, load);
     const uint64x2_t ret = vreinterpretq_u64_u8(hash);
     return vgetq_lane_u64(ret, 0) ^ vgetq_lane_u64(ret, 1);
@@ -914,7 +914,7 @@ std::size_t AesCPF::operator()(const std::string& key) const{
     const __m128i hash = _mm_aesenc_si128(load, load);
     return _mm_extract_epi64(hash , 0) ^ _mm_extract_epi64(hash, 1);
 #elif defined(ARM)
-    const uint8x16_t load = vld1q_u8(key[0],key[1],key[2],key[3],key[4],key[5],key[6],key[7],key[8],key[9],key[10],key[11],key[12],key[13],0,0);
+    const uint8x16_t load = vld1q_u8([key[0],key[1],key[2],key[3],key[4],key[5],key[6],key[7],key[8],key[9],key[10],key[11],key[12],key[13],0,0]);
     const uint8x16_t hash = vaeseq_u8(load, load);
     const uint64x2_t ret = vreinterpretq_u64_u8(hash);
     return vgetq_lane_u64(ret, 0) ^ vgetq_lane_u64(ret, 1);
@@ -927,7 +927,7 @@ std::size_t AesSSN::operator()(const std::string& key) const{
     const __m128i hash = _mm_aesenc_si128(load, load);
     return _mm_extract_epi64(hash , 0) ^ _mm_extract_epi64(hash, 1);
 #elif defined(ARM)
-    const uint8x16_t load = vld1q_u8(key[0],key[1],key[2],key[3],key[4],key[5],key[6],key[7],key[8],key[9],key[10],0,0,0,0,0);
+    const uint8x16_t load = vld1q_u8([key[0],key[1],key[2],key[3],key[4],key[5],key[6],key[7],key[8],key[9],key[10],0,0,0,0,0]);
     const uint8x16_t hash = vaeseq_u8(load, load);
     const uint64x2_t ret = vreinterpretq_u64_u8(hash);
     return vgetq_lane_u64(ret, 0) ^ vgetq_lane_u64(ret, 1);
@@ -940,7 +940,7 @@ std::size_t AesIPV4::operator()(const std::string& key) const{
     const __m128i hash = _mm_aesenc_si128(load, load);
     return _mm_extract_epi64(hash , 0) ^ _mm_extract_epi64(hash, 1);
 #elif defined(ARM)
-    const uint8x16_t load = vld1q_u8(key[0],key[1],key[2],key[3],key[4],key[5],key[6],key[7],key[8],key[9],key[10],key[11],key[12],key[13],key[14],0);
+    const uint8x16_t load = vld1q_u8([key[0],key[1],key[2],key[3],key[4],key[5],key[6],key[7],key[8],key[9],key[10],key[11],key[12],key[13],key[14],0]);
     const uint8x16_t hash = vaeseq_u8(load, load);
     const uint64x2_t ret = vreinterpretq_u64_u8(hash);
     return vgetq_lane_u64(ret, 0) ^ vgetq_lane_u64(ret, 1);
@@ -956,9 +956,9 @@ std::size_t AesIPV6::operator()(const std::string& key) const{
     __m128i tmp1 = _mm_aesenc_si128(hashable2, tmp0);
     return _mm_extract_epi64(tmp1, 0) ^ _mm_extract_epi64(tmp1 , 1);
 #elif defined(ARM)
-    const uint8x16_t hashable0 = vld1q_u8((const __m128i *)(key.c_str()+0));
-    const uint8x16_t hashable1 = vld1q_u8((const __m128i *)(key.c_str()+16));
-    const uint8x16_t hashable2 = vld1q_u8((const __m128i *)(key.c_str()+23));
+    const uint8x16_t hashable0 = vld1q_u8((key.c_str()+0));
+    const uint8x16_t hashable1 = vld1q_u8((key.c_str()+16));
+    const uint8x16_t hashable2 = vld1q_u8((key.c_str()+23));
     const uint8x16_t tmp0 = vaeseq_u8(hashable0, hashable1);
     const uint8x16_t tmp1 = vaeseq_u8(hashable2, tmp0);
     const uint64x2_t ret = vreinterpretq_u64_u8(tmp1);
@@ -983,13 +983,13 @@ std::size_t AesINTS::operator()(const std::string& key) const{
     __m128i tmp5 = _mm_aesenc_si128(tmp3, tmp4);
     return _mm_extract_epi64(tmp5, 0) ^ _mm_extract_epi64(tmp5 , 1);
 #elif defined(ARM)
-    const uint8x16_t hashable0 = vld1q_u8((const __m128i *)(key.c_str()+0));
-    const uint8x16_t hashable1 = vld1q_u8((const __m128i *)(key.c_str()+16));
-    const uint8x16_t hashable2 = vld1q_u8((const __m128i *)(key.c_str()+32));
-    const uint8x16_t hashable3 = vld1q_u8((const __m128i *)(key.c_str()+48));
-    const uint8x16_t hashable4 = vld1q_u8((const __m128i *)(key.c_str()+64));
-    const uint8x16_t hashable5 = vld1q_u8((const __m128i *)(key.c_str()+80));
-    const uint8x16_t hashable6 = vld1q_u8((const __m128i *)(key.c_str()+84));
+    const uint8x16_t hashable0 = vld1q_u8((key.c_str()+0));
+    const uint8x16_t hashable1 = vld1q_u8((key.c_str()+16));
+    const uint8x16_t hashable2 = vld1q_u8((key.c_str()+32));
+    const uint8x16_t hashable3 = vld1q_u8((key.c_str()+48));
+    const uint8x16_t hashable4 = vld1q_u8((key.c_str()+64));
+    const uint8x16_t hashable5 = vld1q_u8((key.c_str()+80));
+    const uint8x16_t hashable6 = vld1q_u8((key.c_str()+84));
     const uint8x16_t tmp0 = vaeseq_u8(hashable0, hashable1);
     const uint8x16_t tmp1 = vaeseq_u8(hashable2, hashable3);
     const uint8x16_t tmp2 = vaeseq_u8(hashable4, hashable5);
