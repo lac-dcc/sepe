@@ -28,7 +28,13 @@ CURRENT_DIR=$(pwd)
 mkdir -p "${ABSEIL_PATH}"
 git clone https://github.com/abseil/abseil-cpp.git
 cd abseil-cpp/ && mkdir build && cd build
-cmake -DABSL_BUILD_TESTING=ON -DABSL_USE_GOOGLETEST_HEAD=ON -DCMAKE_CXX_STANDARD=17 -DCMAKE_INSTALL_PREFIX="$ABSEIL_PATH" ..
-cmake --build . --target install -j$(nproc)
+cmake                                     \
+	-DBUILD_TESTING=OFF                   \
+	-DABSL_BUILD_TESTING=OFF              \
+	-DABSL_USE_GOOGLETEST_HEAD=OFF        \
+	-DCMAKE_CXX_STANDARD=17               \
+	-DCMAKE_INSTALL_PREFIX="$ABSEIL_PATH" \
+	..
+cmake --build . --target install -j"$(nproc)"
 cd "$CURRENT_DIR"
 rm -rf abseil-cpp
