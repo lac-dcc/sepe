@@ -104,19 +104,6 @@ struct IPV4HashMove{
 };
 
 /**
- * @brief Struct for CPFHashVectorizedMul.
- */
-struct CPFHashVectorizedMul{
-    /**
-     * @brief Function call operator that calculates the hash of a key.
-     * 
-     * @param key The fixed lenght std::string key to hash.
-     * @return The hash of the key.
-     */
-    std::size_t operator()(const std::string& key) const;
-};
-
-/**
  * @brief Struct for IntSimdHash.
  */
 struct IntSimdHash{

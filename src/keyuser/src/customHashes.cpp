@@ -161,26 +161,6 @@ std::size_t IPV4HashMove::operator()(const std::string& key) const {
     return ((std::size_t*)key.c_str())[0];
 }
 
-std::size_t CPFHashVectorizedMul::operator()(const std::string& key) const {
-    __m128i vector = _mm_lddqu_si128((const __m128i *)key.c_str());
-    const __m128i zeros = _mm_set1_epi8('0');
-    __m128i sub = _mm_sub_epi8(vector, zeros);
-
-    char* subptr = (char *)(&sub);
-    std::size_t hash_code = (std::size_t)subptr[0]
-        + (std::size_t)subptr[1] *  10
-        + (std::size_t)subptr[2] *  100
-        + (std::size_t)subptr[4] *  1000
-        + (std::size_t)subptr[5] *  10000
-        + (std::size_t)subptr[6] *  100000
-        + (std::size_t)subptr[8] *  1000000
-        + (std::size_t)subptr[9] *  10000000
-        + (std::size_t)subptr[10] * 100000000
-        + (std::size_t)subptr[12] * 1000000000
-        + (std::size_t)subptr[13] * 10000000000;
-    return hash_code;
-}
-
 std::size_t IntSimdHash::operator()(const std::string& key) const {
 #ifdef x86_64
     __m128i bits[7] = {
