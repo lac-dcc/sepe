@@ -843,6 +843,7 @@ std::size_t NaiveINTS::operator()(const std::string& key) const {
 
 std::size_t AesUrlComplex::operator()(const std::string& key) const{
 #ifdef x86_64
+    const __m128i mask = _mm_set_epi64x(0xFB6D468E93C391E2 , 0x9c06f0be6f44851b);
     const __m128i hashable0 = _mm_lddqu_si128((const __m128i *)(key.c_str()+23));
     const __m128i hashable1 = _mm_lddqu_si128((const __m128i *)(key.c_str()+58));
     const __m128i hashable2 = _mm_lddqu_si128((const __m128i *)(key.c_str()+67));
@@ -877,12 +878,15 @@ std::size_t AesUrl::operator()(const std::string& key) const{
 
 std::size_t AesMac::operator()(const std::string& key) const{
 #ifdef x86_64
+    const __m128i roundkey = _mm_set_epi64x(0xFB6D468E93C391E2 , 0x9c06f0be6f44851b);
     const __m128i load = _mm_lddqu_si128((const __m128i *)(key.c_str()));
-    const __m128i hash = _mm_aesenc_si128(load, load);
+    const __m128i hash = _mm_aesenc_si128(load, roundkey);
     return _mm_extract_epi64(hash , 0) ^ _mm_extract_epi64(hash, 1);
 #elif defined(ARM)
+    const uint64_t roundkey_arr[2] = { 0xFB6D468E93C391E2 , 0x9c06f0be6f44851b };
+    const uint8x16_t roundkey = vld1q_u8((const uint8_t *)roundkey_arr);
     const uint8x16_t load = vld1q_u8((const uint8_t *)(key.c_str()));
-    const uint8x16_t hash = vaeseq_u8(load, load);
+    const uint8x16_t hash = vaeseq_u8(load, roundkey);
     const uint64x2_t ret = vreinterpretq_u64_u8(hash);
     return vgetq_lane_u64(ret, 0) ^ vgetq_lane_u64(ret, 1);
 #endif
@@ -890,13 +894,16 @@ std::size_t AesMac::operator()(const std::string& key) const{
 
 std::size_t AesCPF::operator()(const std::string& key) const{
 #ifdef x86_64
+    const __m128i roundkey = _mm_set_epi64x(0xFB6D468E93C391E2 , 0x9c06f0be6f44851b);
     const __m128i load = _mm_set_epi8(key[0],key[1],key[2],key[3],key[4],key[5],key[6],key[7],key[8],key[9],key[10],key[11],key[12],key[13],0,0);
-    const __m128i hash = _mm_aesenc_si128(load, load);
+    const __m128i hash = _mm_aesenc_si128(load, roundkey);
     return _mm_extract_epi64(hash , 0) ^ _mm_extract_epi64(hash, 1);
 #elif defined(ARM)
-	const uint8_t arr[16] = { key[0],key[1],key[2],key[3],key[4],key[5],key[6],key[7],key[8],key[9],key[10],key[11],key[12],key[13],0,0 };
+    const uint64_t roundkey_arr[2] = { 0xFB6D468E93C391E2 , 0x9c06f0be6f44851b };
+    const uint8x16_t roundkey = vld1q_u8((const uint8_t *)roundkey_arr);
+    const uint8_t arr[16] = { key[0],key[1],key[2],key[3],key[4],key[5],key[6],key[7],key[8],key[9],key[10],key[11],key[12],key[13],0,0 };
     const uint8x16_t load = vld1q_u8(arr);
-    const uint8x16_t hash = vaeseq_u8(load, load);
+    const uint8x16_t hash = vaeseq_u8(load, roundkey);
     const uint64x2_t ret = vreinterpretq_u64_u8(hash);
     return vgetq_lane_u64(ret, 0) ^ vgetq_lane_u64(ret, 1);
 #endif
@@ -904,13 +911,16 @@ std::size_t AesCPF::operator()(const std::string& key) const{
 
 std::size_t AesSSN::operator()(const std::string& key) const{
 #ifdef x86_64
+    const __m128i roundkey = _mm_set_epi64x(0xFB6D468E93C391E2 , 0x9c06f0be6f44851b);
     const __m128i load = _mm_set_epi8(key[0],key[1],key[2],key[3],key[4],key[5],key[6],key[7],key[8],key[9],key[10],0,0,0,0,0);
-    const __m128i hash = _mm_aesenc_si128(load, load);
+    const __m128i hash = _mm_aesenc_si128(load, roundkey);
     return _mm_extract_epi64(hash , 0) ^ _mm_extract_epi64(hash, 1);
 #elif defined(ARM)
+    const uint64_t roundkey_arr[2] = { 0xFB6D468E93C391E2 , 0x9c06f0be6f44851b };
+    const uint8x16_t roundkey = vld1q_u8((const uint8_t *)roundkey_arr);
     const uint8_t arr[16] = { key[0],key[1],key[2],key[3],key[4],key[5],key[6],key[7],key[8],key[9],key[10],0,0,0,0,0 };
     const uint8x16_t load = vld1q_u8(arr);
-    const uint8x16_t hash = vaeseq_u8(load, load);
+    const uint8x16_t hash = vaeseq_u8(load, roundkey);
     const uint64x2_t ret = vreinterpretq_u64_u8(hash);
     return vgetq_lane_u64(ret, 0) ^ vgetq_lane_u64(ret, 1);
 #endif
@@ -918,13 +928,16 @@ std::size_t AesSSN::operator()(const std::string& key) const{
 
 std::size_t AesIPV4::operator()(const std::string& key) const{
 #ifdef x86_64
+    const __m128i roundkey = _mm_set_epi64x(0xFB6D468E93C391E2 , 0x9c06f0be6f44851b);
     const __m128i load = _mm_set_epi8(key[0],key[1],key[2],key[3],key[4],key[5],key[6],key[7],key[8],key[9],key[10],key[11],key[12],key[13],key[14],0);
-    const __m128i hash = _mm_aesenc_si128(load, load);
+    const __m128i hash = _mm_aesenc_si128(load, roundkey);
     return _mm_extract_epi64(hash , 0) ^ _mm_extract_epi64(hash, 1);
 #elif defined(ARM)
+    const uint64_t roundkey_arr[2] = { 0xFB6D468E93C391E2 , 0x9c06f0be6f44851b };
+    const uint8x16_t roundkey = vld1q_u8((const uint8_t *)roundkey_arr);
     const uint8_t arr[16] = { key[0],key[1],key[2],key[3],key[4],key[5],key[6],key[7],key[8],key[9],key[10],key[11],key[12],key[13],key[14],0 };
     const uint8x16_t load = vld1q_u8(arr);
-    const uint8x16_t hash = vaeseq_u8(load, load);
+    const uint8x16_t hash = vaeseq_u8(load, roundkey);
     const uint64x2_t ret = vreinterpretq_u64_u8(hash);
     return vgetq_lane_u64(ret, 0) ^ vgetq_lane_u64(ret, 1);
 #endif

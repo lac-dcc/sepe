@@ -557,6 +557,8 @@ std::string synthetizeAesHashFuncLe16bytes(size_t keySize) {
 	keySize = keySize > 16 ? 16 : keySize;
 
     std::string synthesizedHashFunc = "struct synthesizeAesHash {\n\tstd::size_t operator()(const std::string& key) const {\n";
+	synthesizedHashFunc += "\t\t// chosen by a fair roll of the dice\n";
+	synthesizedHashFunc += "\t\tconst __m128i roundkey = _mm_set_epi64x(0xFB6D468E93C391E2 , 0x9c06f0be6f44851b);\n";
 
 	if (keySize == 16) {
 		// if we have exactly 16 bytes, just load them all at once
@@ -572,7 +574,7 @@ std::string synthetizeAesHashFuncLe16bytes(size_t keySize) {
 		synthesizedHashFunc += "\t\tconst __m128i load = _mm_set_epi8(" + setStr + ");\n";
 	}
 
-    synthesizedHashFunc += "\t\tconst __m128i hash = _mm_aesenc_si128(load, load);\n";
+    synthesizedHashFunc += "\t\tconst __m128i hash = _mm_aesenc_si128(load, roundkey);\n";
     synthesizedHashFunc += "\t\treturn _mm_extract_epi64(hash , 0) ^ _mm_extract_epi64(hash, 1); \n";
     synthesizedHashFunc += "\t}\n};\n";
     synthesizedHashFunc = "#include <immintrin.h>\n#include <wmmintrin.h>\n" + synthesizedHashFunc;
