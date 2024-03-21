@@ -104,6 +104,10 @@ class Benchmark{
          */
         virtual int calculateCollisionCountBuckets(void) = 0;
 
+
+
+        virtual void clearBench(void) = 0;
+
         /**
          * @brief Get the hash function used by the container. Must be implemented by derived classes.
          * 
@@ -169,6 +173,11 @@ class UnorderedMapBench : public Benchmark{
          */
         int calculateCollisionCountBuckets(void) override {
             return internalcalculateCollisionCountBuckets(map);
+        }
+
+
+        void clearBench(void) override{
+            map.clear();
         }
 
         /**
@@ -239,6 +248,10 @@ class UnorderedMultiMapBench : public Benchmark{
             return internalcalculateCollisionCountBuckets(mmap);
         }
 
+        void clearBench(void) override{
+            mmap.clear();
+        }
+        
         /**
          * @brief Get the hash function used by the unordered multimap.
          * 
@@ -307,6 +320,10 @@ class UnorderedSetBench : public Benchmark{
             return internalcalculateCollisionCountBuckets(set);
         }
 
+        void clearBench(void) override{
+            set.clear();
+        }
+
         /**
          * @brief Get the hash function used by the unordered set.
          * 
@@ -373,6 +390,10 @@ class UnorderedMultisetBench : public Benchmark{
          */
         int calculateCollisionCountBuckets(void) override {
             return internalcalculateCollisionCountBuckets(mset);
+        }
+
+        void clearBench(void) override{
+            mset.clear();
         }
 
         /**

@@ -93,6 +93,7 @@ def handle_distribution_analysis(args):
         result['Hash Function'] = [re.sub(r'Gperf.*', 'Gperf', x) for x in result['Hash Function']]
         result['Hash Function'] = [re.sub(r'Gpt.*', 'Gpt', x) for x in result['Hash Function']]
         result['Hash Function'] = [re.sub(r'STDHashSrc.*', 'STL', x) for x in result['Hash Function']]
+        result['Hash Function'] = [re.sub(r'Aes.*', 'Aes', x) for x in result['Hash Function']]
 
         if result_array is None:
             result_array = result
@@ -152,25 +153,59 @@ def mannwhitneyu_from_dataframe(args, regex_name, df, column_to_group, column_to
     print("See all results in: ", output_path)
     result.to_csv(output_path, index=False)
 
-def box_plot_dataframe(args, df, regex_name):
-    pass
-    # grouped = df.groupby(['Execution Mode', 'Num Operations', 'Num Keys', 'Insertions (%)', 'Searches (%)', 'Eliminatons(%)'])
 
+def containers_boxplot(args, df):
+
+    # grouped = df.groupby(['Execution Mode', 'Num Operations', 'Num Keys', 'Insertions (%)', 'Searches (%)', 'Eliminatons(%)', 'Hash Container'])
     # # Extract the groups from the DataFrame
     # groups = {}
     # groups = [group for group in grouped.groups]
 
+    # all_data = {}
+
     # for group in groups:
         
-    # ax = df[['Execution Time (s)']].boxplot(by='Hash Function', rot=45, showmeans=True)
-    # ax.set_ylabel('Execution Time (s)')
-    # ax.set_xlabel('')
-    # ax.set_title('global')
-    # plt.suptitle('')
-    # plt.tight_layout()
-    # plt.savefig(args.output_destination+'global.svg')
+    #     temp = grouped.get_group(group)[['Execution Time (s)', 'Collision Count']]
 
-    # print("Boxplots saved in: ", args.output_destination)
+    #     hash_func_name = group[-1]
+
+    #     if hash_func_name not in all_data:
+    #         all_data[hash_func_name] = [(temp['Execution Time (s)'].mean(), temp['Collision Count'].mean())]
+    #     else:
+    #         all_data[hash_func_name].append((temp['Execution Time (s)'].mean(), temp['Collision Count'].mean()))
+
+    # # Geometric mean of all_data
+    # result = pd.DataFrame()
+
+    # for data in all_data:
+    #     samples_geotime = 1.0
+    #     samples_collision = 1.0
+    #     for sample in all_data[data]:
+    #         samples_geotime *= sample[0]
+    #         if sample[1] != 0:
+    #             samples_collision *= sample[1]
+    #     samples_geotime = samples_geotime ** (1/len(all_data[data]))
+    #     samples_collision = samples_collision ** (1/len(all_data[data]))
+    #     result = pd.concat([result, pd.DataFrame({"Func Name": [data], "GeoTime": [samples_geotime], "GeoCollision": [samples_collision]})], ignore_index=True)
+
+    # print("Below DataFrame from Regex: ", regex_name)
+    # print(result)
+    # output_path = args.output_destination + regex_name + "_geomean.csv"
+    # print("See all results in: ", output_path)
+    # result.to_csv(output_path, index=False)
+
+    plt.rcParams['font.size'] = 14
+    df.boxplot(column='Execution Time (s)', by='Hash Container', rot=45, showmeans=True, showfliers=False)
+    plt.ylabel('Execution Time (s)')
+    plt.xlabel('')
+    plt.xticks([1, 2, 3, 4], ["U_Map", "UM_Map", "UM_Set", "U_Set"])
+    plt.title('')   
+    plt.suptitle('')
+    plt.tight_layout()
+    plt.savefig(args.output_destination+'containers.pdf')
+
+    print("Container Boxplots saved in: ", args.output_destination+'containers.pdf')
+
 
 def performance_from_dataframe(args, df, regex_name):
     grouped = df.groupby(['Execution Mode', 'Num Operations', 'Num Keys', 'Insertions (%)', 'Searches (%)', 'Eliminatons(%)', 'Hash Function'])
@@ -183,6 +218,7 @@ def performance_from_dataframe(args, df, regex_name):
 
     for group in groups:
         temp = grouped.get_group(group)[['Execution Time (s)', 'Collision Count']]
+        
         hash_func_name = group[-1]
 
         if hash_func_name not in all_data:
@@ -236,18 +272,31 @@ def handle_performance_analysis(args):
     df['Hash Function'] = [re.sub(r'Gperf.*', 'Gperf', x) for x in df['Hash Function']]
     df['Hash Function'] = [re.sub(r'Gpt.*', 'Gpt', x) for x in df['Hash Function']]
     df['Hash Function'] = [re.sub(r'STDHashSrc.*', 'STL', x) for x in df['Hash Function']]
+    df['Hash Function'] = [re.sub(r'Aes.*', 'Aes', x) for x in df['Hash Function']]
 
-    performance_from_dataframe(args, df, regex_name)
+    if args.hash_performance:
+        # Iterate Hash Functions in the dataframe
+        grouped = df.groupby(['Hash Function'])
+        for hashFunc in grouped.groups:
+            mean = grouped.get_group(hashFunc)['Elapsed Time (seconds)'].mean()
+            mean = mean * 1000
+            print(f"{hashFunc},{mean:.4f}")
+        return
 
     # Calculate the Mann-Whitney U test
     mannwhitneyu_from_dataframe(args, regex_name, df, 'Hash Function', 'Execution Time (s)')
     mannwhitneyu_from_dataframe(args, regex_name, df, 'Hash Function', 'Collision Count')
 
+    if args.rq6:
+        containers_boxplot(args, df)
+
+    performance_from_dataframe(args, df, regex_name)
+
     plt.rcParams['font.size'] = 14
     df.boxplot(column='Collision Count', by='Hash Function', rot=45, showmeans=True, showfliers=False)
     plt.ylabel('Collision Count')
     plt.xlabel('')
-    plt.title('')
+    plt.title('')   
     plt.suptitle('')
     plt.tight_layout()
     plt.savefig(args.output_destination+'global_collision_count.pdf')
@@ -267,10 +316,12 @@ def main():
     parser = argparse.ArgumentParser(description="Keyuser Interpreter")
     parser.add_argument("-d", "--distribution", nargs='*', type=str, default="", help="Name of the distribution files to interpret. Exclusive with -p option.")
     parser.add_argument("-p", "--performance", nargs='*', type=str, default="", help="Name of the csv performance files to interpret. Exclusive with -d option.")
+    parser.add_argument("-hp", "--hash-performance", action='store_true', help="Name of the csv performance files to interpret.")
+    parser.add_argument("-rq6", action='store_true', help="Group performance by data structure.")
     parser.add_argument("-pg", "--plot-graph", action='store_true', help="Option to plot the results in graphs.")
     parser.add_argument("-od", "--output-destination", type=str, default="results/", help="Output path to output graphs. Default is current file.")
     parser.add_argument("-fp", "--full-print", action='store_true', help="Print the entire dataframe.")
-    parser.add_argument("-hf", "--hash-functions", nargs='*', type=str, help="Name of the hash functions to analyize.")
+    parser.add_argument("-hf", "--hash-functions", nargs='*', type=str, help="Name of the hash functions to analyze.")
 
     args = parser.parse_args()
 

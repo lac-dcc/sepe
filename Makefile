@@ -47,4 +47,7 @@ clean:
 	make -C src/keybuilder      clean
 	rm -rfv bin output *.csv
 
+results-clear:
+	make -C results/ clear
+
 .PHONY: all clean

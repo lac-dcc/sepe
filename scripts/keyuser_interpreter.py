@@ -61,9 +61,7 @@ def handle_distribution_analysis(args):
     
     for key, value in arrays.distributions.items():
         key = key.replace("array_", "")
-        # if key not in args.hash_functions:
-        #     print("Skipping", key)
-        #     continue
+
         if args.plot_graph:
             ax.hist(value, label=key, alpha=0.5)
 
@@ -114,7 +112,7 @@ def mannwhitneyu_from_dataframe(args, regex_name, df, column_to_group, column_to
 
     print("Below DataFrame from Regex: ", regex_name)
     print(result)
-    output_path = args.output_destination + regex_name + "_mannwhitneyu.csv"
+    output_path = args.output_destination + regex_name + "_" + column_to_compare + "_mannwhitneyu.csv"
     print("See all results in: ", output_path)
     result.to_csv(output_path, index=False)
 
@@ -126,6 +124,8 @@ def box_plot_dataframe(args, df, regex_name):
     groups = [group for group in grouped.groups]
 
     for group in groups:
+        temp = grouped.get_group(group)[['Execution Time (s)', 'Hash Function']]
+
         ax = grouped.get_group(group)[['Execution Time (s)', 'Hash Function']].boxplot(by='Hash Function', rot=45, showmeans=True)
         ax.set_ylabel('Execution Time (s)')
         ax.set_xlabel('')
