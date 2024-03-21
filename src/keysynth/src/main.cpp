@@ -67,9 +67,9 @@ struct Range{
         zeroes = ~zeroes;
         mask = zeroes | ones;
         mask = ~mask;
-        if(mask == 0){
-            mask = 0x7F; // Default
-        }
+        //if(mask == 0){
+        //    mask = 0x7F; // Default
+        //}
     }
 
     void print(){
