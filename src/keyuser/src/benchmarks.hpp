@@ -104,9 +104,10 @@ class Benchmark{
          */
         virtual int calculateCollisionCountBuckets(void) = 0;
 
-
-
-        virtual void clearBench(void) = 0;
+        /**
+         * @brief Clear the container benchmark between executions. Must be implemented by derived classes.
+         */
+        virtual void clearContainer(void) = 0;
 
         /**
          * @brief Get the hash function used by the container. Must be implemented by derived classes.
@@ -175,8 +176,10 @@ class UnorderedMapBench : public Benchmark{
             return internalcalculateCollisionCountBuckets(map);
         }
 
-
-        void clearBench(void) override{
+        /**
+         * @brief Clear the container benchmark between executions.
+         */
+        void clearContainer(void) override{
             map.clear();
         }
 
@@ -248,7 +251,10 @@ class UnorderedMultiMapBench : public Benchmark{
             return internalcalculateCollisionCountBuckets(mmap);
         }
 
-        void clearBench(void) override{
+        /**
+         * @brief Clear the container benchmark between executions.
+         */
+        void clearContainer(void) override{
             mmap.clear();
         }
         
@@ -320,7 +326,10 @@ class UnorderedSetBench : public Benchmark{
             return internalcalculateCollisionCountBuckets(set);
         }
 
-        void clearBench(void) override{
+        /**
+         * @brief Clear the container benchmark between executions.
+         */
+        void clearContainer(void) override{
             set.clear();
         }
 
@@ -391,8 +400,11 @@ class UnorderedMultisetBench : public Benchmark{
         int calculateCollisionCountBuckets(void) override {
             return internalcalculateCollisionCountBuckets(mset);
         }
-
-        void clearBench(void) override{
+        
+        /**
+         * @brief Clear the container benchmark between executions.
+         */
+        void clearContainer(void) override{
             mset.clear();
         }
 

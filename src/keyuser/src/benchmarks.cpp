@@ -173,14 +173,14 @@ void benchmarkExecutor(const std::vector<Benchmark*>& benchmarks,
             auto end = std::chrono::system_clock::now();
             std::chrono::duration<double> elapsed_seconds = end-start;
 
-            bench->clearBench();
-
             reportMetricsCSV("Interweaved",
                              argsString,
                              bench->getContainerName().c_str(),
                              bench->getHashName().c_str(),
                              elapsed_seconds.count(),
                              bench->calculateCollisionCountBuckets());
+
+            bench->clearContainer();
 
         }
     }
@@ -193,8 +193,6 @@ void benchmarkExecutor(const std::vector<Benchmark*>& benchmarks,
             executeBatched(bench, keys, args);
             auto end = std::chrono::system_clock::now();
             std::chrono::duration<double> elapsed_seconds = end-start;
-            
-            bench->clearBench();
 
             reportMetricsCSV("Batched",
                              argsString,
@@ -202,6 +200,8 @@ void benchmarkExecutor(const std::vector<Benchmark*>& benchmarks,
                              bench->getHashName().c_str(),
                              elapsed_seconds.count(),
                              bench->calculateCollisionCountBuckets());
+
+            bench->clearContainer();
 
         }
     }
