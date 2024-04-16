@@ -23,8 +23,6 @@ Rust is only necessary if you want to run the experiments. If you are only inter
 
 You can follow these two steps to use optimized hash functions generated from this project:
 
-(**Obs: keys must have a fixed lenght.**)
-
 1. Obtain your synthesized hash function in one of the two ways: 
    1. Using a set of [key examples](#synthesizing-from-key-examples).
    2. Using the [regular expression of the keys](#synthesizing-from-regular-expression).
@@ -145,7 +143,7 @@ For more options, see [sepe-runner](#sepe-runner) section:
 
 `keygen` generates (standard output) n random keys from Regex. 
 
-Not all valid regexes are accepted since we only synthesize hash functions for fixed-length keys. Specifically, we did not implement the `OR` (`|`), `Kleene Star` (`*`),  `Plus` (`+`), and `DOT` (`.`)  operators.
+Not all valid regexes are accepted since we did not implement the `OR` (`|`), `Kleene Star` (`*`),  `Plus` (`+`), and `DOT` (`.`)  operators.
 
 ```sh
 ./bin/keygen REGEX [number_of_elements] [seed]
@@ -189,7 +187,7 @@ For more options, do:
 
 ### keybuilder
 
-`keybuilder` creates a regex from a series of *fixed-sized* strings passed through standard input, separated by a new line.
+`keybuilder` creates a regex from a series of strings passed through standard input, separated by a new line.
 
 ```sh
 ./bin/keybuilder < txt-file-with-strings
