@@ -11,7 +11,15 @@
  * @param hashname The name of the hash function used in the benchmark.
  * @return A pointer to the new benchmark object.
  */
-#define DECLARE_ONE_BENCH(name, hashname) (Benchmark*)new name<hashname>(#name,#hashname)
+
+template <typename HashFunc>
+struct HashWrapper{
+    std::size_t operator()(const std::string& key) const{
+        return HashFunc()(key) >> UPPER_SHIFT;
+    }
+};
+
+#define DECLARE_ONE_BENCH(name, hashname) (Benchmark*)new name<HashWrapper<hashname>>(#name,#hashname)
 
 /**
  * @def REGISTER_BENCHMARKS(hashname)

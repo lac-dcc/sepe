@@ -166,7 +166,6 @@ void benchmarkExecutor(const std::vector<Benchmark*>& benchmarks,
     // Execution modes are hard coded since we do not expect to add new ones or modify existing ones
     for(int r=0; r < args.repetitions; ++r){
         for (const auto& bench : benchmarks){
-
             // Execute benchmark
             auto start = std::chrono::system_clock::now();
             executeInterweaved(bench, keys, args);
@@ -187,7 +186,6 @@ void benchmarkExecutor(const std::vector<Benchmark*>& benchmarks,
 
     for(int r=0; r < args.repetitions; ++r){
         for (const auto& bench : benchmarks){
-
             // Execute benchmark
             auto start = std::chrono::system_clock::now();
             executeBatched(bench, keys, args);

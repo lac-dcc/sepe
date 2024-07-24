@@ -11,12 +11,13 @@ bin/keygen: $(shell find src/keygen/src/ -type f)
 	cd src/keygen && cargo build --release
 	cp src/keygen/target/release/keygen $@
 
+# Example: make keyuser UPPER_SHIFT=32
 bin/keyuser: $(shell find src/keyuser/src/ -type f) src/keyuser/Makefile
-	make -C src/keyuser keyuser
+	make -C src/keyuser keyuser UPPER_SHIFT=$(UPPER_SHIFT)
 	cp src/keyuser/keyuser $@
 
 bin/keyuser-debug: $(shell find src/keyuser/src/ -type f) src/keyuser/Makefile
-	make -C src/keyuser keyuser-debug
+	make -C src/keyuser keyuser-debug UPPER_SHIFT=$(UPPER_SHIFT)
 	cp src/keyuser/keyuser-debug $@
 
 bin/keybuilder: $(shell find src/keybuilder/src/ -type f) src/keybuilder/Makefile

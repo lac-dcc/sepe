@@ -28,6 +28,11 @@ ifeq ($(PLATFORM),aarch64)
 	INTRINSICS=-march=armv8-a+crypto
 endif
 
+ifdef UPPER_SHIFT
+    CXXFLAGS += -DUPPER_SHIFT=$(UPPER_SHIFT)
+    CFLAGS += -DUPPER_SHIFT=$(UPPER_SHIFT)
+endif
+
 # Compilation variables
 CXXFLAGS += -std=c++20 
 COMMON_FLAGS  := -Wall -Wextra -pedantic -I$(ABSL_INC) -L$(ABSL_LIB) -Igperf_hashes/

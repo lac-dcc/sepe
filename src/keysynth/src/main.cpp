@@ -627,12 +627,12 @@ int main(int argc, char** argv){
     printf("// Helper function, include in your codebase:\n");
     printf("%s\n", load_u64_le.c_str());
 
-    printf("// Pext Hash Function:\n");
+    printf("// (Recommended) Pext Hash Function:\n");
     printf("%s\n", synthetizePextHashFunc(ranges, offset).c_str());
     printf("// OffXor Hash Function:\n");
     printf("%s\n", synthetizeOffXorHashFunc(ranges, offset).c_str());
     if(regexSize > 16){
-        printf("// (Recommended) Aes Hash Function:\n");
+        printf("// Aes Hash Function:\n");
         printf("%s", synthetizeAesHashFunc(ranges, offset).c_str());
     } else {
         printf("%s", synthetizeAesHashFuncLe16bytes(keySize).c_str());
