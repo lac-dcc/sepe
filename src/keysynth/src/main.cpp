@@ -38,14 +38,12 @@ struct Range{
     int offset; ///< The offset of the range.
     size_t repetition; ///< The repetition count of the range.
     char mask; ///< The mask associated with the range. Only useful for PEXT.
-    float entropy; ///< The associated entropy of the range.
 
-    Range(char _start, char _end, int _offset, size_t _repetition, float _entropy) :
+    Range(char _start, char _end, int _offset, size_t _repetition) :
         start(_start),
         end(_end),
         offset(_offset),
-        repetition(_repetition),
-        entropy(_entropy)
+        repetition(_repetition)
     {
 
         /**
@@ -228,7 +226,7 @@ static std::vector<size_t> calculateOffsets(std::vector<Range>& ranges, int regS
  * @return std::pair<std::vector<Range>,size_t> A pair containing the vector of Range objects and the final offset.
  */
 static std::pair<std::vector<Range>,size_t>
-calculateRanges(std::string& regex, std::vector<float>& charEntropy){
+calculateRanges(std::string& regex){
     std::vector<Range> ranges;
     size_t offset = 0;
     for(size_t i = 0; i < regex.size(); i++){
@@ -236,12 +234,12 @@ calculateRanges(std::string& regex, std::vector<float>& charEntropy){
             if(regex[i+5] == '{'){
                 size_t closeBracketPos = regex.find('}', i+6);
                 size_t repetition = std::stoi(regex.substr(i+6, closeBracketPos));
-                ranges.push_back(Range(regex[i+1],regex[i+3],offset,repetition,charEntropy[i+1]));
+                ranges.push_back(Range(regex[i+1],regex[i+3],offset,repetition));
                 offset += repetition;
                 i = closeBracketPos;
             } else {
                 offset++;
-                ranges.push_back(Range(regex[i+1],regex[i+3],offset,1,charEntropy[i+1]));
+                ranges.push_back(Range(regex[i+1],regex[i+3],offset,1));
                 i += 4;
             }
         } else if(regex[i] == '\\') {
@@ -596,26 +594,13 @@ std::string synthetizeAesHashFuncLe16bytes(size_t keySize) {
 int main(int argc, char** argv){
 
     std::string regexStr = std::string(argv[1]);
-    std::vector<float> charEntropy;
-    for(int i = 2; i < argc; i++){
-        charEntropy.push_back(std::stof(argv[i]));
-    }
 
     // Create ranges
     size_t offset;
     std::vector<Range> ranges;
-    std::pair<std::vector<Range>,size_t> res = calculateRanges(regexStr,charEntropy);
+    std::pair<std::vector<Range>,size_t> res = calculateRanges(regexStr);
     ranges = res.first;
     offset = res.second;
-
-    size_t keySize = offset;
-
-    float maxEntropy = *std::max_element(charEntropy.begin(), charEntropy.end());
-    float entropyThreshold = maxEntropy / 2.0;
-    // Remove all ranges that have lower than entropyThreshold entropy
-    ranges.erase(std::remove_if(ranges.begin(), ranges.end(), [entropyThreshold](const Range& range) {
-        return range.entropy < entropyThreshold;
-    }), ranges.end());
 
     size_t regexSize = 0;
     for(const auto& range : ranges){
@@ -627,15 +612,15 @@ int main(int argc, char** argv){
     printf("// Helper function, include in your codebase:\n");
     printf("%s\n", load_u64_le.c_str());
 
-    printf("// Pext Hash Function:\n");
+    printf("// (Recommended) Pext Hash Function:\n");
     printf("%s\n", synthetizePextHashFunc(ranges, offset).c_str());
     printf("// OffXor Hash Function:\n");
     printf("%s\n", synthetizeOffXorHashFunc(ranges, offset).c_str());
     if(regexSize > 16){
-        printf("// (Recommended) Aes Hash Function:\n");
+        printf("// Aes Hash Function:\n");
         printf("%s", synthetizeAesHashFunc(ranges, offset).c_str());
     } else {
-        printf("%s", synthetizeAesHashFuncLe16bytes(keySize).c_str());
+        printf("%s", synthetizeAesHashFuncLe16bytes(offset).c_str());
 
 	}
 
