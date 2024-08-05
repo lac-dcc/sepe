@@ -374,6 +374,151 @@ unrollMasks_calculateShift(std::string& mask, size_t lastMaskShift){
     return std::make_pair(shifts, masksStr);
 }
 
+std::string skipTable_synthetizePextHashFunc(std::vector<Range>& ranges, size_t offset){
+
+    std::vector<Range> localRanges = ranges;
+
+    std::string synthesizedHashFunc = "struct skipTable_synthetizedPextHashFunc {\n\tstd::size_t operator()(const std::string& key) const {\n";
+
+    std::string mask = "";
+    int currOffset = localRanges.front().offset;
+
+    for(int i = 0 ; i < localRanges.front().offset; i++ ){
+        mask = "00" + mask;
+    }
+
+    // Calculate the mask for the entire key
+    for(size_t rangeIdx = 0; rangeIdx < localRanges.size(); rangeIdx++){
+        Range range = localRanges[rangeIdx];
+        for(size_t i = 0; i < range.repetition; i++) {
+            mask += intToHex(range.mask);
+        }
+
+        // Next, lets prepare to advance to the next range
+        currOffset += range.repetition;
+
+        // Fill non-continuous localRanges with necessary zeroes in-between
+        if((rangeIdx+1) < localRanges.size()
+                && !nextIsContinuous(localRanges, rangeIdx))
+        {
+            int numZeroes = localRanges[rangeIdx+1].offset - currOffset;
+            for(int i = 0; i < numZeroes; i++){
+                mask += "00";
+            }
+            currOffset += numZeroes;
+        }
+
+    }
+
+    // Add zeroes to fill 8 bytes
+        // (number 16 because we are using Hex numbers, so two hex = 1 byte)
+    int numZeroes = mask.size() % 16;
+    if(numZeroes > 0){
+        for(int i = 0; i < (16-numZeroes); i++){
+            mask += "0";
+        }
+    }
+
+    // Avoid out of bounds memory access on the last mask/offset
+    size_t outOfBoundsBytes = 0;
+    size_t finalPos = localRanges.back().offset + localRanges.back().repetition;
+    if (finalPos >= offset){
+        outOfBoundsBytes = mask.size() / 2 - offset;
+    }
+
+
+    for(size_t rangeIdx = 0; rangeIdx < localRanges.size(); rangeIdx++){
+        Range range = localRanges[rangeIdx];
+        if(range.offset % 8 != 0){
+            range.offset = range.offset - (range.offset % 8);
+            range.repetition = range.repetition + (range.offset % 8);
+        }
+        localRanges[rangeIdx] = range;
+    }
+
+    std::vector<size_t> offsets;
+
+    // Unroll Mask and calculate shifts
+    int maskID = 0;
+    currOffset = 0;
+    std::vector<int> shifts;
+    std::string masksStr;
+    for(size_t i = 0; i < mask.size(); i+=16){
+        std::string currMask = mask.substr(i,16);
+
+        // Ignore full 0 masks
+        if(currMask.compare("0000000000000000") == 0){
+            currOffset += 8;
+            continue;
+        }
+
+        // Swap to little-endian
+        std::swap(currMask[0], currMask[14]);
+        std::swap(currMask[1], currMask[15]);
+        std::swap(currMask[2], currMask[12]);
+        std::swap(currMask[3], currMask[13]);
+        std::swap(currMask[4], currMask[10]);
+        std::swap(currMask[5], currMask[11]);
+        std::swap(currMask[6], currMask[8]);
+        std::swap(currMask[7], currMask[9]);
+
+        // Fix last mask to avoid out of bounds memory access
+        if(i + 16 >= mask.size()){
+
+            for( size_t j = 0; j < outOfBoundsBytes; j++ ) {
+                currMask = currMask + "00";
+            }
+
+            currMask = currMask.substr(outOfBoundsBytes*2,currMask.size());
+        }
+
+        long maskInt = std::stold("0x" + currMask);
+        shifts.push_back(countZeros(maskInt));
+
+        masksStr += "\t\tconstexpr std::size_t mask" +
+                    std::to_string(maskID) +
+                    " = 0x" +
+                    currMask +
+                    ";\n";
+        offsets.push_back(currOffset);
+        currOffset += 8;
+        maskID++;
+    }
+
+    offsets.back() -= outOfBoundsBytes;
+
+    synthesizedHashFunc += masksStr;
+
+    // Create hashables
+    int hashableID = 0;
+    for(const auto& off : offsets){
+        synthesizedHashFunc += hashablePext(hashableID++, off);
+    }
+
+    // Create hashable variables and left shift them as much as possible for better collision
+    for (int i = 0; i < hashableID; ++i) {
+        if (i % 2 == 0) {
+            synthesizedHashFunc += "\t\tsize_t shift" + std::to_string(i) + " = " + "hashable" + std::to_string(i) + ";\n";
+        } else {
+            synthesizedHashFunc += "\t\tsize_t shift" + std::to_string(i) + " = " + "hashable" + std::to_string(i) + " << " + std::to_string(shifts[i]) + ";\n";
+        }
+    }
+
+    // Create queue of "XORable" variables
+    std::queue<std::string> queue;
+    for (int i = 0; i < hashableID; ++i) {
+        queue.push("shift" + std::to_string(i));
+    }
+
+    // Cascade XOR variables
+    synthesizedHashFunc += cascadeXorVars(queue);
+
+    synthesizedHashFunc += "\t\treturn " + queue.front() + "; \n";
+    synthesizedHashFunc += "\t}\n};\n";
+
+    return synthesizedHashFunc;
+}
+
 /**
  * @brief Synthesize a PEXT hash function.
  *
@@ -409,7 +554,6 @@ std::string synthetizePextHashFunc(std::vector<Range>& ranges, size_t offset){
         }
         mask = s + mask;
     }
-
 
     // Add zeroes to fill 8 bytes
         // (number 16 because we are using Hex numbers, so two hex = 1 byte)
@@ -612,8 +756,12 @@ int main(int argc, char** argv){
     printf("// Helper function, include in your codebase:\n");
     printf("%s\n", load_u64_le.c_str());
 
-    printf("// (Recommended) Pext Hash Function:\n");
+    printf("// (Recommended) 'NO SKIP TABLE' Pext Hash Function:\n");
     printf("%s\n", synthetizePextHashFunc(ranges, offset).c_str());
+
+    printf("//  Pext Hash Function:\n");
+    printf("%s\n", skipTable_synthetizePextHashFunc(ranges, offset).c_str());
+
     printf("// OffXor Hash Function:\n");
     printf("%s\n", synthetizeOffXorHashFunc(ranges, offset).c_str());
     if(regexSize > 16){
