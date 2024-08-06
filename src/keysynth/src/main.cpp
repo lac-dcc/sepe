@@ -374,6 +374,16 @@ unrollMasks_calculateShift(std::string& mask, size_t lastMaskShift){
     return std::make_pair(shifts, masksStr);
 }
 
+/**
+ * @brief Synthesize a PEXT hash function using Skip Tables: which guarantees memory aligned loads but may generate extra instructions.
+ *
+ * This function synthesizes a PEXT hash function. It does this by taking a vector of Range objects and an offset as input.
+ * The general idea of the implementation is to compress the input key into relevant bytes and only hashing them.
+ *
+ * @param ranges The vector of Range objects.
+ * @param offset Total key size to use as a base in offset calculation
+ * @return std::string The synthesized PEXT hash function as a string.
+ */
 std::string skipTable_synthetizePextHashFunc(std::vector<Range>& ranges, size_t offset){
 
     std::vector<Range> localRanges = ranges;
@@ -425,7 +435,6 @@ std::string skipTable_synthetizePextHashFunc(std::vector<Range>& ranges, size_t 
     if (finalPos >= offset){
         outOfBoundsBytes = mask.size() / 2 - offset;
     }
-
 
     for(size_t rangeIdx = 0; rangeIdx < localRanges.size(); rangeIdx++){
         Range range = localRanges[rangeIdx];
@@ -526,7 +535,7 @@ std::string skipTable_synthetizePextHashFunc(std::vector<Range>& ranges, size_t 
  * The general idea of the implementation is to compress the input key into relevant bytes and only hashing them.
  *
  * @param ranges The vector of Range objects.
- * @param offset The offset.
+ * @param offset Total key size to use as a base in offset calculation
  * @return std::string The synthesized PEXT hash function as a string.
  */
 std::string synthetizePextHashFunc(std::vector<Range>& ranges, size_t offset){
@@ -606,7 +615,7 @@ std::string synthetizePextHashFunc(std::vector<Range>& ranges, size_t offset){
  * This is a naive implementation that just XORs bytes at the given offsets.
  *
  * @param ranges The vector of Range objects.
- * @param offset The offset.
+ * @param offset Total key size to use as a base in offset calculation
  * @return std::string The synthesized Offset XOR hash function as a string.
  */
 std::string synthetizeOffXorHashFunc(std::vector<Range>& ranges, size_t offset){
@@ -649,7 +658,7 @@ std::string synthetizeOffXorHashFunc(std::vector<Range>& ranges, size_t offset){
  * This is an implementation that keeps reducing the number of available bytes by repeatedly calling Aes instructions
  *
  * @param ranges The vector of Range objects.
- * @param offset The offset.
+ * @param offset Total key size to use as a base in offset calculation
  * @return std::string The synthesized Offset XOR SIMD hash function as a string.
  */
 std::string synthetizeAesHashFunc(std::vector<Range>& ranges, size_t offset) {
