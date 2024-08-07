@@ -126,13 +126,14 @@ static void reportMetricsCSV(
                                  const float execTime,
                                  const int collisions)
 {
-    printf( "%s,%s,%s,%s,%f,%d\n",
+    printf( "%s,%s,%s,%s,%f,%d,%d\n",
             execMode,
             argsString,
             containerName,
             hashFuncName,
             execTime,
-            collisions);
+            collisions,
+            UPPER_SHIFT);
 }
 
 void benchmarkExecutor(const std::vector<Benchmark*>& benchmarks, 
@@ -141,7 +142,7 @@ void benchmarkExecutor(const std::vector<Benchmark*>& benchmarks,
 {
 
     // Init CSV File
-    printf("%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s\n",
+    printf("%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s\n",
         "Execution Mode",
         "Key Distribution",
         "Num Operations",
@@ -152,7 +153,8 @@ void benchmarkExecutor(const std::vector<Benchmark*>& benchmarks,
         "Hash Container",
         "Hash Function",
         "Execution Time (s)",
-        "Collision Count");
+        "Collision Count",
+        "UPPER_SHIFT");
     
     char* argsString = (char*)malloc(sizeof(char)*100);
     sprintf(argsString, "%s,%d,%ld,%d,%d,%d",
