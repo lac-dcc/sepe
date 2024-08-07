@@ -180,6 +180,21 @@ DECLARE_SYNTH_OFFXOR_NAIVE_CHATGPT_AND_GPERF_FUNCTIONS(IPV4)
 DECLARE_SYNTH_OFFXOR_NAIVE_CHATGPT_AND_GPERF_FUNCTIONS(IPV6)
 DECLARE_SYNTH_OFFXOR_NAIVE_CHATGPT_AND_GPERF_FUNCTIONS(INTS)
 
+#define DECLARE_SYNTH_OFFXOR_NAIVE_FUNCTIONS(NAME) \
+    struct Aes ## NAME { \
+        std::size_t operator()(const std::string& key) const; \
+    }; \
+    struct Pext ## NAME { \
+        std::size_t operator()(const std::string& key) const; \
+    }; \
+    struct OffXor ## NAME { \
+        std::size_t operator()(const std::string& key) const; \
+    }; \
+    struct Naive ## NAME { \
+        std::size_t operator()(const std::string& key) const; \
+    };
+
+DECLARE_SYNTH_OFFXOR_NAIVE_FUNCTIONS(INT4)
 /**
  * @brief Struct for NaiveSimdUrlComplex.
  */
