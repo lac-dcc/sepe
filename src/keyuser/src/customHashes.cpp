@@ -60,6 +60,14 @@ std::size_t CityHash::operator()(const std::string& key) const{
     return CityHash64(key.c_str(), key.size());
 }
 
+inline static uint32_t load_u32_le(const char* b) {
+    uint32_t Ret;
+    // This is a way for the compiler to optimize this func to a single movq instruction
+    memcpy(&Ret, b, sizeof(uint32_t));
+    return Ret;
+}
+
+
 inline static uint64_t load_u64_le(const char* b) {
     uint64_t Ret;
     // This is a way for the compiler to optimize this func to a single movq instruction
@@ -608,8 +616,8 @@ std::size_t PextINTS::operator()(const std::string& key) const {
 }
 
 std::size_t PextINT4::operator()(const std::string& key) const {
-    constexpr std::size_t mask0 = 0x0f0f0f0f00000000;
-    const std::size_t hashable0 = _pext_u64((unsigned int)load_u64_le(key.c_str()), mask0);
+    constexpr std::size_t mask0 = 0x0f0f0f0f;
+    const std::size_t hashable0 = _pext_u32(load_u32_le(key.c_str()), mask0);
     size_t shift0 = hashable0;
     return shift0;
 }
