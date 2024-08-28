@@ -755,10 +755,20 @@ int main(int argc, char** argv){
     ranges = res.first;
     offset = res.second;
 
-    size_t regexSize = 0;
+    size_t keySize = 0;
     for(const auto& range : ranges){
-        regexSize += range.repetition;
-        regexSize += range.offset;
+        keySize += range.repetition;
+        keySize += range.offset;
+    }
+
+    if(keySize <= 8){
+        printf("// Key size is less than 8 bytes. Using default Function. \n\
+            struct synthesizedHashFunc{\n\
+                std::size_t operator()(const std::string& key) const {\n\
+                    \treturn std::hash<std::string>{}(key);\n\
+                }\n\
+            }\n");
+        return 0;
     }
 
     // load_u64_le function header
@@ -773,7 +783,7 @@ int main(int argc, char** argv){
 
     printf("// OffXor Hash Function:\n");
     printf("%s\n", synthetizeOffXorHashFunc(ranges, offset).c_str());
-    if(regexSize > 16){
+    if(keySize > 16){
         printf("// Aes Hash Function:\n");
         printf("%s", synthetizeAesHashFunc(ranges, offset).c_str());
     } else {
