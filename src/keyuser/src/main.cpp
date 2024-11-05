@@ -6,7 +6,6 @@
  * It parses command line arguments and runs the benchmarks accordingly.
  */
 
-#include <algorithm>
 #include <iostream>
 #include <cstring>
 #include <vector>

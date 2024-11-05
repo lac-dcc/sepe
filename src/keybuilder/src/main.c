@@ -190,18 +190,6 @@ int main(int argc, const char* argv[]) {
 	}
 	puts("");
 
-	for (ssize_t i = 0; i < line_size - 1; ++i) {
-		double entropy = 0;
-		for (int j = 0; j < 256; ++j) {
-			if (ranges[i].count[j] != 0) {
-				double p = (double)ranges[i].count[j] / (double)line_count;
-				entropy += p * log2(p);
-			}
-		}
-		printf("%g \n", -entropy);
-	}
-	puts("");
-
 	free(ranges);
 	return 0;
 }

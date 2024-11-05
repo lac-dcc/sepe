@@ -11,15 +11,7 @@
  * @param hashname The name of the hash function used in the benchmark.
  * @return A pointer to the new benchmark object.
  */
-
-template <typename HashFunc>
-struct HashWrapper{
-    std::size_t operator()(const std::string& key) const{
-        return HashFunc()(key) >> UPPER_SHIFT;
-    }
-};
-
-#define DECLARE_ONE_BENCH(name, hashname) (Benchmark*)new name<HashWrapper<hashname>>(#name,#hashname)
+#define DECLARE_ONE_BENCH(name, hashname) (Benchmark*)new name<hashname>(#name,#hashname)
 
 /**
  * @def REGISTER_BENCHMARKS(hashname)
@@ -52,7 +44,6 @@ struct HashWrapper{
     REGISTER_BENCHMARKS(PextIPV4); \
     REGISTER_BENCHMARKS(PextIPV6); \
     REGISTER_BENCHMARKS(PextINTS); \
-    REGISTER_BENCHMARKS(PextINT4); \
     REGISTER_BENCHMARKS(OffXorUrlComplex); \
     REGISTER_BENCHMARKS(OffXorUrl); \
     REGISTER_BENCHMARKS(OffXorMac); \
@@ -61,7 +52,6 @@ struct HashWrapper{
     REGISTER_BENCHMARKS(OffXorIPV4); \
     REGISTER_BENCHMARKS(OffXorIPV6); \
     REGISTER_BENCHMARKS(OffXorINTS); \
-    REGISTER_BENCHMARKS(OffXorINT4); \
     REGISTER_BENCHMARKS(NaiveUrlComplex); \
     REGISTER_BENCHMARKS(NaiveUrl); \
     REGISTER_BENCHMARKS(NaiveMac); \
@@ -70,7 +60,6 @@ struct HashWrapper{
     REGISTER_BENCHMARKS(NaiveIPV4); \
     REGISTER_BENCHMARKS(NaiveIPV6); \
     REGISTER_BENCHMARKS(NaiveINTS); \
-    REGISTER_BENCHMARKS(NaiveINT4); \
     REGISTER_BENCHMARKS(AesUrlComplex); \
     REGISTER_BENCHMARKS(AesUrl); \
     REGISTER_BENCHMARKS(AesMac); \
@@ -79,7 +68,6 @@ struct HashWrapper{
     REGISTER_BENCHMARKS(AesIPV4); \
     REGISTER_BENCHMARKS(AesIPV6); \
     REGISTER_BENCHMARKS(AesINTS); \
-    REGISTER_BENCHMARKS(AesINT4); \
     REGISTER_BENCHMARKS(NaiveSimdUrlComplex); \
     REGISTER_BENCHMARKS(NaiveSimdUrl); \
     REGISTER_BENCHMARKS(NaiveSimdIPV6); \

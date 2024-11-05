@@ -126,14 +126,13 @@ static void reportMetricsCSV(
                                  const float execTime,
                                  const int collisions)
 {
-    printf( "%s,%s,%s,%s,%f,%d,%d\n",
+    printf( "%s,%s,%s,%s,%f,%d\n",
             execMode,
             argsString,
             containerName,
             hashFuncName,
             execTime,
-            collisions,
-            UPPER_SHIFT);
+            collisions);
 }
 
 void benchmarkExecutor(const std::vector<Benchmark*>& benchmarks, 
@@ -142,7 +141,7 @@ void benchmarkExecutor(const std::vector<Benchmark*>& benchmarks,
 {
 
     // Init CSV File
-    printf("%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s\n",
+    printf("%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s\n",
         "Execution Mode",
         "Key Distribution",
         "Num Operations",
@@ -153,8 +152,7 @@ void benchmarkExecutor(const std::vector<Benchmark*>& benchmarks,
         "Hash Container",
         "Hash Function",
         "Execution Time (s)",
-        "Collision Count",
-        "UPPER_SHIFT");
+        "Collision Count");
     
     char* argsString = (char*)malloc(sizeof(char)*100);
     sprintf(argsString, "%s,%d,%ld,%d,%d,%d",
@@ -168,6 +166,7 @@ void benchmarkExecutor(const std::vector<Benchmark*>& benchmarks,
     // Execution modes are hard coded since we do not expect to add new ones or modify existing ones
     for(int r=0; r < args.repetitions; ++r){
         for (const auto& bench : benchmarks){
+
             // Execute benchmark
             auto start = std::chrono::system_clock::now();
             executeInterweaved(bench, keys, args);
@@ -188,6 +187,7 @@ void benchmarkExecutor(const std::vector<Benchmark*>& benchmarks,
 
     for(int r=0; r < args.repetitions; ++r){
         for (const auto& bench : benchmarks){
+
             // Execute benchmark
             auto start = std::chrono::system_clock::now();
             executeBatched(bench, keys, args);

@@ -38,14 +38,12 @@ struct Range{
     int offset; ///< The offset of the range.
     size_t repetition; ///< The repetition count of the range.
     char mask; ///< The mask associated with the range. Only useful for PEXT.
-    float entropy; ///< The associated entropy of the range.
 
-    Range(char _start, char _end, int _offset, size_t _repetition, float _entropy) :
+    Range(char _start, char _end, int _offset, size_t _repetition) :
         start(_start),
         end(_end),
         offset(_offset),
-        repetition(_repetition),
-        entropy(_entropy)
+        repetition(_repetition)
     {
 
         /**
@@ -228,7 +226,7 @@ static std::vector<size_t> calculateOffsets(std::vector<Range>& ranges, int regS
  * @return std::pair<std::vector<Range>,size_t> A pair containing the vector of Range objects and the final offset.
  */
 static std::pair<std::vector<Range>,size_t>
-calculateRanges(std::string& regex, std::vector<float>& charEntropy){
+calculateRanges(std::string& regex){
     std::vector<Range> ranges;
     size_t offset = 0;
     for(size_t i = 0; i < regex.size(); i++){
@@ -236,12 +234,12 @@ calculateRanges(std::string& regex, std::vector<float>& charEntropy){
             if(regex[i+5] == '{'){
                 size_t closeBracketPos = regex.find('}', i+6);
                 size_t repetition = std::stoi(regex.substr(i+6, closeBracketPos));
-                ranges.push_back(Range(regex[i+1],regex[i+3],offset,repetition,charEntropy[i+1]));
+                ranges.push_back(Range(regex[i+1],regex[i+3],offset,repetition));
                 offset += repetition;
                 i = closeBracketPos;
             } else {
                 offset++;
-                ranges.push_back(Range(regex[i+1],regex[i+3],offset,1,charEntropy[i+1]));
+                ranges.push_back(Range(regex[i+1],regex[i+3],offset,1));
                 i += 4;
             }
         } else if(regex[i] == '\\') {
@@ -377,13 +375,167 @@ unrollMasks_calculateShift(std::string& mask, size_t lastMaskShift){
 }
 
 /**
+ * @brief Synthesize a PEXT hash function using Skip Tables: which guarantees memory aligned loads but may generate extra instructions.
+ *
+ * This function synthesizes a PEXT hash function. It does this by taking a vector of Range objects and an offset as input.
+ * The general idea of the implementation is to compress the input key into relevant bytes and only hashing them.
+ *
+ * @param ranges The vector of Range objects.
+ * @param offset Total key size to use as a base in offset calculation
+ * @return std::string The synthesized PEXT hash function as a string.
+ */
+std::string skipTable_synthetizePextHashFunc(std::vector<Range>& ranges, size_t offset){
+
+    std::vector<Range> localRanges = ranges;
+
+    std::string synthesizedHashFunc = "struct skipTable_synthetizedPextHashFunc {\n\tstd::size_t operator()(const std::string& key) const {\n";
+
+    std::string mask = "";
+    int currOffset = localRanges.front().offset;
+
+    for(int i = 0 ; i < localRanges.front().offset; i++ ){
+        mask = "00" + mask;
+    }
+
+    // Calculate the mask for the entire key
+    for(size_t rangeIdx = 0; rangeIdx < localRanges.size(); rangeIdx++){
+        Range range = localRanges[rangeIdx];
+        for(size_t i = 0; i < range.repetition; i++) {
+            mask += intToHex(range.mask);
+        }
+
+        // Next, lets prepare to advance to the next range
+        currOffset += range.repetition;
+
+        // Fill non-continuous localRanges with necessary zeroes in-between
+        if((rangeIdx+1) < localRanges.size()
+                && !nextIsContinuous(localRanges, rangeIdx))
+        {
+            int numZeroes = localRanges[rangeIdx+1].offset - currOffset;
+            for(int i = 0; i < numZeroes; i++){
+                mask += "00";
+            }
+            currOffset += numZeroes;
+        }
+
+    }
+
+    // Add zeroes to fill 8 bytes
+        // (number 16 because we are using Hex numbers, so two hex = 1 byte)
+    int numZeroes = mask.size() % 16;
+    if(numZeroes > 0){
+        for(int i = 0; i < (16-numZeroes); i++){
+            mask += "0";
+        }
+    }
+
+    // Avoid out of bounds memory access on the last mask/offset
+    size_t outOfBoundsBytes = 0;
+    size_t finalPos = localRanges.back().offset + localRanges.back().repetition;
+    if (finalPos >= offset){
+        outOfBoundsBytes = mask.size() / 2 - offset;
+    }
+
+    for(size_t rangeIdx = 0; rangeIdx < localRanges.size(); rangeIdx++){
+        Range range = localRanges[rangeIdx];
+        if(range.offset % 8 != 0){
+            range.offset = range.offset - (range.offset % 8);
+            range.repetition = range.repetition + (range.offset % 8);
+        }
+        localRanges[rangeIdx] = range;
+    }
+
+    std::vector<size_t> offsets;
+
+    // Unroll Mask and calculate shifts
+    int maskID = 0;
+    currOffset = 0;
+    std::vector<int> shifts;
+    std::string masksStr;
+    for(size_t i = 0; i < mask.size(); i+=16){
+        std::string currMask = mask.substr(i,16);
+
+        // Ignore full 0 masks
+        if(currMask.compare("0000000000000000") == 0){
+            currOffset += 8;
+            continue;
+        }
+
+        // Swap to little-endian
+        std::swap(currMask[0], currMask[14]);
+        std::swap(currMask[1], currMask[15]);
+        std::swap(currMask[2], currMask[12]);
+        std::swap(currMask[3], currMask[13]);
+        std::swap(currMask[4], currMask[10]);
+        std::swap(currMask[5], currMask[11]);
+        std::swap(currMask[6], currMask[8]);
+        std::swap(currMask[7], currMask[9]);
+
+        // Fix last mask to avoid out of bounds memory access
+        if(i + 16 >= mask.size()){
+
+            for( size_t j = 0; j < outOfBoundsBytes; j++ ) {
+                currMask = currMask + "00";
+            }
+
+            currMask = currMask.substr(outOfBoundsBytes*2,currMask.size());
+        }
+
+        long maskInt = std::stold("0x" + currMask);
+        shifts.push_back(countZeros(maskInt));
+
+        masksStr += "\t\tconstexpr std::size_t mask" +
+                    std::to_string(maskID) +
+                    " = 0x" +
+                    currMask +
+                    ";\n";
+        offsets.push_back(currOffset);
+        currOffset += 8;
+        maskID++;
+    }
+
+    offsets.back() -= outOfBoundsBytes;
+
+    synthesizedHashFunc += masksStr;
+
+    // Create hashables
+    int hashableID = 0;
+    for(const auto& off : offsets){
+        synthesizedHashFunc += hashablePext(hashableID++, off);
+    }
+
+    // Create hashable variables and left shift them as much as possible for better collision
+    for (int i = 0; i < hashableID; ++i) {
+        if (i % 2 == 0) {
+            synthesizedHashFunc += "\t\tsize_t shift" + std::to_string(i) + " = " + "hashable" + std::to_string(i) + ";\n";
+        } else {
+            synthesizedHashFunc += "\t\tsize_t shift" + std::to_string(i) + " = " + "hashable" + std::to_string(i) + " << " + std::to_string(shifts[i]) + ";\n";
+        }
+    }
+
+    // Create queue of "XORable" variables
+    std::queue<std::string> queue;
+    for (int i = 0; i < hashableID; ++i) {
+        queue.push("shift" + std::to_string(i));
+    }
+
+    // Cascade XOR variables
+    synthesizedHashFunc += cascadeXorVars(queue);
+
+    synthesizedHashFunc += "\t\treturn " + queue.front() + "; \n";
+    synthesizedHashFunc += "\t}\n};\n";
+
+    return synthesizedHashFunc;
+}
+
+/**
  * @brief Synthesize a PEXT hash function.
  *
  * This function synthesizes a PEXT hash function. It does this by taking a vector of Range objects and an offset as input.
  * The general idea of the implementation is to compress the input key into relevant bytes and only hashing them.
  *
  * @param ranges The vector of Range objects.
- * @param offset The offset.
+ * @param offset Total key size to use as a base in offset calculation
  * @return std::string The synthesized PEXT hash function as a string.
  */
 std::string synthetizePextHashFunc(std::vector<Range>& ranges, size_t offset){
@@ -411,7 +563,6 @@ std::string synthetizePextHashFunc(std::vector<Range>& ranges, size_t offset){
         }
         mask = s + mask;
     }
-
 
     // Add zeroes to fill 8 bytes
         // (number 16 because we are using Hex numbers, so two hex = 1 byte)
@@ -464,7 +615,7 @@ std::string synthetizePextHashFunc(std::vector<Range>& ranges, size_t offset){
  * This is a naive implementation that just XORs bytes at the given offsets.
  *
  * @param ranges The vector of Range objects.
- * @param offset The offset.
+ * @param offset Total key size to use as a base in offset calculation
  * @return std::string The synthesized Offset XOR hash function as a string.
  */
 std::string synthetizeOffXorHashFunc(std::vector<Range>& ranges, size_t offset){
@@ -507,7 +658,7 @@ std::string synthetizeOffXorHashFunc(std::vector<Range>& ranges, size_t offset){
  * This is an implementation that keeps reducing the number of available bytes by repeatedly calling Aes instructions
  *
  * @param ranges The vector of Range objects.
- * @param offset The offset.
+ * @param offset Total key size to use as a base in offset calculation
  * @return std::string The synthesized Offset XOR SIMD hash function as a string.
  */
 std::string synthetizeAesHashFunc(std::vector<Range>& ranges, size_t offset) {
@@ -596,46 +747,47 @@ std::string synthetizeAesHashFuncLe16bytes(size_t keySize) {
 int main(int argc, char** argv){
 
     std::string regexStr = std::string(argv[1]);
-    std::vector<float> charEntropy;
-    for(int i = 2; i < argc; i++){
-        charEntropy.push_back(std::stof(argv[i]));
-    }
 
     // Create ranges
     size_t offset;
     std::vector<Range> ranges;
-    std::pair<std::vector<Range>,size_t> res = calculateRanges(regexStr,charEntropy);
+    std::pair<std::vector<Range>,size_t> res = calculateRanges(regexStr);
     ranges = res.first;
     offset = res.second;
 
-    size_t keySize = offset;
-
-    float maxEntropy = *std::max_element(charEntropy.begin(), charEntropy.end());
-    float entropyThreshold = maxEntropy / 2.0;
-    // Remove all ranges that have lower than entropyThreshold entropy
-    ranges.erase(std::remove_if(ranges.begin(), ranges.end(), [entropyThreshold](const Range& range) {
-        return range.entropy < entropyThreshold;
-    }), ranges.end());
-
-    size_t regexSize = 0;
+    size_t keySize = 0;
     for(const auto& range : ranges){
-        regexSize += range.repetition;
-        regexSize += range.offset;
+        keySize += range.repetition;
+        keySize += range.offset;
+    }
+
+    if(keySize <= 8){
+        printf("// Key size is less than 8 bytes. Using default Function. \n\
+            struct synthesizedHashFunc{\n\
+                std::size_t operator()(const std::string& key) const {\n\
+                    \treturn std::hash<std::string>{}(key);\n\
+                }\n\
+            }\n");
+        return 0;
     }
 
     // load_u64_le function header
     printf("// Helper function, include in your codebase:\n");
     printf("%s\n", load_u64_le.c_str());
 
-    printf("// (Recommended) Pext Hash Function:\n");
+    printf("// (Recommended) 'NO SKIP TABLE' Pext Hash Function:\n");
     printf("%s\n", synthetizePextHashFunc(ranges, offset).c_str());
+
+    printf("//  Pext Hash Function:\n");
+    printf("%s\n", skipTable_synthetizePextHashFunc(ranges, offset).c_str());
+
     printf("// OffXor Hash Function:\n");
     printf("%s\n", synthetizeOffXorHashFunc(ranges, offset).c_str());
-    if(regexSize > 16){
+    if(keySize > 16){
         printf("// Aes Hash Function:\n");
         printf("%s", synthetizeAesHashFunc(ranges, offset).c_str());
     } else {
-        printf("%s", synthetizeAesHashFuncLe16bytes(keySize).c_str());
+        printf("%s", synthetizeAesHashFuncLe16bytes(offset).c_str());
 
 	}
 

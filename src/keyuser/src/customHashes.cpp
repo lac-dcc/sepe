@@ -13,7 +13,7 @@
  *  - Gperf: Uses the GPERF generated hash functions.
  *
  *  NOTE THAT THE ARM IMPLEMENTATIONS ARE INCOMPLETE. In particular, we've only
- *  properly implemented the aes hash functions on x86_64. 
+ *  properly implemented the aes hash functions properly on Arm. 
 **/
 
 #if defined(__amd64__)  || \
@@ -59,14 +59,6 @@ std::size_t AbseilHash::operator()(const std::string& key) const{
 std::size_t CityHash::operator()(const std::string& key) const{
     return CityHash64(key.c_str(), key.size());
 }
-
-inline static uint32_t load_u32_le(const char* b) {
-    uint32_t Ret;
-    // This is a way for the compiler to optimize this func to a single movq instruction
-    memcpy(&Ret, b, sizeof(uint32_t));
-    return Ret;
-}
-
 
 inline static uint64_t load_u64_le(const char* b) {
     uint64_t Ret;
@@ -615,13 +607,6 @@ std::size_t PextINTS::operator()(const std::string& key) const {
     return tmp11;
 }
 
-std::size_t PextINT4::operator()(const std::string& key) const {
-    constexpr std::size_t mask0 = 0x0f0f0f0f;
-    const std::size_t hashable0 = _pext_u32(load_u32_le(key.c_str()), mask0);
-    size_t shift0 = hashable0;
-    return shift0;
-}
-
 std::size_t OffXorUrlComplex::operator()(const std::string& key) const {
     const std::size_t hashable0 = load_u64_le(key.c_str()+23);
     const std::size_t hashable1 = load_u64_le(key.c_str()+31);
@@ -715,11 +700,6 @@ std::size_t OffXorINTS::operator()(const std::string& key) const {
     size_t tmp10 = tmp7 ^ tmp8;
     size_t tmp11 = tmp9 ^ tmp10;
     return tmp11;
-}
-
-std::size_t OffXorINT4::operator()(const std::string& key) const {
-    const std::size_t hashable0 = (unsigned int)load_u64_le(key.c_str());
-    return hashable0; 
 }
 
 std::size_t NaiveSimdUrlComplex::operator()(const std::string& key) const {
@@ -859,11 +839,6 @@ std::size_t NaiveINTS::operator()(const std::string& key) const {
     std::size_t xor10 = xor7 ^ xor8;
     std::size_t xor11 = xor9 ^ xor10;
     return xor11 ;
-}
-
-std::size_t NaiveINT4::operator()(const std::string& key) const {
-    const std::size_t hashable0 = (unsigned int)load_u64_le(key.c_str());
-    return hashable0; 
 }
 
 std::size_t AesUrlComplex::operator()(const std::string& key) const{
@@ -1020,14 +995,6 @@ std::size_t AesINTS::operator()(const std::string& key) const{
     const uint64x2_t ret = vreinterpretq_u64_u8(tmp5);
     return vgetq_lane_u64(ret, 0) ^ vgetq_lane_u64(ret, 1);
 #endif
-}
-
-std::size_t AesINT4::operator()(const std::string& key) const{
-     // chosen by a fair roll of the dice
-    const __m128i roundkey = _mm_set_epi64x(0xFB6D468E93C391E2 , 0x9c06f0be6f44851b);
-    const __m128i load = _mm_set_epi8(key[0],key[1],key[2],key[3],0,0,0,0,0,0,0,0,0,0,0,0);
-    const __m128i hash = _mm_aesenc_si128(load, roundkey);
-    return _mm_extract_epi64(hash , 0) ^ _mm_extract_epi64(hash, 1);
 }
 
 std::size_t NaiveSimdUrl::operator()(const std::string& key) const {
