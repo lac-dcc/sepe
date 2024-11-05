@@ -31,7 +31,3 @@ hashes = ["STDHashSrc", "AbseilHash", "CityHash", "FNVHash", "PextIPV6", "OffXor
 [INTS]
 regex = "[0-9]{100}"
 hashes = ["STDHashSrc", "AbseilHash", "CityHash", "FNVHash", "PextINTS", "OffXorINTS", "NaiveINTS", "GptINTS", "GperfINTS", "AesINTS"]
-
-[INT4]
-regex = "[0-9]{4}"
-hashes = ["STDHashSrc", "AbseilHash", "CityHash", "FNVHash", "PextINT4", "OffXorINT4", "NaiveINT4", "AesINTS"]
