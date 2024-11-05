@@ -44,6 +44,8 @@ Each experiment can be reproduced by executing the script in the directory of th
 There is no experiment for RQ4 because it is simply RQs 1 and 2 executed in a machine with an
 aarch64 CPU.
 
+Below follows specific notes about each research question.
+
 #### RQ1
 
 **TODO**
@@ -54,7 +56,16 @@ aarch64 CPU.
 
 #### RQ3
 
-**TODO**
+Note that Aes with incremental distribution is slightly different than the one
+reported in the paper due to small implementations changes we've made after
+collecting the results the first time. The difference is minimal and we do not believe
+they affect our analysis and conclusions.
+
+Furthermore, while executing the incremental execution, `keyuser` will print a warning
+that the distribution is incorrect. This is an implementation detail that can be ignored.
+The incremental distribution is implemented by the key generator, `keygen`, not `keyuser`,
+but `sepe-runner` passes an `-d incremental` flag to `keyuser` anyway, which generates
+the warning.
 
 #### RQ5
 
