@@ -2,7 +2,7 @@
 
 set -e
 
-if [ "$(basename "$(pwd)")" = "scripts" ]; then
+if [ "$(basename "$(pwd)")" = "scripts" ] || [ "$(basename "$(pwd)")" = "artifact"  ]; then
         cd ..
 fi
 
@@ -10,10 +10,11 @@ if [ ! -d output ]; then
         mkdir output
 fi
 
+rm -f output/*.csv 
+
 make -j"$(nproc)"
 make -j"$(nproc)" benchmark
-
-DISTRIBUTIONS="normal uniform"
+DISTRIBUTIONS="normal"
 NUM_OPS=10000
 NUM_KEYS="500 2000 10000"
 REGEXES="$(sed  -n 's/^\[\(.*\)\]/\1/p' Regexes.toml)"
@@ -91,3 +92,17 @@ done
 
 mv -v ./*.csv output/
 zip -9 -o RQ1_RQ2_hash-performance.zip -r output/*
+
+mkdir -p artifact/output-rq1-rq2
+mv -- *.zip artifact/output-rq1-rq2
+cd artifact/output-rq1-rq2/
+
+mkdir -p results/
+
+unzip RQ1_RQ2_hash-performance.zip -d hash-performance
+../../scripts/global_keyuser_interpreter.py -p hash-performance/output/*.csv -hp > results/hash-performance.txt
+
+unzip RQ1_RQ2.zip -d performance
+../../scripts/global_keyuser_interpreter.py -p performance/*.csv
+
+echo "Done! Results are in artifact/output-rq1-rq2/results/"
