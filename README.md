@@ -22,6 +22,7 @@ To run the experiments, the following dependencies must be installed:
 | Rust       | >= 1.7    |
 | Python     | >= 3.10   |
 | Git        | >= 2.0    |
+| zip        | >= 3.0    |
 
 Additionally, to analyze the results the following python libraries must be available:
 
@@ -48,11 +49,13 @@ Below follows specific notes about each research question.
 
 #### RQ1
 
-**TODO**
+RQ1 abseil results may differ from those of the original paper because we used the latest
+abseil git version, which has changed from the time we first collected the results.
 
-#### RQ2
+#### R2
 
-**TODO**
+Like RQ1 abseil results may differ from those of the original paper because we used the
+latest abseil git version, which has changed from the time we first collected the results.
 
 #### RQ3
 
