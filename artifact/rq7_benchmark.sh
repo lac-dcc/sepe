@@ -78,11 +78,11 @@ for SHIFT in $UPPER_SHIFTS; do
 		COUNT=0
 		for NUM_OP in $NUM_OPS; do
 				for NUM_KEY in $NUM_KEYS; do
-						for ARG in $(seq 1 3 "$PERCENTAGES_COUNT"); do
+						for ARG in $(seq 1 3 "$DISTRIBUTIONS_COUNT"); do
 
-								INSERTION="$(  echo "$PERCENTAGES" | tr '\n' ' ' | awk "{print \$$((ARG + 0))}")"
-								SEARCH="$(     echo "$PERCENTAGES" | tr '\n' ' ' | awk "{print \$$((ARG + 1))}")"
-								ELIMINATION="$(echo "$PERCENTAGES" | tr '\n' ' ' | awk "{print \$$((ARG + 2))}")"
+								INSERTION="$(  echo "$DISTRIBUTIONS" | tr '\n' ' ' | awk "{print \$$((ARG + 0))}")"
+								SEARCH="$(     echo "$DISTRIBUTIONS" | tr '\n' ' ' | awk "{print \$$((ARG + 1))}")"
+								ELIMINATION="$(echo "$DISTRIBUTIONS" | tr '\n' ' ' | awk "{print \$$((ARG + 2))}")"
 
 								./bin/sepe-runner \
 										--verbose \
