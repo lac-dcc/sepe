@@ -2,7 +2,7 @@
 
 set -e
 
-if [ "$(basename "$(pwd)")" = "scripts" ]; then
+if [ "$(basename "$(pwd)")" = "scripts" ] || [ "$(basename "$(pwd)")" = "artifact"  ]; then
 	cd ..
 fi
 
@@ -55,6 +55,18 @@ for HD in $HISTOGRAM_DISTRIBUTION; do
         done
     done
     mv -v ./*.csv output/
-    zip -9 -o "$(date '+%Y-%m-%d_%Hh-%Mm-%Ss')""-${HD}.zip" -r output/*
+    zip -9 -o "RQ5-${HD}.zip" -r output/*
 done
 
+mkdir -p artifact/output-rq5
+mv -- RQ5*.zip artifact/output-rq5
+if [ ! -d output-rq3 ]; then
+    ./rq3_benchmark.sh
+fi
+cd artifact/output-rq5
+
+for DIST in $HISTOGRAM_DISTRIBUTION; 
+do 
+    unzip RQ5-"$DIST".zip -d rq5-data
+    ../../scripts/global_keyuser_interpreter.py -p rq5-data/*.csv
+done

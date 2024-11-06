@@ -94,7 +94,7 @@ mv -v ./*.csv output/
 zip -9 -o RQ1_RQ2_hash-performance.zip -r output/*
 
 mkdir -p artifact/output-rq1-rq2
-mv -- *.zip artifact/output-rq1-rq2
+mv -- RQ1_RQ2*.zip artifact/output-rq1-rq2
 cd artifact/output-rq1-rq2/
 
 mkdir -p results/

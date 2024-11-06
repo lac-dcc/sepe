@@ -60,13 +60,13 @@ for HD in $HISTOGRAM_DISTRIBUTION; do
         done
     done
     mv -v ./*.csv output/
-    zip -9 -o "histogram-${HD}.zip" -r output/*
+    zip -9 -o "RQ3-histogram-${HD}.zip" -r output/*
 done
 
 DISTRIBS="uniform normal incremental"
 
 mkdir -p artifact/output-rq3
-mv -- *.zip artifact/output-rq3
+mv -- RQ3*.zip artifact/output-rq3
 cd artifact/output-rq3/
 
 for DIST in $DISTRIBS; 
