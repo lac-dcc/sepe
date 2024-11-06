@@ -64,9 +64,13 @@ if [ ! -d output-rq3 ]; then
     ./artifact/rq3_benchmark.sh
 fi
 cd artifact/output-rq5
+mkdir -p results
 
 for DIST in $HISTOGRAM_DISTRIBUTION; 
 do 
     unzip RQ5-"$DIST".zip -d rq5-data
-    ../../scripts/global_keyuser_interpreter.py -p rq5-data/*.csv
+    ../../scripts/global_keyuser_interpreter.py -p rq5-data/output/*.csv
+    mv -v results/global_geomean.csv results/global_geomean_"$DIST".csv
 done
+
+echo "Done! Results are in artifact/output-rq5/results/"

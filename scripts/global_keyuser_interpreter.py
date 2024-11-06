@@ -289,6 +289,7 @@ def handle_performance_analysis(args):
 
     if args.rq9:
         containers_boxplot(args, df)
+        return
 
     performance_from_dataframe(args, df, regex_name)
 
