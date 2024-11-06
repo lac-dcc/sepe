@@ -107,7 +107,7 @@ def handle_distribution_analysis(args):
     print("Below DataFrame from distribution file: ", args.distribution)
     print(result_array)
     output_path = args.output_destination + regex_name + "_chitest.csv"
-    print("See all results in: ", output_path)
+    # print("See all results in: ", output_path)
     result_array.to_csv(output_path, index=False)
 
     # if args.plot_graph:

@@ -39,4 +39,4 @@ cmake                                     \
 	..
 cmake --build . --target install -j"$(nproc)"
 cd "$CURRENT_DIR"
-rm -rf abseil-cpp
+rm -rf abseil-cpp-20240116.1/ 20240116.1.zip

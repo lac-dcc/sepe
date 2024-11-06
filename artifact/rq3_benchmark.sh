@@ -65,13 +65,14 @@ done
 
 DISTRIBS="uniform normal incremental"
 
+rm -rf artifact/output-rq3
 mkdir -p artifact/output-rq3
 mv -- RQ3*.zip artifact/output-rq3
 cd artifact/output-rq3/
 
 for DIST in $DISTRIBS; 
 do 
-    unzip histogram-"$DIST".zip -d "$DIST"
+    unzip RQ3-histogram-"$DIST".zip -d "$DIST"
     cd "$DIST"/output/
     for f in *.csv; do mv "$f" "$(echo "$f" | cut -d. -f1)".py ; done
     cd ../../
