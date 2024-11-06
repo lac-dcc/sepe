@@ -61,7 +61,7 @@ done
 mkdir -p artifact/output-rq5
 mv -- RQ5*.zip artifact/output-rq5
 if [ ! -d output-rq3 ]; then
-    ./rq3_benchmark.sh
+    ./artifact/rq3_benchmark.sh
 fi
 cd artifact/output-rq5
 

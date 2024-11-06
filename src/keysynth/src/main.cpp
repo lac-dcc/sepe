@@ -4,6 +4,7 @@
 #include <queue>
 #include <utility>
 #include <algorithm>
+#include <chrono>
 
 // Constant to hold a helper function used within the synthetized functions
 static const std::string load_u64_le = "inline static uint64_t load_u64_le(const char* b) {\n\
@@ -733,6 +734,8 @@ std::string synthetizeAesHashFuncLe16bytes(size_t keySize) {
     return synthesizedHashFunc;
 }
 
+int rq6_artifact(int argc, char** argv);
+
 /**
  * @brief Entry point of the program.
  *
@@ -746,8 +749,13 @@ std::string synthetizeAesHashFuncLe16bytes(size_t keySize) {
  */
 int main(int argc, char** argv){
 
-    std::string regexStr = std::string(argv[1]);
+    
+    if((argc > 2) && (std::string(argv[1]) == "_rq6")) {
+        rq6_artifact(argc, argv);
+        return 0;
+    }
 
+    std::string regexStr = std::string(argv[1]);
     // Create ranges
     size_t offset;
     std::vector<Range> ranges;
@@ -790,6 +798,47 @@ int main(int argc, char** argv){
         printf("%s", synthetizeAesHashFuncLe16bytes(offset).c_str());
 
 	}
+
+    return 0;
+}
+
+int rq6_artifact(int argc, char** argv){
+    std::string regexStr = std::string(argv[2]);
+    // Create ranges
+    size_t offset;
+    std::vector<Range> ranges;
+    std::pair<std::vector<Range>,size_t> res = calculateRanges(regexStr);
+    ranges = res.first;
+    offset = res.second;
+
+    size_t keySize = 0;
+    for(auto& range : ranges){
+        keySize += range.repetition;
+        keySize += range.offset;
+    }
+
+    auto start = std::chrono::high_resolution_clock::now();
+    // printf("%s\n", synthetizePextHashFunc(ranges, offset).c_str());
+    synthetizePextHashFunc(ranges, offset).c_str();
+    auto end = std::chrono::high_resolution_clock::now();
+    printf("%s,%g,%lu\n","Pext", (double)std::chrono::duration_cast<std::chrono::nanoseconds>(end - start).count()/1e9, keySize);
+
+    start = std::chrono::high_resolution_clock::now();
+    // printf("%s\n", synthetizeOffXorHashFunc(ranges, offset).c_str());
+    synthetizeOffXorHashFunc(ranges, offset).c_str();
+    end = std::chrono::high_resolution_clock::now();
+    printf("%s,%g,%lu\n","OffXor", (double)std::chrono::duration_cast<std::chrono::nanoseconds>(end - start).count()/1e9, keySize);
+
+    start = std::chrono::high_resolution_clock::now();
+    if(keySize > 16){
+        // printf("%s", synthetizeAesHashFunc(ranges, offset).c_str());
+        synthetizeAesHashFunc(ranges, offset).c_str();
+    } else {
+        // printf("%s", synthetizeAesHashFuncLe16bytes(offset).c_str());
+        synthetizeAesHashFuncLe16bytes(offset).c_str();
+    }
+    end = std::chrono::high_resolution_clock::now();
+    printf("%s,%g,%lu\n","Aes", (double)std::chrono::duration_cast<std::chrono::nanoseconds>(end - start).count()/1e9, keySize);
 
     return 0;
 }

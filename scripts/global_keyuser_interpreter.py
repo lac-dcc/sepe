@@ -287,7 +287,7 @@ def handle_performance_analysis(args):
     mannwhitneyu_from_dataframe(args, regex_name, df, 'Hash Function', 'Execution Time (s)')
     mannwhitneyu_from_dataframe(args, regex_name, df, 'Hash Function', 'Collision Count')
 
-    if args.rq6:
+    if args.rq9:
         containers_boxplot(args, df)
 
     performance_from_dataframe(args, df, regex_name)
@@ -317,7 +317,7 @@ def main():
     parser.add_argument("-d", "--distribution", nargs='*', type=str, default="", help="Name of the distribution files to interpret. Exclusive with -p option.")
     parser.add_argument("-p", "--performance", nargs='*', type=str, default="", help="Name of the csv performance files to interpret. Exclusive with -d option.")
     parser.add_argument("-hp", "--hash-performance", action='store_true', help="Name of the csv performance files to interpret.")
-    parser.add_argument("-rq6", action='store_true', help="Group performance by data structure.")
+    parser.add_argument("-rq9", action='store_true', help="Group performance by data structure.")
     parser.add_argument("-pg", "--plot-graph", action='store_true', help="Option to plot the results in graphs.")
     parser.add_argument("-od", "--output-destination", type=str, default="results/", help="Output path to output graphs. Default is current file.")
     parser.add_argument("-fp", "--full-print", action='store_true', help="Print the entire dataframe.")

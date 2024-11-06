@@ -2,13 +2,15 @@
 
 set -e
 
-if [ "$(basename "$(pwd)")" = "scripts" ]; then
-        cd ..
+if [ "$(basename "$(pwd)")" = "scripts" ] || [ "$(basename "$(pwd)")" = "artifact"  ]; then
+	cd ..
 fi
 
 if [ ! -d output ]; then
         mkdir output
 fi
+
+pwd
 
 make -j"$(nproc)"
 make -j"$(nproc)" benchmark
@@ -28,18 +30,24 @@ PERCENTAGES_COUNT="$(echo "$PERCENTAGES" | wc -w)"
 
 rm -rf output/*
 rm -f rq6.csv
+rm -rf artifact/output_rq6/
 echo "REGEX,Exec Time,Problem Size" >> rq6.csv
-for REGEX in $REGEXES; do
+for SIZE in $KEY_SIZES; do
 	for ((i = 0 ; i < 10 ; i++)); do	
-		VAL=$(./bin/keysynth $(cat $REGEX | ./bin/keybuilder))
+		VAL=$(./bin/keysynth _rq6 $(cat artifact/rq6_input/INTS$SIZE.dat | ./bin/keybuilder))
 		echo "${VAL}" >> rq6.csv
 	done
 done
-
 rm -rf output/*
 
+cd artifact/
+mkdir -p output_rq6/
+mv -v ../rq6.csv output_rq6/
+
+#TODO: SCRIPT TO PLOT
+
 for REGEX in $REGEXES; do
-        COUNT=0
+        # COUNT=0
 		for DISTRIBUTION in $DISTRIBUTIONS; do
 		for NUM_OP in $NUM_OPS; do
 					for KEY_SIZE in $KEY_SIZES; do
@@ -59,7 +67,7 @@ for REGEX in $REGEXES; do
 											--search "$SEARCH" \
 											--elimination "$ELIMINATION" \
 											--repetitions $REPETITIONS \
-											--outfile "_${DISTRIBUTION}_hash_functions.csv" \
+											--outfile "RQ8_${DISTRIBUTION}_hash_functions.csv" \
 											"$REGEX"
 
 							done
@@ -69,5 +77,14 @@ for REGEX in $REGEXES; do
 done
 
 mv -v ./*.csv output/
-zip -9 -o RQ8_hash-functions.zip -r output/*
+zip -9 -o RQ8.zip -r output/*
 rm -rf output/*
+
+cd artifact/
+mkdir -p output_rq8/
+mv -v ../RQ8.zip output_rq8/
+cd output_rq8/
+unzip RQ8.zip
+
+# TODO: SCRIPT TO PLOT
+
