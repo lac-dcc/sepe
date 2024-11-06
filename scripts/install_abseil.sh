@@ -26,8 +26,10 @@ echo "Installation path for Abseil: $ABSEIL_PATH"
 CURRENT_DIR=$(pwd)
 
 mkdir -p "${ABSEIL_PATH}"
-git clone https://github.com/abseil/abseil-cpp.git
-cd abseil-cpp/ && mkdir build && cd build
+# git clone https://github.com/abseil/abseil-cpp.git
+wget https://github.com/abseil/abseil-cpp/archive/refs/tags/20240116.1.zip
+unzip 20240116.1.zip
+cd abseil-cpp-20240116.1/ && mkdir build && cd build
 cmake                                     \
 	-DBUILD_TESTING=OFF                   \
 	-DABSL_BUILD_TESTING=OFF              \

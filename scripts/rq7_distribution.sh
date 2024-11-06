@@ -2,13 +2,15 @@
 
 set -e
 
-if [ "$(basename "$(pwd)")" = "scripts" ]; then
+if [ "$(basename "$(pwd)")" = "scripts" ] || [ "$(basename "$(pwd)")" = "artifact"  ]; then
 	cd ..
 fi
 
 if [ ! -d output ]; then
 	mkdir output
 fi
+
+# TODO: switch branch to upper-shifts
 
 UPPER_SHIFTS="0 16 24 32 48"
 NUM_OPS=10000
@@ -62,3 +64,7 @@ for HD in $HISTOGRAM_DISTRIBUTION; do
 	done
 	zip -9 -o "histogram-${HD}.zip" -r temp-files/*
 done
+
+
+
+# TODO: switch back branch to artifact
