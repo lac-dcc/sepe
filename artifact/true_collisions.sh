@@ -7,7 +7,20 @@ if [ ! -d output-rq3 ]; then
 	exit 1
 fi
 
- tail -n 10 -- output-rq3/normal/output/*0.py |\
-	 sed 's/\(UrlComplex\|Url\|SSN\|CPF\|INTS\|Hash\|IPV4\|IPV6\|Mac\)//g' |\
-	 awk '/Function/ {sum[$3] += $5} END { for (hash in sum) print hash, sum[hash]; }' |\
-	 sort
+if [ $# -lt 2 ]; then
+	echo "usage: $0 <normal|incremental|uniform>"
+	exit 2
+fi
+
+case $1 in
+	normal | incremental | uniform)
+		tail -n 10 -- output-rq3/"$1"/output/*0.py |
+			sed 's/\(UrlComplex\|Url\|SSN\|CPF\|INTS\|Hash\|IPV4\|IPV6\|Mac\)//g' |
+			awk '/Function/ {sum[$3] += $5} END { for (hash in sum) print hash, sum[hash]; }' |
+			sort
+		;;
+	*)
+		echo "usage: $0 <normal|incremental|uniform>"
+		exit 3
+		;;
+esac

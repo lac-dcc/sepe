@@ -61,8 +61,8 @@ For RQ1, the result of every column in our paper can be found in the following p
   * B-Time: in file`results/global_geoman.csv`, second column.
   * H-Time: in file `results/hash-performance.txt`
   * B-Coll: in file `results/global_geoman.csv`, final column.
-  * T-Coll: requires the execution of RQ3 script. After executing it, run the
-    `true_collisions.sh` script.
+  * T-Coll: requires the execution of RQ3 script. After executing it, run
+    `true_collisions.sh normal`.
 
 RQ2 results will be in `results/global_collision_count.pdf`, as a graph.
 
@@ -82,7 +82,19 @@ The result of each column in RQ3's table can be found in:
 
 #### RQ5
 
-**TODO**
+This script can take a long time to run.
+
+The results for the `BT` columns in the paper can be found at:
+
+  * Inc:     `output-rq5/results/global_geomean_incremental.csv`, second column.
+  * Normal:  `output-rq5/results/global_geomean_normal.csv`, second column.
+  * Uniform: `output-rq5/results/global_geomean_uniform.csv`, second column.
+
+**Note the results are in seconds, while in the paper they are in milliseconds.**
+
+The `TC` columns are calculated based on the results of `RQ3`. `RQ5` will run the `RQ3`
+if it deems necessary. After `RQ5` executes, `TC` column results can be produced by
+executing `true_collisions.sh <normal|uniform|incremental>`
 
 #### RQ6
 
