@@ -103,6 +103,6 @@ unzip RQ1_RQ2_hash-performance.zip -d hash-performance
 ../../scripts/global_keyuser_interpreter.py -p hash-performance/output/*.csv -hp > results/hash-performance.txt
 
 unzip RQ1_RQ2.zip -d performance
-../../scripts/global_keyuser_interpreter.py -p performance/*.csv
+../../scripts/global_keyuser_interpreter.py -p performance/output/*.csv
 
 echo "Done! Results are in artifact/output-rq1-rq2/results/"
