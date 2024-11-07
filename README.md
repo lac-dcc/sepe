@@ -96,6 +96,8 @@ The `TC` columns are calculated based on the results of `RQ3`. `RQ5` will run th
 if it deems necessary. After `RQ5` executes, `TC` column results can be produced by
 executing `true_collisions.sh <normal|uniform|incremental>`
 
+**TODO: INC TC AND UNIFORM TC ARE SWITCHED**
+
 #### RQ6
 
 **TODO**
@@ -110,4 +112,5 @@ executing `true_collisions.sh <normal|uniform|incremental>`
 
 #### RQ9
 
-**TODO**
+RQ9's output is a pdf file in `output-rq9/containers.pdf`. It depends on RQ1 and
+RQ2's execution. RQ9's script will call it automatically if necessary.

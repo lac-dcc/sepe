@@ -34,7 +34,9 @@ rm -rf artifact/output_rq6/
 echo "REGEX,Exec Time,Problem Size" >> rq6.csv
 for SIZE in $KEY_SIZES; do
 	for ((i = 0 ; i < 10 ; i++)); do	
-		VAL=$(./bin/keysynth _rq6 $(cat artifact/rq6_input/INTS$SIZE.dat | ./bin/keybuilder))
+		# disable shellcheck for unquoted $(), since we are doing this deliberately
+		# shellcheck disable=SC2046
+		VAL=$(./bin/keysynth _rq6 $(./bin/keybuilder < artifact/rq6_input/INTS"$SIZE".dat))
 		echo "${VAL}" >> rq6.csv
 	done
 done
