@@ -9,4 +9,5 @@ fi
 
  tail -n 10 -- output-rq3/normal/output/*0.py |\
 	 sed 's/\(UrlComplex\|Url\|SSN\|CPF\|INTS\|Hash\|IPV4\|IPV6\|Mac\)//g' |\
-	 awk '/Function/ {sum[$3] += $5} END { for (hash in sum) print hash, sum[hash]; }'
+	 awk '/Function/ {sum[$3] += $5} END { for (hash in sum) print hash, sum[hash]; }' |\
+	 sort
