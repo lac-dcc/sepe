@@ -7,7 +7,7 @@ if [ ! -d output-rq3 ]; then
 	exit 1
 fi
 
-if [ $# -lt 2 ]; then
+if [ $# -lt 1 ]; then
 	echo "usage: $0 <normal|incremental|uniform>"
 	exit 2
 fi
