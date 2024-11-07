@@ -105,8 +105,32 @@ for SHIFT in $UPPER_SHIFTS; do
 done
 zip -9 -o rq7-performance.zip -r temp-files/*
 
-# TODO: execute script
-
 git checkout artifact
 
+mkdir -p output-rq7
+mv ../*.zip output-rq7
 
+cd output-rq7
+mkdir -p results
+
+unzip rq7-performance.zip
+mv temp-files performance
+
+for dist in incremental normal uniform; do
+	unzip rq7-$dist.zip
+	mv temp-files $dist
+	cd $dist
+    for f in *.csv; do mv "$f" "$(echo "$f" | cut -d. -f1)".py ; done
+	cd ..
+done
+unzip rq7-incremental.zip
+mv temp-files incremental
+unzip rq7-normal.zip
+mv temp-files normal
+unzip rq7-uniform.zip
+mv temp-files uniform
+
+../../scripts/global_keyuser_interpreter.py -p performance/*.csv
+
+# TODO: how the hell do we run this??? 
+../../scripts/global_keyuser_interpreter.py -d incremental/*.py
