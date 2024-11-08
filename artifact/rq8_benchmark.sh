@@ -24,6 +24,7 @@ for KEY_SIZE in $KEY_SIZES; do
 		-r $REPETITIONS \
 		--hashes AbseilHash CityHash FNVHash Pext"${KEY_SIZE}"INTS STDHashSrc \
 		--hash-performance < artifact/rq6_input/INTS"$KEY_SIZE".dat \
+		| awk "{ if (NR == 1) { print \$0 \",size\" } else { print \$0 \",$KEY_SIZE\" } }" \
 		> artifact/output_rq8/"$KEY_SIZE".csv
 done
 rm -rf bin/keyuser output/*
