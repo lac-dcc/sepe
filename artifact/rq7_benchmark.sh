@@ -31,9 +31,9 @@ HISTOGRAM_DISTRIBUTION="normal uniform incremental"
 mkdir -p temp-files
 
 rm -f -- *.csv
-for SHIFT in $UPPER_SHIFTS; do
-	make -B -j"$(nproc)" keyuser UPPER_SHIFT="$SHIFT"
-	for HD in $HISTOGRAM_DISTRIBUTION; do
+for HD in $HISTOGRAM_DISTRIBUTION; do
+	for SHIFT in $UPPER_SHIFTS; do
+		make -B -j"$(nproc)" keyuser UPPER_SHIFT="$SHIFT"
 		for REGEX in $REGEXES; do
 			COUNT=0
 			for NUM_OP in $NUM_OPS; do
@@ -63,11 +63,11 @@ for SHIFT in $UPPER_SHIFTS; do
 			done
 		done
 	done
+	zip -9 -o "rq7-${HD}.zip" -r ./*.csv
+	rm -f -- *.csv
+	rm -rf output
 done
 
-zip -9 -o "rq7-${HD}.zip" -r ./*.csv
-rm -f -- *.csv
-rm -rf output
 for SHIFT in $UPPER_SHIFTS; do
 	make -B -j"$(nproc)" keyuser UPPER_SHIFT="$SHIFT"
 
