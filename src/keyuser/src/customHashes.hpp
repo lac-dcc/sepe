@@ -232,4 +232,30 @@ struct NaiveSimdINTS {
     std::size_t operator()(const std::string& key) const;
 }; 
 
+#ifdef RQ8
+struct Pext16INTS {
+    std::size_t operator()(const std::string& key) const;
+};
+
+struct Pext64INTS {
+    std::size_t operator()(const std::string& key) const;
+};
+
+struct Pext256INTS {
+    std::size_t operator()(const std::string& key) const;
+};
+
+struct Pext1024INTS {
+    std::size_t operator()(const std::string& key) const;
+};
+
+struct Pext4096INTS {
+    std::size_t operator()(const std::string& key) const;
+};
+
+struct Pext16384INTS {
+    std::size_t operator()(const std::string& key) const;
+};
+#endif // RQ8
+
 #endif
