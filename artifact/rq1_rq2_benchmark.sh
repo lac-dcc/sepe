@@ -27,67 +27,67 @@ PERCENTAGES="
 PERCENTAGES_COUNT="$(echo "$PERCENTAGES" | wc -w)"
 
 for REGEX in $REGEXES; do
-        COUNT=0
-		for DISTRIBUTION in $DISTRIBUTIONS; do
-			for NUM_OP in $NUM_OPS; do
-					for NUM_KEY in $NUM_KEYS; do
-							for ARG in $(seq 1 3 "$PERCENTAGES_COUNT"); do
+	COUNT=0
+	for DISTRIBUTION in $DISTRIBUTIONS; do
+		for NUM_OP in $NUM_OPS; do
+				for NUM_KEY in $NUM_KEYS; do
+						for ARG in $(seq 1 3 "$PERCENTAGES_COUNT"); do
 
-									INSERTION="$(  echo "$PERCENTAGES" | tr '\n' ' ' | awk "{print \$$((ARG + 0))}")"
-									SEARCH="$(     echo "$PERCENTAGES" | tr '\n' ' ' | awk "{print \$$((ARG + 1))}")"
-									ELIMINATION="$(echo "$PERCENTAGES" | tr '\n' ' ' | awk "{print \$$((ARG + 2))}")"
+								INSERTION="$(  echo "$PERCENTAGES" | tr '\n' ' ' | awk "{print \$$((ARG + 0))}")"
+								SEARCH="$(     echo "$PERCENTAGES" | tr '\n' ' ' | awk "{print \$$((ARG + 1))}")"
+								ELIMINATION="$(echo "$PERCENTAGES" | tr '\n' ' ' | awk "{print \$$((ARG + 2))}")"
 
-									./bin/sepe-runner \
-											--verbose \
-											--distribution "$DISTRIBUTION" \
-											--operations "$NUM_OP" \
-											--keys "$NUM_KEY" \
-											--insert "$INSERTION" \
-											--search "$SEARCH" \
-											--elimination "$ELIMINATION" \
-											--repetitions $REPETITIONS \
-											--outfile "${COUNT}.csv" \
-											"$REGEX"
+								./bin/sepe-runner \
+										--verbose \
+										--distribution "$DISTRIBUTION" \
+										--operations "$NUM_OP" \
+										--keys "$NUM_KEY" \
+										--insert "$INSERTION" \
+										--search "$SEARCH" \
+										--elimination "$ELIMINATION" \
+										--repetitions $REPETITIONS \
+										--outfile "${COUNT}.csv" \
+										"$REGEX"
 
-									COUNT=$((COUNT + 1))
-							done
-					done
-			done
+								COUNT=$((COUNT + 1))
+						done
+				done
 		done
+	done
 done
 
 mv -v ./*.csv output/
 zip -9 -o RQ1_RQ2.zip -r output/*
 
 for REGEX in $REGEXES; do
-        COUNT=0
-		for DISTRIBUTION in $DISTRIBUTIONS; do
-			for NUM_OP in $NUM_OPS; do
-					for NUM_KEY in $NUM_KEYS; do
-							for ARG in $(seq 1 3 "$PERCENTAGES_COUNT"); do
+	COUNT=0
+	for DISTRIBUTION in $DISTRIBUTIONS; do
+		for NUM_OP in $NUM_OPS; do
+				for NUM_KEY in $NUM_KEYS; do
+						for ARG in $(seq 1 3 "$PERCENTAGES_COUNT"); do
 
-									INSERTION="$(  echo "$PERCENTAGES" | tr '\n' ' ' | awk "{print \$$((ARG + 0))}")"
-									SEARCH="$(     echo "$PERCENTAGES" | tr '\n' ' ' | awk "{print \$$((ARG + 1))}")"
-									ELIMINATION="$(echo "$PERCENTAGES" | tr '\n' ' ' | awk "{print \$$((ARG + 2))}")"
+								INSERTION="$(  echo "$PERCENTAGES" | tr '\n' ' ' | awk "{print \$$((ARG + 0))}")"
+								SEARCH="$(     echo "$PERCENTAGES" | tr '\n' ' ' | awk "{print \$$((ARG + 1))}")"
+								ELIMINATION="$(echo "$PERCENTAGES" | tr '\n' ' ' | awk "{print \$$((ARG + 2))}")"
 
-									./bin/sepe-runner \
-											--verbose \
-											--hash-performance \
-											--distribution "$DISTRIBUTION" \
-											--operations "$NUM_OP" \
-											--keys "$NUM_KEY" \
-											--insert "$INSERTION" \
-											--search "$SEARCH" \
-											--elimination "$ELIMINATION" \
-											--repetitions $REPETITIONS \
-											--outfile "${COUNT}.csv" \
-											"$REGEX"
+								./bin/sepe-runner \
+										--verbose \
+										--hash-performance \
+										--distribution "$DISTRIBUTION" \
+										--operations "$NUM_OP" \
+										--keys "$NUM_KEY" \
+										--insert "$INSERTION" \
+										--search "$SEARCH" \
+										--elimination "$ELIMINATION" \
+										--repetitions $REPETITIONS \
+										--outfile "${COUNT}.csv" \
+										"$REGEX"
 
-									COUNT=$((COUNT + 1))
-							done
-					done
-			done
+								COUNT=$((COUNT + 1))
+						done
+				done
 		done
+	done
 done
 
 mv -v ./*.csv output/
