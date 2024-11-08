@@ -104,6 +104,7 @@ zip -9 -o rq7-performance.zip -r ./*.csv
 rm -f -- *.csv
 
 git checkout artifact
+cd artifact
 
 mkdir -p output-rq7
 mv ../*.zip output-rq7
@@ -121,6 +122,6 @@ done
 
 for SHIFT in $UPPER_SHIFTS; do
 	mkdir -p results
-	../../scripts/global_keyuser_interpreter.py -p -- performance/*SHIFT_"$SHIFT".csv
+	../../scripts/global_keyuser_interpreter.py -p ./performance/*SHIFT_"$SHIFT".csv
 	mv results results_"$SHIFT"
 done
