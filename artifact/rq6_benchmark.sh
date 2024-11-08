@@ -35,3 +35,5 @@ mv -v ../rq6.csv output_rq6/
 
 mkdir -p results/
 ../scripts/keyuser_interpreter.py -rq6 output_rq6/rq6.csv
+mv -v results/rq6.pdf output_rq6/
+echo "Results are in output_rq6/rq6.pdf"

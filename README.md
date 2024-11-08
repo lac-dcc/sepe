@@ -101,7 +101,7 @@ executing `true_collisions.sh <normal|uniform|incremental>`
 #### RQ6
 
 RQ6 produces a graph that should show the same patterns as the ones in the
-paper. The graphs is in the file: `**TODO**`.
+paper. The graphs is in the file: `output-rq6/rq6.pdf`.
 
 #### RQ7
 
