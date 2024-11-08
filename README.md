@@ -96,12 +96,10 @@ The `TC` columns are calculated based on the results of `RQ3`. `RQ5` will run th
 if it deems necessary. After `RQ5` executes, `TC` column results can be produced by
 executing `true_collisions.sh <normal|uniform|incremental>`
 
-**TODO: INC TC AND UNIFORM TC ARE SWITCHED**
-
 #### RQ6
 
 RQ6 produces a graph that should show the same patterns as the ones in the
-paper. The graphs is in the file: `output-rq6/rq6.pdf`.
+paper. The graph is in the file: `output-rq6/rq6.pdf`.
 
 #### RQ7
 
@@ -110,7 +108,7 @@ paper. The graphs is in the file: `output-rq6/rq6.pdf`.
 #### RQ8
 
 RQ8 produces a graph that should show the same patterns as the ones in the
-paper. The graphs is in the file: `**TODO**`.
+paper. The graph is in the file: `**results/rq8.pdf**`.
 
 #### RQ9
 
