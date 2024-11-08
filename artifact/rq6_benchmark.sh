@@ -16,7 +16,6 @@ make -j"$(nproc)"
 make -j"$(nproc)" benchmark
 
 KEY_SIZES="16 64 256 1024 4096 16384"
-REPETITIONS=10
 
 rm -rf rq6.csv output/* artifact/output_rq6/
 echo "REGEX,Exec Time,Problem Size" >> rq6.csv
@@ -34,24 +33,5 @@ cd artifact/
 mkdir -p output_rq6/
 mv -v ../rq6.csv output_rq6/
 
-#TODO: SCRIPT TO PLOT RQ6
-
-mkdir -p output_rq8/
-cd ..
-for KEY_SIZE in $KEY_SIZES; do
-	# most arguments do not matter. We are just passing whatever for keyuser to work
-	./bin/keyuser \
-		-i 70 \
-		-s 20 \
-		-e 10 \
-		-n 10000 \
-		-r $REPETITIONS \
-		--hashes AbseilHash CityHash FNVHash PextINTS STDHashSrc \
-		--hash-performance < artifact/rq6_input/INTS"$KEY_SIZE".dat \
-		> artifact/output_rq8/"$KEY_SIZE".csv
-done
-
-rm -rf output/*
-cd artifact/output_rq8
-
-# TODO: SCRIPT TO PLOT RQ8
+mkdir -p results/
+../scripts/keyuser_interpreter.py -rq6 output_rq6/rq6.csv

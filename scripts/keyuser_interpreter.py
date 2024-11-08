@@ -199,6 +199,48 @@ def handle_performance_analysis(args):
 
     performance_from_dataframe(args, df, regex_name)
 
+def rq8_analysis(args):
+
+    # Load CSV files into pandas dataframe
+    csv_files = args.rq8
+    df = [pd.read_csv(file) for file in csv_files]
+
+    # Concatenate dataframes
+    # df = pd.concat(df, ignore_index=True)
+
+    df = df.groupby(['Hash Function', 'Problem Size']).mean().reset_index()
+
+
+    print(df)
+
+
+def rq6_analysis(args):
+    df = pd.read_csv(args.rq6[0])
+
+    # Dataframe: REGEX     Exec Time  Problem Size
+    avg_df = df.groupby(['REGEX', 'Problem Size']).mean().reset_index()
+
+    groups = avg_df.groupby('REGEX')
+
+    # plt.rcParams['font.size'] = 14
+    fig, ax = plt.subplots()
+
+    for name, group in groups:
+        ax.plot(group['Problem Size'], group['Exec Time'], marker='o', linestyle='-', label=name)
+
+    ax.set_xlabel('Problem Size')
+    ax.set_ylabel('Synthesis Exec Time (s)')
+    ax.legend()
+
+    # Set x-ticks with equal spacing on a logarithmic scale
+    xticks = [2**4, 2**6, 2**8, 2**10, 2**12, 2**14]
+    ax.set_xscale('log', base=2)
+    ax.set_xticks(xticks)
+    ax.set_xticklabels([f'$2^{{{int(np.log2(x))}}}$' for x in xticks])
+
+    plt.grid(True)
+    plt.savefig(args.output_destination + "rq6.pdf")
+
 def main():
     parser = argparse.ArgumentParser(description="Keyuser Interpreter")
     parser.add_argument("-d", "--distribution", type=str, default="", help="Name of the distribution file to interpret. Exclusive with -p option.")
@@ -207,6 +249,8 @@ def main():
     parser.add_argument("-od", "--output-destination", type=str, default="results/", help="Output path to output graphs. Default is current file.")
     parser.add_argument("-fp", "--full-print", action='store_true', help="Print the entire dataframe.")
     parser.add_argument("-hf", "--hash-functions", nargs='*', type=str, help="Name of the hash functions to analyize.")
+    parser.add_argument("-rq6", "--rq6", nargs='*', type=str, default="", help="Run the RQ6 analysis with csv file.")
+    parser.add_argument("-rq8", "--rq8", nargs='*', type=str, default="", help="Run the RQ8 analysis with csv file.")
 
     args = parser.parse_args()
 
@@ -220,5 +264,9 @@ def main():
         handle_performance_analysis(args)
     elif args.distribution:
         handle_distribution_analysis(args)
+    elif args.rq6:
+        rq6_analysis(args)
+    elif args.rq8:
+        rq8_analysis(args)
 
 main()
