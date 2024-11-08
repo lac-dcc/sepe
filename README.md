@@ -103,7 +103,11 @@ paper. The graph is in the file: `output-rq6/rq6.pdf`.
 
 #### RQ7
 
-**TODO**
+RQ7 results will be in `output-rq7`, in several directories.
+They are named according to their x-axis value. For example,
+`output-rq7/results_0` or `output-rq7/results_16`.
+
+The results will be in `output-rq7/results_*/global_geomean.csv`.
 
 #### RQ8
 
