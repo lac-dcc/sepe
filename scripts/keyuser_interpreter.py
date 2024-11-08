@@ -199,19 +199,40 @@ def handle_performance_analysis(args):
 
     performance_from_dataframe(args, df, regex_name)
 
+import re
 def rq8_analysis(args):
 
     # Load CSV files into pandas dataframe
     csv_files = args.rq8
     df = [pd.read_csv(file) for file in csv_files]
 
+
     # Concatenate dataframes
-    # df = pd.concat(df, ignore_index=True)
+    df = pd.concat(df, ignore_index=True)
 
-    df = df.groupby(['Hash Function', 'Problem Size']).mean().reset_index()
+    df['Hash Function'] = [re.sub(r'STDHashSrc.*', 'STL', x) for x in df['Hash Function']]
+    df['Hash Function'] = [re.sub(r'Pext.*', 'Pext', x) for x in df['Hash Function']]
 
+    df = df.groupby(['Hash Function', 'size']).mean().reset_index()
 
-    print(df)
+    groups = df.groupby('Hash Function')
+    fig, ax = plt.subplots()
+
+    for name, group in groups:
+        ax.plot(group['size'], group['Elapsed Time (seconds)'], marker='o', linestyle='-', label=name)
+
+    ax.set_xlabel('Problem Size')
+    ax.set_ylabel('Hash Func Exec Time (s)')
+    ax.legend()
+
+    # Set x-ticks with equal spacing on a logarithmic scale
+    xticks = [2**4, 2**6, 2**8, 2**10, 2**12, 2**14]
+    ax.set_xscale('log', base=2)
+    ax.set_xticks(xticks)
+    ax.set_xticklabels([f'$2^{{{int(np.log2(x))}}}$' for x in xticks])
+
+    plt.grid(True)
+    plt.savefig(args.output_destination + "rq8.pdf")
 
 
 def rq6_analysis(args):

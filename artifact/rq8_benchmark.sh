@@ -28,6 +28,7 @@ for KEY_SIZE in $KEY_SIZES; do
 		> artifact/output_rq8/"$KEY_SIZE".csv
 done
 rm -rf bin/keyuser output/*
-cd artifact/output_rq8
 
-# TODO: SCRIPT TO PLOT RQ8
+cd artifact/
+../scripts/keyuser_interpreter.py -rq8 output_rq8/*.csv
+echo "Done! See the output in: \`results/rq8.pdf\`"
