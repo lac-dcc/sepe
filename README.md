@@ -98,17 +98,19 @@ executing `true_collisions.sh <normal|uniform|incremental>`
 
 **TODO: INC TC AND UNIFORM TC ARE SWITCHED**
 
-#### RQ6 and RQ8
+#### RQ6
 
-RQ6 and RQ8 are in the same script. They both produce graphs that should show
-the same patterns as the ones in the paper. The graphs are:
-
-  * **TODO**
-  * **TODO**
+RQ6 produces a graph that should show the same patterns as the ones in the
+paper. The graphs is in the file: `**TODO**`.
 
 #### RQ7
 
 **TODO**
+
+#### RQ8
+
+RQ8 produces a graph that should show the same patterns as the ones in the
+paper. The graphs is in the file: `**TODO**`.
 
 #### RQ9
 
