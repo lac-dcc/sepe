@@ -6,21 +6,14 @@ if [ "$(basename "$(pwd)")" = "scripts" ] || [ "$(basename "$(pwd)")" = "artifac
 	cd ..
 fi
 
-if [ ! -d output ]; then
-	mkdir output
-fi
-
-pwd
+mkdir -p artifact/output_rq8/
 
 make -j"$(nproc)"
-make -j"$(nproc)" bin/sepe/runner
+make -j"$(nproc)" bin/sepe-runner
 make -B -j"$(nproc)" keyuser RQ8=true
 
 KEY_SIZES="16 64 256 1024 4096 16384"
 REPETITIONS=10
-
-mkdir -p output_rq8/
-cd ..
 for KEY_SIZE in $KEY_SIZES; do
 	# most arguments do not matter. We are just passing whatever for keyuser to work
 	./bin/keyuser \
