@@ -12,7 +12,7 @@ fi
 
 git checkout upper-shift-experiment
 make -j"$(nproc)"
-make -j"$(nproc)" benchmark
+make bin/sepe-runner
 
 UPPER_SHIFTS="0 16 24 32 48"
 NUM_OPS=10000
@@ -31,10 +31,9 @@ HISTOGRAM_DISTRIBUTION="normal uniform incremental"
 mkdir -p temp-files
 
 rm -f -- *.csv
-for HD in $HISTOGRAM_DISTRIBUTION; do
-	for SHIFT in $UPPER_SHIFTS; do
-		rm -rf output
-		make -B -j"$(nproc)" keyuser UPPER_SHIFT="$SHIFT"
+for SHIFT in $UPPER_SHIFTS; do
+	make -B -j"$(nproc)" keyuser UPPER_SHIFT="$SHIFT"
+	for HD in $HISTOGRAM_DISTRIBUTION; do
 		for REGEX in $REGEXES; do
 			COUNT=0
 			for NUM_OP in $NUM_OPS; do
@@ -68,8 +67,8 @@ done
 
 zip -9 -o "rq7-${HD}.zip" -r ./*.csv
 rm -f -- *.csv
+rm -rf output
 for SHIFT in $UPPER_SHIFTS; do
-	rm -rf output
 	make -B -j"$(nproc)" keyuser UPPER_SHIFT="$SHIFT"
 
 	for REGEX in $REGEXES; do
