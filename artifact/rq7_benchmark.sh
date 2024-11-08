@@ -111,14 +111,9 @@ mv ../*.zip output-rq7
 cd output-rq7
 mkdir -p results
 
-unzip rq7-performance.zip
-mkdir performance
-mv ./*.csv performance
-
+unzip rq7-performance.zip -d performance
 for dist in incremental normal uniform; do
-	unzip rq7-$dist.zip
-	mkdir $dist
-	mv ./*.csv $dist
+	unzip rq7-$dist.zip -d $dist
 	cd $dist
 	for f in *.csv; do mv "$f" "$(echo "$f" | cut -d. -f1)".py; done
 	cd ..
