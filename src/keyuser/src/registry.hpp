@@ -24,6 +24,11 @@
                                         benchmarks.push_back(DECLARE_ONE_BENCH(UnorderedMultisetBench, hashname));
 
 #ifdef RQ8
+/**
+ * @def REGISTER_ALL_BENCHMARKS
+ * @brief This macro registers all benchmarks for all hash functions.
+ */
+#define REGISTER_ALL_BENCHMARKS \
     REGISTER_BENCHMARKS(AbseilHash); \
     REGISTER_BENCHMARKS(STDHashBin); \
     REGISTER_BENCHMARKS(STDHashSrc); \
@@ -85,7 +90,7 @@
     REGISTER_BENCHMARKS(GperfIPV6); \
     REGISTER_BENCHMARKS(GperfINTS); \
     REGISTER_BENCHMARKS(PextMurmurUrlComplex); \
-    REGISTER_BENCHMARKS(PextMurmurINTS);
+    REGISTER_BENCHMARKS(PextMurmurINTS); \
     REGISTER_BENCHMARKS(Pext16INTS); \
     REGISTER_BENCHMARKS(Pext64INTS); \
     REGISTER_BENCHMARKS(Pext256INTS); \

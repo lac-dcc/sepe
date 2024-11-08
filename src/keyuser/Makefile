@@ -28,6 +28,11 @@ ifeq ($(PLATFORM),aarch64)
 	INTRINSICS=-march=armv8-a+crypto
 endif
 
+ifdef RQ8
+    CXXFLAGS += -DRQ8=$(RQ8)
+    CFLAGS   += -DRQ8=$(RQ8)
+endif
+
 # Compilation variables
 CXXFLAGS += -std=c++20 
 COMMON_FLAGS  := -Wall -Wextra -pedantic -I$(ABSL_INC) -L$(ABSL_LIB) -Igperf_hashes/

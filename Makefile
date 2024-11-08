@@ -13,11 +13,11 @@ bin/keygen: $(shell find src/keygen/src/ -type f)
 
 # Example: make keyuser UPPER_SHIFT=32
 bin/keyuser: $(shell find src/keyuser/src/ -type f) src/keyuser/Makefile
-	make -C src/keyuser keyuser UPPER_SHIFT=$(UPPER_SHIFT)
+	make -C src/keyuser keyuser UPPER_SHIFT=$(UPPER_SHIFT) RQ8=$(RQ8)
 	cp src/keyuser/keyuser $@
 
 bin/keyuser-debug: $(shell find src/keyuser/src/ -type f) src/keyuser/Makefile
-	make -C src/keyuser keyuser-debug UPPER_SHIFT=$(UPPER_SHIFT)
+	make -C src/keyuser keyuser-debug UPPER_SHIFT=$(UPPER_SHIFT) RQ8=$(RQ8)
 	cp src/keyuser/keyuser-debug $@
 
 bin/keybuilder: $(shell find src/keybuilder/src/ -type f) src/keybuilder/Makefile
