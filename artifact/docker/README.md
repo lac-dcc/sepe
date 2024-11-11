@@ -24,7 +24,4 @@ docker run --rm sepe-benchmark rq7_benchmark.sh
 docker run --rm sepe-benchmark rq8_benchmark.sh
 docker run --rm sepe-benchmark rq9_benchmark.sh
 ```
-
-After running each research question, you should get the following outputs:
-
-*TO BE DONE*
+Within the `artifact` branch See the expected results in `sepe/README.md`.
