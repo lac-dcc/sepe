@@ -264,3 +264,11 @@ Example for interpreting hash distribution using IPV4 keys:
 ```sh
 ./bin/sepe-runner --histogram IPV4 && ./scripts/keyuser_interpreter.py -d IPV4_distribution.py
 ```
+
+### Reproducing Experiments
+
+The [artifact branch](https://github.com/lac-dcc/sepe/tree/artifact) reproduces the research questions from the paper.
+All scripts to reproduce the RQs are available in a Docker container.
+RQ1 and RQ2 can be reproduced with a single script \texttt{rq1\_rq2\_benchmark.sh}. 
+All other RQs have an individual script \texttt{rq\_benchmark.sh}. 
+
