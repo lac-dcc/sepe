@@ -9,7 +9,23 @@ The recommended way of reproducing the experiments is through [Docker](docker).
 
 This setup has been successfully reproduced in the following Linux distribution:
 
-**TODO: Linux setup.**
+We executed the experiments in the following machine:
+
+```
+Ubuntu 20.04.4 LTS
+
+Kernel: Linux 5.4.0-105-generic
+
+Architecture: x86-64
+
+CPU: Intel(R) Xeon(R) Silver 4210 CPU @ 2.20GHz
+Socket(s): 2
+Core(s) per socket: 10
+Total number cores with hyperthreading: 40
+Active Energy Governor: performance
+
+Total memory space (MB): 144674
+```
 
 ## Prerequisites
 
@@ -36,8 +52,6 @@ Additionally, to analyze the results the following python libraries must be avai
 It may be possible to reproduce the results with different library versions. However,
 in case any incompatibilities arise, it is recommended to use the exact versions
 listed above.
-
-**TODO: commands to install dependencies**.
 
 ## Reproducing the experiments
 
