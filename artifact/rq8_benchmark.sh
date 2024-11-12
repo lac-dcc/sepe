@@ -30,5 +30,6 @@ done
 rm -rf bin/keyuser output/*
 
 cd artifact/
+mkdir -p results/
 ../scripts/keyuser_interpreter.py -rq8 output_rq8/*.csv
 echo "Done! See the output in: \`results/rq8.pdf\`"
