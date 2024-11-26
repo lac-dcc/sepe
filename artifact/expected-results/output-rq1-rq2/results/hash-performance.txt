@@ -1,0 +1,10 @@
+Abseil,0.5002
+Aes,0.0198
+City,0.0389
+FNV,0.1778
+Gperf,0.0141
+Gpt,0.0504
+Naive,0.0135
+OffXor,0.0126
+Pext,0.0141
+STL,0.0464
