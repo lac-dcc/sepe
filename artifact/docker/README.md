@@ -6,7 +6,7 @@ To create a docker image out of this docker file, you can run the following comm
 ```bash
 # Clone the Sepe repository artifact branch:
 #
-git clone --branch artifact https://github.com/lac-dcc/sepe /sepe
+git clone --branch artifact https://github.com/lac-dcc/sepe ./sepe
 # Move to where the Docker file is located:
 #
 cd sepe/artifact/docker/
