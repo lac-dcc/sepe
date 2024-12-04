@@ -68,7 +68,7 @@ mkdir -p results
 
 for DIST in $HISTOGRAM_DISTRIBUTION; 
 do 
-    unzip RQ5-"$DIST".zip -d rq5-data
+    unzip -o RQ5-"$DIST".zip -d rq5-data
     ../../scripts/global_keyuser_interpreter.py -p rq5-data/output/*.csv
     mv -v results/global_geomean.csv results/global_geomean_"$DIST".csv
 done
