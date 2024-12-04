@@ -30,7 +30,7 @@ RUN curl https://sh.rustup.rs -sSf | sh -s -- -y && . "$HOME/.cargo/env"
 ENV PATH="/root/.cargo/bin:${PATH}"
 
 # Clone the repository
-RUN git clone --branch artifact https://github.com/lac-dcc/sepe /sepe
+RUN git clone --branch artifact https://github.com/lac-dcc/sepe ./sepe
 
 # Set the working directory to the artifact directory
 WORKDIR /sepe/artifact
