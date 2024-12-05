@@ -26,7 +26,7 @@ DISTRIBUTIONS="
 "
 DISTRIBUTIONS_COUNT="$(echo "$DISTRIBUTIONS" | wc -w)"
 
-HISTOGRAM_DISTRIBUTION="normal uniform incremental"
+HISTOGRAM_DISTRIBUTION="normal"
 
 mkdir -p temp-files
 
