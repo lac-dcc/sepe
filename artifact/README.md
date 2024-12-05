@@ -110,6 +110,16 @@ The `TC` columns are calculated based on the results of `RQ3`. `RQ5` will run th
 if it deems necessary. After `RQ5` executes, `TC` column results can be produced by
 executing `true_collisions.sh <normal|uniform|incremental>`
 
+To obtain the TC column from Table 3, for each distribution:
+    ```
+    # First, make sure that output-rq3 exists
+    # Inside sepe/artifact/
+    # TC is the second column from:
+    ./true_collisions.sh incremental
+    ./true_collisions.sh normal
+    ./true_collisions.sh uniform
+    ```
+
 #### RQ6
 
 RQ6 produces a graph that should show the same patterns as the ones in the
