@@ -80,6 +80,7 @@ def handle_distribution_analysis(args):
             # Remove all entries from the dataframe that contain Simd Keyword
         result = result[~result['Hash Function'].str.contains("Simd")]
         result = result[~result['Hash Function'].str.contains("Murmur")]
+        result = result[~result['Hash Function'].str.contains("Gperf")]
 
         # Replace all instances of AbseilHash with Abseil
         result['Hash Function'] = [re.sub(r'AbseilHash.*', 'Abseil', x) for x in result['Hash Function']]
@@ -90,7 +91,6 @@ def handle_distribution_analysis(args):
         result['Hash Function'] = [re.sub(r'Pext.*', 'Pext', x) for x in result['Hash Function']]
         result['Hash Function'] = [re.sub(r'OffXor.*', 'OffXor', x) for x in result['Hash Function']]
         result['Hash Function'] = [re.sub(r'Naive.*', 'Naive', x) for x in result['Hash Function']]
-        result['Hash Function'] = [re.sub(r'Gperf.*', 'Gperf', x) for x in result['Hash Function']]
         result['Hash Function'] = [re.sub(r'Gpt.*', 'Gpt', x) for x in result['Hash Function']]
         result['Hash Function'] = [re.sub(r'STDHashSrc.*', 'STL', x) for x in result['Hash Function']]
         result['Hash Function'] = [re.sub(r'Aes.*', 'Aes', x) for x in result['Hash Function']]
@@ -100,7 +100,6 @@ def handle_distribution_analysis(args):
         else:
             result_array = pd.concat([result_array, result], ignore_index=True)
 
-    # Remove all entries from the dataframe that contain Simd Keyword
     result_array = result_array.groupby("Hash Function")["Chi-Test"].sum().reset_index()
     result_array["Chi-Test"] = result_array["Chi-Test"] / len(arrays)
 
@@ -259,6 +258,7 @@ def handle_performance_analysis(args):
 
     # Remove all entries from the dataframe that contain Simd Keyword
     df = df[~df['Hash Function'].str.contains("Simd")]
+    df = df[~df['Hash Function'].str.contains("Gperf")]
 
     # Replace all instances of AbseilHash with Abseil
     df['Hash Function'] = [re.sub(r'AbseilHash.*', 'Abseil', x) for x in df['Hash Function']]
