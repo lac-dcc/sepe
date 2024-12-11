@@ -71,7 +71,7 @@ struct Range{
         //}
     }
 
-    void print(){
+    void print() const {
         printf("Range: %c - %c : offset %d repetition %lu\n", start, end, offset, repetition);
     }
 
@@ -706,25 +706,25 @@ std::string synthetizeAesHashFunc(std::vector<Range>& ranges, size_t offset) {
  * @return std::string The synthesized Offset XOR SIMD hash function as a string.
  */
 std::string synthetizeAesHashFuncLe16bytes(size_t keySize) {
-	keySize = keySize > 16 ? 16 : keySize;
+    keySize = keySize > 16 ? 16 : keySize;
 
     std::string synthesizedHashFunc = "struct synthesizeAesHash {\n\tstd::size_t operator()(const std::string& key) const {\n";
-	synthesizedHashFunc += "\t\t// chosen by a fair roll of the dice\n";
-	synthesizedHashFunc += "\t\tconst __m128i roundkey = _mm_set_epi64x(0xFB6D468E93C391E2 , 0x9c06f0be6f44851b);\n";
+    synthesizedHashFunc += "\t\t// chosen by a fair roll of the dice\n";
+    synthesizedHashFunc += "\t\tconst __m128i roundkey = _mm_set_epi64x(0xFB6D468E93C391E2 , 0x9c06f0be6f44851b);\n";
 
-	if (keySize == 16) {
-		// if we have exactly 16 bytes, just load them all at once
-		std::string setStr = "";
-		synthesizedHashFunc += "\t\tconst __m128i load = _mm_lddqu_si128((const __m128i *)(key.c_str()));\n";
-	} else {
-		std::string setStr = "";
-		for (size_t i = 0; i < keySize; ++i)
-			setStr += "key[" + std::to_string(i) + "],";
-		for (size_t i = keySize; i < 16; ++i)
-			setStr += "0,";
-		setStr.pop_back();
-		synthesizedHashFunc += "\t\tconst __m128i load = _mm_set_epi8(" + setStr + ");\n";
-	}
+    if (keySize == 16) {
+        // if we have exactly 16 bytes, just load them all at once
+        std::string setStr = "";
+        synthesizedHashFunc += "\t\tconst __m128i load = _mm_lddqu_si128((const __m128i *)(key.c_str()));\n";
+    } else {
+        std::string setStr = "";
+        for (size_t i = 0; i < keySize; ++i)
+            setStr += "key[" + std::to_string(i) + "],";
+        for (size_t i = keySize; i < 16; ++i)
+            setStr += "0,";
+        setStr.pop_back();
+        synthesizedHashFunc += "\t\tconst __m128i load = _mm_set_epi8(" + setStr + ");\n";
+    }
 
     synthesizedHashFunc += "\t\tconst __m128i hash = _mm_aesenc_si128(load, roundkey);\n";
     synthesizedHashFunc += "\t\treturn _mm_extract_epi64(hash , 0) ^ _mm_extract_epi64(hash, 1); \n";
@@ -763,11 +763,7 @@ int main(int argc, char** argv){
     ranges = res.first;
     offset = res.second;
 
-    size_t keySize = 0;
-    for(const auto& range : ranges){
-        keySize += range.repetition;
-        keySize += range.offset;
-    }
+    size_t keySize = ranges[ranges.size() - 1].offset + ranges[ranges.size() - 1].repetition;
 
     if(keySize <= 8){
         printf("// Key size is less than 8 bytes. Using default Function. \n\
@@ -796,8 +792,7 @@ int main(int argc, char** argv){
         printf("%s", synthetizeAesHashFunc(ranges, offset).c_str());
     } else {
         printf("%s", synthetizeAesHashFuncLe16bytes(offset).c_str());
-
-	}
+    }
 
     return 0;
 }
